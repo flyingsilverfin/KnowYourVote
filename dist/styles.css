@@ -1,17 +1,33 @@
 html, body {
     margin: 0;
     padding: 0;
-    background-color: white;
+    background-color: #888888;
     color:white;
     font-family: Arial, Helvetica, sans-serif;
-    height: 100%;
-    min-height:100%;
+       
+    position:fixed;
+    top:0px;
+    bottom:0px;
+    left:0px;
+    right:0px;
+
 }
 
 a {
     color: white;
     text-decoration: none;
 }
+
+h2 {
+    margin: 0;
+    padding: 0;
+}
+
+ol {
+    margin: 0;
+    padding: 0;
+}
+
 
 a:hover {
     color: #CCCCCC;
@@ -40,12 +56,18 @@ a:hover {
     font-size: 2em;
     min-height: 100px;
     height: 25%;
+    max-height: 200px;
+
+    text-transform: capitalize;
+
 
 display: flex;
 flex-direction: column;
 justify-content: center; /* align horizontal */
 align-items: center; /* align vertical */
 }
+
+
 
 #home-text {
     text-align: center;
@@ -54,8 +76,9 @@ align-items: center; /* align vertical */
 }
 
 .topic-tiles-container {
-    width: 70%;
+    width: 72%;
     margin: 0 auto;
+    text-align: center;
 }
 
 .topic-tile {
@@ -64,8 +87,10 @@ align-items: center; /* align vertical */
     margin: 40px;
 
     text-align: center;
+    vertical-align: top;
+    
 
-display: flex;
+display: inline-flex;
 flex-direction: column;
 justify-content: center; /* align horizontal */
 align-items: center; /* align vertical */
@@ -74,8 +99,7 @@ align-items: center; /* align vertical */
 
 }
 
-.topic-tile-image {
-    display: block;
+.topic-tile-image-container {
     width: 25%;
     height: 25%;
     border: 1px solid white;
@@ -91,8 +115,8 @@ align-items: center; /* align vertical */
     font-size: 1.3em;
 }
 
-.topic-tile-text:first-letter {
-    text-transform: capitalize;
+.topic-tile-text::first-letter {
+    text-transform: uppercase;
 }
 
 .tile-active {
@@ -113,23 +137,25 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
     display: inline-block;
 }
 
+
 .spectrum-pane-container {
     overflow-x: auto;
     overflow-y: hidden;
     width:100%;
+    flex: 1 1 auto;
 }
 
 .spectrum-pane {
     position: relative;
-    min-height:600px;
+    min-height: 600px;
     min-width: 1000px;
     border-top: 1px solid black;
     border-bottom: 1px solid black;
-
     margin: 0;
-    padding :0;
+    padding: 0;
     text-align: center;
-
+    flex: 1 1 auto;
+    height: 100%;
 }
 
 .spectrum-overlay {
@@ -183,18 +209,38 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
     margin: 9px;
 }
 
+.topic-container {
+    height:100%;
+}
+
+.topic-content {
+    background-color: #888888;
+    display: flex;
+    flex-flow: column;
+    height:100%;
+}
+
+.topic-description-container {
+    width: calc(100% - 2px);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-right: 1px solid #353435;
+    border-left: 1px solid #353435;
+    flex: 0 1 auto;
+}
 
 .topic-description {
-    width:100%;
-    display:block;
-    background-color: #555555;
-    padding: 1em 5em 1em 5em;
-    margin: 1px;
+    width: 80%;
+    margin-left: 10%;
+}
+
+.description-listitem {
+    font-size: 1.2em;
+    padding: 5px 0 5px 0;
 }
 
 .choice-pane {
     width:100%;
-    
 }
 
 

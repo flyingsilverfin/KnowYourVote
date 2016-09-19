@@ -32,14 +32,31 @@ class Topic extends React.Component {
     }
 
     render() {
+
+        let statusquo = this.props.data.statusquo;
+        let quolist = statusquo.map((status) =>
+            <li className="description-listitem"> {status} </li>
+        );
+
         return (
-            <div>
-                <p>{this.state.topic} </p>
-                <div className="topic-description">
-                    {this.props.data.statusquo}
+            <div className="topic-container">
+                <div className="header">
+                    {this.state.topic} 
                 </div>
-                <ChoicePane question={this.props.data.question} onSelect={this.onSelect.bind(this)} />
-                <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} />
+                <div className="topic-content">
+                    <div className="topic-description-container">
+                        <div className="topic-description">
+                        <h2> Facts </h2>
+                        <ol>
+                        {quolist}
+                        </ol>
+                        </div>
+                    </div>
+                    {/*
+                        <ChoicePane question={this.props.data.question} onSelect={this.onSelect.bind(this)} />
+                    */}
+                    <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} />
+                </div>
             </div>
         )
     }
