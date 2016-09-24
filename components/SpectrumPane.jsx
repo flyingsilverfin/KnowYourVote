@@ -41,7 +41,8 @@ class SpectrumPane extends React.Component {
 
 
         this.setState({
-            parties: parties
+            parties: parties,
+            dividerPositionLeft: 100*(this.props.currentValue/10.0) //percentage from left
         });
     }
 
@@ -50,25 +51,16 @@ class SpectrumPane extends React.Component {
         let options = this.state.parties.map(
             (p, i) =>
                 <SpectrumOption ref={p} name={p} values={this.props.options[p]} key={this.state.seed + i}/>
-        )
+        );
 
         let dividerPosition = {
-            'left': 100*(this.props.currentValue/10.0)+ "%"
-        }
+            'left': 100*(this.props.currentValue/10.0) + "%"
+        };
 
 
 
-// ummmm
-        // update after render
-        let dividerLabelPosition = null;
-        if (this.state.dividerLabelLeft === null) {
-            dividerLabelPosition = {
-                'left': dividerPosition.left
-            }
-        } else {
-            dividerLabelPosition = {
-                'left': this.state.dividerLabelLeft
-            }
+        let dividerLabelPosition = {
+            'left': this.state.dividerPositionLeft
         }
 
 
@@ -88,7 +80,7 @@ class SpectrumPane extends React.Component {
                                 key={1}/>
                         </ReactCSSTransitionGroup>
                     </div>
-                    <div id="current-value-divider-label" key={this.state.seed} ref="divider-label" style={dividerPosition}>
+                    <div id="current-value-divider-label" key={this.state.seed} ref="divider-label" style={dividerLabelPosition}>
                         <h2>
                             Current State of Affairs
                         </h2>
@@ -111,7 +103,6 @@ class SpectrumPane extends React.Component {
         this.place();
 
         this.placeDividerLabel();
-
     }
 
     componentDidUpdate() {
@@ -122,10 +113,17 @@ class SpectrumPane extends React.Component {
         let dividerLabelRef = this.refs['divider-label'];
         let dividerLabelElement = ReactDOM.findDOMNode(dividerLabelRef);
 
+        let parent = dividerLabelElement.parentElement;
+        let parentWidth = parent.getBoundingClientRect().width;
+
+
+
         let boundingRect = dividerLabelElement.getBoundingClientRect();
-        let w = boundingRect.width;
-        let left = boundingRect.left;
-        dividerLabelElement.style.left = left - (w/2) + "px";
+        let width = boundingRect.width;
+        let left = parentWidth * this.state.dividerPositionLeft / 100;
+
+        console.log("Going to position label from left:" + ( left - (width/2)));
+        dividerLabelElement.style.left = 1 + left - (width/2) + "px";
     }
     
 

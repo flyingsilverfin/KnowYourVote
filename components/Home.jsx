@@ -52,7 +52,7 @@ class Home extends React.Component {
                 <div className="header">
                     Election Erection
                 </div>
-                <div>
+                <div className="home-not-header">
                     <div id="home-text">
                         This topic gets me going
                     </div>
