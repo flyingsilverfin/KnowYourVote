@@ -34,13 +34,13 @@ class Topic extends React.Component {
     render() {
 
         let statusquo = this.props.data.statusquo;
-        let quolist = statusquo.map((status) =>
-            <li className="description-listitem"> {status} </li>
+        let quolist = statusquo.map((status, i) =>
+            <li className="description-listitem" key={i}> {status} </li>
         );
 
         return (
             <div className="topic-container">
-                <div className="header">
+                <div className="topic-header">
                     {this.state.topic} 
                 </div>
                 <div className="topic-content">

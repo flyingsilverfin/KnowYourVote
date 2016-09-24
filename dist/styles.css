@@ -44,7 +44,6 @@ a:hover {
 
 #content {
     margin: 0 auto;
-    max-width: 1100px;
     background-color: #555555;
     height: 100%;
 }
@@ -67,6 +66,23 @@ justify-content: center; /* align horizontal */
 align-items: center; /* align vertical */
 }
 
+.topic-header {
+    text-align: center;
+    background-color: #353435;
+    font-size: 2em;
+    min-height: 100px;
+    height: 10%;
+    max-height: 200px;
+
+    text-transform: capitalize;
+
+
+display: flex;
+flex-direction: column;
+justify-content: center; /* align horizontal */
+align-items: center; /* align vertical */
+}
+
 
 
 #home-text {
@@ -76,7 +92,7 @@ align-items: center; /* align vertical */
 }
 
 .topic-tiles-container {
-    width: 72%;
+    max-width: 1000px;
     margin: 0 auto;
     text-align: center;
 }
@@ -149,8 +165,6 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
     position: relative;
     min-height: 600px;
     min-width: 1000px;
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
     margin: 0;
     padding: 0;
     text-align: center;
@@ -184,6 +198,43 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
     width: 100%;
     transition: width 600ms ease-in;
 }
+
+
+#current-value-divider-label {
+    background-color: #CCCCCC;
+    color: black;
+    position: absolute;
+    z-index: 2;
+    display: inline-block;
+    padding: 20px;
+}
+
+
+#current-value-divider-label {
+	position: absolute;
+	background: #CCCCCC;
+}
+#current-value-divider-label:after, #current-value-divider-label:before {
+	top: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+#current-value-divider-label:after {
+	border-color: rgba(204, 204, 204, 0);
+	border-top-color: #CCCCCC;
+	border-width: 30px;
+	margin-left: -30px;
+}
+
+
+
+
 
 #current-value-divider {
     position: absolute;
@@ -221,11 +272,10 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
 }
 
 .topic-description-container {
-    width: calc(100% - 2px);
+    max-width: 1000px;
     padding-top: 20px;
     padding-bottom: 20px;
-    border-right: 1px solid #353435;
-    border-left: 1px solid #353435;
+    margin: 0 auto;
     flex: 0 1 auto;
 }
 
@@ -238,6 +288,8 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
     font-size: 1.2em;
     padding: 5px 0 5px 0;
 }
+
+
 
 .choice-pane {
     width:100%;
