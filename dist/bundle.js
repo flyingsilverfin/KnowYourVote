@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "d93c8f42c3846b785ab6"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "53a8489646dbe8ccebd8"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -8228,8 +8228,8 @@
 	_reactDom2.default.render(_react2.default.createElement(
 		_reactRouter.Router,
 		{ history: _reactRouter.browserHistory },
-		_react2.default.createElement(_reactRouter.Route, { path: '/u/63059389/KnowYourVote/index.html', component: _App2.default, data: _data2.default }),
-		_react2.default.createElement(_reactRouter.Route, { path: '/u/63059389/KnowYourVote/:topic', component: _App2.default, data: _data2.default })
+		_react2.default.createElement(_reactRouter.Route, { path: '/', component: _App2.default, data: _data2.default }),
+		_react2.default.createElement(_reactRouter.Route, { path: '/:topic', component: _App2.default, data: _data2.default })
 	), document.getElementById('app'));
 
 	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(321); if (makeExportsHot(module, __webpack_require__(152))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "index.jsx" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
@@ -35206,10 +35206,9 @@
 	            return _react2.default.createElement(
 	                'div',
 	                { id: 'container' },
-	                _react2.default.createElement(_Nav2.default, { path: this.state.path, humanPath: this.state.humanPath }),
 	                _react2.default.createElement(
 	                    'div',
-	                    null,
+	                    { id: 'content' },
 	                    this.state.display
 	                )
 	            );
@@ -35262,7 +35261,12 @@
 	    function Home(props) {
 	        _classCallCheck(this, Home);
 
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Home).call(this, props));
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Home).call(this, props));
+
+	        _this.state = {
+	            active: null
+	        };
+	        return _this;
 	    }
 
 	    _createClass(Home, [{
@@ -35274,18 +35278,60 @@
 	            var topicTiles = Object.keys(this.props.data).map(function (topic, i) {
 	                return _react2.default.createElement(
 	                    _reactRouter.Link,
-	                    { to: "/u/63059389/KnowYourVote/" + topic, key: i },
+	                    { to: "/KnowYourVote/" + topic, key: i },
 	                    _react2.default.createElement(
 	                        'div',
-	                        { className: 'topic-tile', style: _this2.props.data[topic].styles },
-	                        topic[0].toUpperCase() + topic.slice(1)
+	                        { className: "topic-tile" + (_this2.state.active === topic ? " tile-active" : ""),
+	                            onMouseEnter: function (event) {
+	                                this.setState({ active: topic });
+	                            }.bind(_this2),
+
+	                            onMouseLeave: function (event) {
+	                                this.setState({ active: null });
+	                            }.bind(_this2)
+
+	                        },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'topic-tile-image-container', title: _this2.state.active },
+	                            function () {
+	                                console.log('hi');
+	                                if (_this2.state.active === topic) {
+	                                    return _react2.default.createElement('img', { className: 'tile-image', src: _this2.props.data[topic].image });
+	                                }
+	                            }()
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'topic-tile-text' },
+	                            topic[0].toUpperCase() + topic.slice(1)
+	                        )
 	                    )
 	                );
 	            });
 	            return _react2.default.createElement(
 	                'div',
-	                null,
-	                topicTiles
+	                { className: 'full-height' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'header' },
+	                    'Election Erection'
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'home-not-header' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { id: 'home-text' },
+	                        'This topic gets me going',
+	                        _react2.default.createElement('hr', { id: 'home-text-divider' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'topic-tiles-container' },
+	                        topicTiles
+	                    )
+	                )
 	            );
 	        }
 	    }]);
@@ -35455,6 +35501,8 @@
 
 	var _SpectrumPane2 = _interopRequireDefault(_SpectrumPane);
 
+	var _reactRouter = __webpack_require__(257);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35499,22 +35547,62 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+
+	            var statusquo = this.props.data.statusquo;
+	            var quolist = statusquo.map(function (status, i) {
+	                return _react2.default.createElement(
+	                    'li',
+	                    { className: 'description-listitem', key: i },
+	                    ' ',
+	                    status,
+	                    ' '
+	                );
+	            });
+
 	            return _react2.default.createElement(
 	                'div',
-	                null,
+	                { className: 'topic-container' },
 	                _react2.default.createElement(
-	                    'p',
-	                    null,
-	                    this.state.topic,
-	                    ' '
+	                    'div',
+	                    { className: 'topic-header' },
+	                    _react2.default.createElement(
+	                        _reactRouter.Link,
+	                        { to: '/KnowYourVote/index.html' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { id: 'topic-header-home-button' },
+	                            'Home'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { id: 'topic-header-text' },
+	                        this.state.topic
+	                    )
 	                ),
 	                _react2.default.createElement(
 	                    'div',
-	                    { className: 'topic-description' },
-	                    this.props.data.statusquo
-	                ),
-	                _react2.default.createElement(_ChoicePane2.default, { question: this.props.data.question, onSelect: this.onSelect.bind(this) }),
-	                _react2.default.createElement(_SpectrumPane2.default, { topic: this.state.topic, currentValue: this.state.data.current, options: this.state.data.options, direction: this.state.direction })
+	                    { className: 'topic-content' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'topic-description-container' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'topic-description' },
+	                            _react2.default.createElement(
+	                                'h2',
+	                                null,
+	                                ' Facts '
+	                            ),
+	                            _react2.default.createElement(
+	                                'ol',
+	                                null,
+	                                quolist
+	                            )
+	                        )
+	                    ),
+	                    _react2.default.createElement(_SpectrumPane2.default, { topic: this.state.topic, currentValue: this.state.data.current, options: this.state.data.options, direction: this.state.direction })
+	                )
 	            );
 	        }
 	    }]);
@@ -35670,7 +35758,8 @@
 
 	        _this.state = {
 	            parties: null,
-	            seed: 0
+	            seed: 0,
+	            dividerLabelLeft: null
 	        };
 	        return _this;
 	    }
@@ -35696,7 +35785,8 @@
 	            this.swapElements(parties, greenIndex, 2);
 
 	            this.setState({
-	                parties: parties
+	                parties: parties,
+	                dividerPositionLeft: 100 * (this.props.currentValue / 10.0) //percentage from left
 	            });
 	        }
 	    }, {
@@ -35708,8 +35798,21 @@
 	                return _react2.default.createElement(_SpectrumOption2.default, { ref: p, name: p, values: _this2.props.options[p], key: _this2.state.seed + i });
 	            });
 
-	            var dividerStyle = {
+	            var dividerPosition = {
 	                'left': 100 * (this.props.currentValue / 10.0) + "%"
+	            };
+
+	            // these all get updated post render
+	            var dividerLabelPosition = {
+	                'left': this.state.dividerPositionLeft
+	            };
+
+	            var leftArrowStyle = {
+	                'right': this.state.dividerPositionLeft
+	            };
+
+	            var rightArrowStyle = {
+	                'left': this.state.dividerPositionLeft
 	            };
 
 	            return _react2.default.createElement(
@@ -35736,7 +35839,36 @@
 	                    ),
 	                    _react2.default.createElement(
 	                        'div',
-	                        { id: 'current-value-divider', key: this.state.seed - 1, style: dividerStyle },
+	                        { id: 'left-arrow', key: this.state.seed, ref: 'left-arrow', style: leftArrowStyle },
+	                        _react2.default.createElement(
+	                            'h2',
+	                            { className: 'inline slightly-larger-text' },
+	                            'LESS'
+	                        ),
+	                        ' advocating'
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { id: 'right-arrow', key: this.state.seed + 1, ref: 'right-arrow', style: rightArrowStyle },
+	                        _react2.default.createElement(
+	                            'h2',
+	                            { className: 'inline slightly-larger-text' },
+	                            'MORE'
+	                        ),
+	                        ' advocating'
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { id: 'current-value-divider-label', key: this.state.seed + 2, ref: 'divider-label', style: dividerLabelPosition },
+	                        _react2.default.createElement(
+	                            'h2',
+	                            { className: 'slightly-larger-text' },
+	                            'Current State of Affairs'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { id: 'current-value-divider', key: this.state.seed + 3, style: dividerPosition },
 	                        ' '
 	                    ),
 	                    options
@@ -35755,11 +35887,40 @@
 	            window.addEventListener("resize", this.forceRedraw.bind(this));
 
 	            this.place();
+
+	            this.placeDividerLabels();
 	        }
 	    }, {
 	        key: 'componentDidUpdate',
 	        value: function componentDidUpdate() {
 	            this.place();
+	        }
+	    }, {
+	        key: 'placeDividerLabels',
+	        value: function placeDividerLabels() {
+
+	            var dividerLabelRef = this.refs['divider-label'];
+	            var dividerLabelElement = _reactDom2.default.findDOMNode(dividerLabelRef);
+
+	            var parent = dividerLabelElement.parentElement;
+	            var parentWidth = parent.getBoundingClientRect().width;
+
+	            var boundingRect = dividerLabelElement.getBoundingClientRect();
+	            var width = boundingRect.width;
+	            var left = parentWidth * this.state.dividerPositionLeft / 100;
+
+	            var labelLeft = 1 + left - width / 2;
+	            console.log("Going to position label from left:" + labelLeft);
+	            dividerLabelElement.style.left = labelLeft + "px";
+
+	            var leftArrowRef = this.refs['left-arrow'];
+	            var rightArrowRef = this.refs['right-arrow'];
+	            var leftArrow = _reactDom2.default.findDOMNode(leftArrowRef);
+	            var rightArrow = _reactDom2.default.findDOMNode(rightArrowRef);
+
+	            console.log("leftArrow right endpoint: " + (labelLeft - 5));
+	            leftArrow.style.right = parentWidth - labelLeft + 5 + "px";
+	            rightArrow.style.left = labelLeft - 1 + width + 5 + "px";
 	        }
 	    }, {
 	        key: 'forceRedraw',
@@ -35773,6 +35934,8 @@
 	                    seed: Math.random()
 	                });
 	            }
+
+	            this.placeDividerLabels();
 	        }
 	    }, {
 	        key: 'place',
@@ -36941,7 +37104,7 @@
 	                    { className: 'nav-link-container', key: i },
 	                    _react2.default.createElement(
 	                        _reactRouter.Link,
-	                        { to: "/" + _this2.state.path.slice(0, i + 1).join('/'), className: 'nav-link' },
+	                        { to: "/KnowYourVote/" + _this2.state.path.slice(0, i + 1).join('/'), className: 'nav-link' },
 	                        p
 	                    ),
 	                    _react2.default.createElement(
@@ -36973,11 +37136,14 @@
 
 	module.exports = {
 		"environment": {
+			"image": "images/env.png",
 			"styles": {
 				"backgroundColor": "#00ff00"
 			},
 			"question": "The goverment should do more for the environment",
-			"statusquo": "The government has a limited commitment to cutting greenhouse gases, and water pollution",
+			"statusquo": [
+				"The government has a limited commitment to cutting greenhouse gases, and water pollution"
+			],
 			"data": {
 				"current": 3,
 				"options": {
@@ -37000,11 +37166,15 @@
 			}
 		},
 		"immigration": {
+			"image": "images/immigration.png",
 			"styles": {
 				"backgroundColor": "#ff00ff"
 			},
 			"question": "The goverment should have stronger immigration control",
-			"statusquo": "The government has stringent visa requirements and accepts 5% of asylum seekers - this year 1000 people",
+			"statusquo": [
+				"The government has stringent visa requirements and accepts 5% of asylum seekers - this year 1000 people",
+				"test"
+			],
 			"data": {
 				"current": 4,
 				"options": {
@@ -37057,6 +37227,92 @@
 						"value": 5.4,
 						"short": "Collision Test7 jf ;ldsa jlsaj d;lfjsa lfjas;ld jf",
 						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sa"
+					}
+				}
+			}
+		},
+		"a": {
+			"image": "images/immigration.png",
+			"styles": {
+				"backgroundColor": "#ff00ff"
+			},
+			"question": "The goverment should have stronger immigration control",
+			"statusquo": [
+				"The government has stringent visa requirements and accepts 5% of asylum seekers - this year 1000 people"
+			],
+			"data": {
+				"current": 4,
+				"options": {
+					"Labor": {
+						"value": 6,
+						"short": "fun and happiness for all, but with strong background checks",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					},
+					"Conservative": {
+						"value": 5,
+						"short": "Less fun and happiness for all, with stronger background checks",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					},
+					"Green": {
+						"value": 8,
+						"short": "much fun and happiness for all, but with check later",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					}
+				}
+			}
+		},
+		"b": {
+			"image": "images/immigration.png",
+			"styles": {
+				"backgroundColor": "#ff00ff"
+			},
+			"question": "The goverment should have stronger immigration control",
+			"statusquo": "The government has stringent visa requirements and accepts 5% of asylum seekers - this year 1000 people",
+			"data": {
+				"current": 4,
+				"options": {
+					"Labor": {
+						"value": 6,
+						"short": "fun and happiness for all, but with strong background checks",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					},
+					"Conservative": {
+						"value": 5,
+						"short": "Less fun and happiness for all, with stronger background checks",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					},
+					"Green": {
+						"value": 8,
+						"short": "much fun and happiness for all, but with check later",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					}
+				}
+			}
+		},
+		"c": {
+			"image": "images/immigration.png",
+			"styles": {
+				"backgroundColor": "#ff00ff"
+			},
+			"question": "The goverment should have stronger immigration control",
+			"statusquo": "The government has stringent visa requirements and accepts 5% of asylum seekers - this year 1000 people",
+			"data": {
+				"current": 4,
+				"options": {
+					"Labor": {
+						"value": 6,
+						"short": "fun and happiness for all, but with strong background checks",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					},
+					"Conservative": {
+						"value": 5,
+						"short": "Less fun and happiness for all, with stronger background checks",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
+					},
+					"Green": {
+						"value": 8,
+						"short": "much fun and happiness for all, but with check later",
+						"long": "alsdkjf ;lkdsjfsalkjf ;ldsa jlsaj d;lfjsa lfjas;ld jf;ldsa kjfsaf\n  ;saldjf; jdsfljsa ldfj ;sajd;f jsa;fdksa jf;lsaj fd;sla jf;lsa jf;lksa \nasd fjflsadjf lkdsajf ;lksa jfd;lksaj;lksa jfd;lksaj"
 					}
 				}
 			}

@@ -58,12 +58,19 @@ class SpectrumPane extends React.Component {
         };
 
 
-
+        // these all get updated post render
         let dividerLabelPosition = {
             'left': this.state.dividerPositionLeft
         }
 
 
+        let leftArrowStyle = {
+            'right': this.state.dividerPositionLeft
+        }
+
+        let rightArrowStyle = {
+            'left' : this.state.dividerPositionLeft
+        }
 
         return (
             <div className="spectrum-pane-container">
@@ -80,12 +87,22 @@ class SpectrumPane extends React.Component {
                                 key={1}/>
                         </ReactCSSTransitionGroup>
                     </div>
-                    <div id="current-value-divider-label" key={this.state.seed} ref="divider-label" style={dividerLabelPosition}>
-                        <h2>
+                    <div id="left-arrow" key={this.state.seed} ref="left-arrow" style={leftArrowStyle}>
+                        <h2 className="inline slightly-larger-text">
+                            LESS
+                        </h2> advocating
+                    </div>
+                    <div id="right-arrow" key={this.state.seed+1} ref="right-arrow" style={rightArrowStyle}>
+                        <h2 className="inline slightly-larger-text">
+                            MORE
+                        </h2> advocating
+                    </div>                    
+                    <div id="current-value-divider-label" key={this.state.seed+2} ref="divider-label" style={dividerLabelPosition}>
+                        <h2 className="slightly-larger-text">
                             Current State of Affairs
                         </h2>
                     </div>
-                    <div id="current-value-divider" key={this.state.seed+1} style={dividerPosition}> </div>
+                    <div id="current-value-divider" key={this.state.seed+3} style={dividerPosition}> </div>
                     {options}
                 </div>
             </div>
@@ -102,28 +119,37 @@ class SpectrumPane extends React.Component {
 
         this.place();
 
-        this.placeDividerLabel();
+        this.placeDividerLabels();
     }
 
     componentDidUpdate() {
         this.place();
     }
 
-    placeDividerLabel() {
+    placeDividerLabels() {
+        
         let dividerLabelRef = this.refs['divider-label'];
         let dividerLabelElement = ReactDOM.findDOMNode(dividerLabelRef);
 
         let parent = dividerLabelElement.parentElement;
         let parentWidth = parent.getBoundingClientRect().width;
 
-
-
         let boundingRect = dividerLabelElement.getBoundingClientRect();
         let width = boundingRect.width;
         let left = parentWidth * this.state.dividerPositionLeft / 100;
 
-        console.log("Going to position label from left:" + ( left - (width/2)));
-        dividerLabelElement.style.left = 1 + left - (width/2) + "px";
+        let labelLeft = 1 + left - (width/2);
+        console.log("Going to position label from left:" + labelLeft);
+        dividerLabelElement.style.left = labelLeft + "px";
+
+        let leftArrowRef = this.refs['left-arrow'];
+        let rightArrowRef = this.refs['right-arrow'];
+        let leftArrow = ReactDOM.findDOMNode(leftArrowRef);
+        let rightArrow = ReactDOM.findDOMNode(rightArrowRef);
+
+        console.log("leftArrow right endpoint: " + (labelLeft - 5));
+        leftArrow.style.right = parentWidth - labelLeft + 5 + "px";
+        rightArrow.style.left = labelLeft - 1 + width + 5 + "px";
     }
     
 
@@ -138,7 +164,7 @@ class SpectrumPane extends React.Component {
             });
         }
         
-        this.placeDividerLabel();
+        this.placeDividerLabels();
 
     }
 

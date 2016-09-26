@@ -33,7 +33,7 @@
             "backgroundColor": "#ff00ff"
         },
         "question" : "The goverment should have stronger immigration control",
-        "statusquo": ["The government has stringent visa requirements and accepts 5% of asylum seekers - this year 1000 people", "test", "test"],
+        "statusquo": ["The government has stringent visa requirements and accepts 5% of asylum seekers - this year 1000 people", "test"],
         "data": {
             "current": 4.0,
             "options": {

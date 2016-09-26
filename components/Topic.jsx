@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 
 import ChoicePane from './ChoicePane';
 import SpectrumPane from './SpectrumPane';
+import {Link} from 'react-router';
 
 
 class Topic extends React.Component {
@@ -41,7 +42,14 @@ class Topic extends React.Component {
         return (
             <div className="topic-container">
                 <div className="topic-header">
-                    {this.state.topic} 
+                    <Link to="/KnowYourVote/index.html">
+                        <div id="topic-header-home-button">
+                            Home
+                        </div>
+                    </Link>
+                    <div id="topic-header-text">
+                        {this.state.topic}
+                    </div> 
                 </div>
                 <div className="topic-content">
                     <div className="topic-description-container">

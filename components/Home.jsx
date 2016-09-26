@@ -16,7 +16,7 @@ class Home extends React.Component {
         // let topicTiles = this.state.topics.map(
         let topicTiles = Object.keys(this.props.data).map(
             (topic, i) =>
-                <Link to={"/" + topic} key={i}>
+                <Link to={"/KnowYourVote/" + topic} key={i}>
                     <div className={"topic-tile" +
                                     (this.state.active === topic ? " tile-active" : "")
                                     } 
@@ -55,6 +55,7 @@ class Home extends React.Component {
                 <div className="home-not-header">
                     <div id="home-text">
                         This topic gets me going
+                        <hr id="home-text-divider" />
                     </div>
                     <div className="topic-tiles-container">
                         {topicTiles}
