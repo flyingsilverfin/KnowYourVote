@@ -130,12 +130,6 @@ flex-direction: column;
     position: relative;
 }
 
-#home-text hr {
-    width: 50%;
-    background-color: white;
-    margin: 40px auto -30px auto;
-}
-
 .topic-tiles-container {
     overflow-y: auto;
 }
@@ -143,7 +137,7 @@ flex-direction: column;
 .topic-tile {
     width: 180px;
     height: 180px;
-    margin: 40px;
+    margin: 20px;
 
     text-align: center;
     vertical-align: top;
@@ -202,6 +196,9 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
     overflow-y: hidden;
     width:100%;
     flex: 1 1 auto;
+
+    display:flex;
+
 }
 
 .spectrum-pane {
@@ -212,7 +209,6 @@ box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.15);
     padding: 0;
     text-align: center;
     flex: 1 1 auto;
-    height: 100%;
 }
 
 .spectrum-overlay {

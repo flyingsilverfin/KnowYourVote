@@ -42,7 +42,7 @@ class Topic extends React.Component {
         return (
             <div className="topic-container">
                 <div className="topic-header">
-                    <Link to="/KnowYourVote/index.html">
+                    <Link to="/">
                         <div id="topic-header-home-button">
                             Home
                         </div>
