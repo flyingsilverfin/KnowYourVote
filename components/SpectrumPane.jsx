@@ -110,7 +110,7 @@ class SpectrumPane extends React.Component {
                         </div>
                     </div>
                     <div ref="spectrumPane" className="spectrum-pane" style={spectrumPaneStyle}>
-                        <div className="overlay-container">
+                        {/*<div className="overlay-container">
                             <ReactCSSTransitionGroup transitionName="overlay-slide" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
                                 <div ref="leftOverlay"
                                     style={{right: 100 - this.props.currentValue/10.0*100 + "%"}}
@@ -122,6 +122,7 @@ class SpectrumPane extends React.Component {
                                     key={1}/>
                             </ReactCSSTransitionGroup>
                         </div>
+                        */}
                         
                         <div id="current-value-divider" key={this.state.seed+3} style={dividerPosition}> </div>
                         {options}

@@ -9,6 +9,8 @@ class SpectrumOption extends React.Component {
     constructor(props) {
         super(props);
 
+        console.log(props);
+
         this.state = {
             styles: {
                 top: 0,
@@ -22,7 +24,7 @@ class SpectrumOption extends React.Component {
         return (
             <div ref="child" className="spectrum-option" style={this.state.styles} >
             <ReactCSSTransitionGroup transitionName="activate" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
-                <div className={"spectrum-option-enter" + (this.props.active === 'null' ? '' : (this.props.active ? ' spectrum-option-enter-activate' : ' spectrum-option-enter-deactivate'))}>
+                <div className={"spectrum-option-enter spectrum-option-deactivate-enter" + (this.props.active === null ? '' : (this.props.active ? ' spectrum-option-enter-activate' : ' spectrum-option-deactivate-enter-activate'))}>
                     <div className="title">
                         {this.props.name}
                     </div>
