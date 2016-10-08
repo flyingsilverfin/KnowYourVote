@@ -34,7 +34,6 @@ class Home extends React.Component {
 
                         <div className="topic-tile-image-container" title={this.state.active}>
                         {( () => {
-                            console.log('hi');
                             if (this.state.active === topic) {
                                   return <img className="tile-image" src={this.props.data[topic].image}/>  
                             }

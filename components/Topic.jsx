@@ -11,7 +11,6 @@ class Topic extends React.Component {
     constructor(props) {
         super(props);
         console.log("constructing Topic");
-        console.log(this.props);
         this.state = {
             topic : this.props.name,
             data: this.props.data.data,

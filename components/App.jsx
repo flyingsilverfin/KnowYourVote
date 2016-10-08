@@ -10,7 +10,6 @@ class App extends React.Component {
 
     constructor(props) {
         super(props);    //gets this for component
-        console.log(this.props);
         console.log('constructing app');
 
         this.state = {

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import SpectrumOption from './SpectrumOption';
+import ChoicePane from './ChoicePane';
 
 
 let MARGIN = 10;
@@ -18,7 +19,11 @@ class SpectrumPane extends React.Component {
         this.state = {
             parties: null,
             seed: 0,
-            dividerLabelLeft: null
+            dividerPositionLeft: null,
+            direction: null,
+            minHeight: 0,
+            maxHeight: 0,
+            spectrumPaneHeight: 0
         };
     }
 
@@ -50,7 +55,15 @@ class SpectrumPane extends React.Component {
 
         let options = this.state.parties.map(
             (p, i) =>
-                <SpectrumOption ref={p} name={p} values={this.props.options[p]} key={this.state.seed + i}/>
+                <SpectrumOption 
+                    ref={p}
+                    name={p} 
+                    values={this.props.options[p]} 
+                    key={this.state.seed + i}
+                    active={this.state.direction === null ? null : 
+                            ((this.state.direction === 'left' && this.props.options[p].value <= this.props.currentValue)
+                            || (this.state.direction === 'right' && this.props.options[p].value >= this.props.currentValue))? true : false}
+                    />
         );
 
         let dividerPosition = {
@@ -72,39 +85,49 @@ class SpectrumPane extends React.Component {
             'left' : this.state.dividerPositionLeft
         }
 
+        let spectrumPaneStyle = {
+            'height' : this.state.spectrumPaneHeight
+        }
+
         return (
-            <div className="spectrum-pane-container">
-                <div ref="spectrumPane" className="spectrum-pane">
-                    <div className="overlay-container">
-                        <ReactCSSTransitionGroup transitionName="overlay-slide" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
-                            <div ref="leftOverlay"
-                                style={{right: 100 - this.props.currentValue/10.0*100 + "%"}}
-                                className={'spectrum-overlay overlay-slide-enter ' + (this.props.direction === 'left' ? 'overlay-slide-enter-active' : '')}
-                                key={0}/>
-                            <div ref="rightOverlay"
-                                style={{left: this.props.currentValue/10.0*100 + "%"}}
-                                className={'spectrum-overlay overlay-slide-enter ' + (this.props.direction === 'right' ? 'overlay-slide-enter-active' : '')}
-                                key={1}/>
-                        </ReactCSSTransitionGroup>
+            <div>
+                <div className="spectrum-pane-container">
+                    <div id="label-container">
+                        <div id="left-arrow" key={this.state.seed} ref="left-arrow" style={leftArrowStyle}>
+                            <h2 className="inline slightly-larger-text">
+                                LESS
+                            </h2> advocating
+                        </div>
+                        <div id="right-arrow" key={this.state.seed+1} ref="right-arrow" style={rightArrowStyle}>
+                            <h2 className="inline slightly-larger-text">
+                                MORE
+                            </h2> advocating
+                        </div>                    
+                        <div id="current-value-divider-label" key={this.state.seed+2} ref="divider-label" style={dividerLabelPosition}>
+                            <h2 className="slightly-larger-text">
+                                Current State of Affairs
+                            </h2>
+                        </div>
                     </div>
-                    <div id="left-arrow" key={this.state.seed} ref="left-arrow" style={leftArrowStyle}>
-                        <h2 className="inline slightly-larger-text">
-                            LESS
-                        </h2> advocating
+                    <div ref="spectrumPane" className="spectrum-pane" style={spectrumPaneStyle}>
+                        <div className="overlay-container">
+                            <ReactCSSTransitionGroup transitionName="overlay-slide" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
+                                <div ref="leftOverlay"
+                                    style={{right: 100 - this.props.currentValue/10.0*100 + "%"}}
+                                    className={'spectrum-overlay overlay-slide-enter ' + (this.state.direction === 'left' ? 'overlay-slide-enter-active' : '')}
+                                    key={0}/>
+                                <div ref="rightOverlay"
+                                    style={{left: this.props.currentValue/10.0*100 + "%"}}
+                                    className={'spectrum-overlay overlay-slide-enter ' + (this.state.direction === 'right' ? 'overlay-slide-enter-active' : '')}
+                                    key={1}/>
+                            </ReactCSSTransitionGroup>
+                        </div>
+                        
+                        <div id="current-value-divider" key={this.state.seed+3} style={dividerPosition}> </div>
+                        {options}
                     </div>
-                    <div id="right-arrow" key={this.state.seed+1} ref="right-arrow" style={rightArrowStyle}>
-                        <h2 className="inline slightly-larger-text">
-                            MORE
-                        </h2> advocating
-                    </div>                    
-                    <div id="current-value-divider-label" key={this.state.seed+2} ref="divider-label" style={dividerLabelPosition}>
-                        <h2 className="slightly-larger-text">
-                            Current State of Affairs
-                        </h2>
-                    </div>
-                    <div id="current-value-divider" key={this.state.seed+3} style={dividerPosition}> </div>
-                    {options}
                 </div>
+                <ChoicePane onSelect={this.setDirection.bind(this)} leftQuestion="Question left" rightQuestion="Question right" />
             </div>
         )
     }
@@ -122,8 +145,16 @@ class SpectrumPane extends React.Component {
         this.placeDividerLabels();
     }
 
-    componentDidUpdate() {
-        this.place();
+    componentDidUpdate(prevProps, prevState) {
+        // only want to redraw if certain state has changed
+        if (prevState.seed != this.state.seed)
+        {
+            this.place();
+        }
+    }
+
+    setDirection(direction) {
+        this.setState({direction: direction});
     }
 
     placeDividerLabels() {
@@ -139,7 +170,7 @@ class SpectrumPane extends React.Component {
         let left = parentWidth * this.state.dividerPositionLeft / 100;
 
         let labelLeft = 1 + left - (width/2);
-        console.log("Going to position label from left:" + labelLeft);
+        console.log("Going to position divider label from left:" + labelLeft);
         dividerLabelElement.style.left = labelLeft + "px";
 
         let leftArrowRef = this.refs['left-arrow'];
@@ -172,22 +203,26 @@ class SpectrumPane extends React.Component {
         
         let cd = new CollisionDetector();
 
-
-
-        console.log(this.refs.spectrumPane);
         let container = ReactDOM.findDOMNode(this.refs.spectrumPane);
 
         let containerWidth = container.getBoundingClientRect().width;
         let containerHeight = container.getBoundingClientRect().height;
 
+        console.log('SpectrumPane height: ' + containerHeight);
+
         let i  = 0;
 
         // we're doing this CPS sort of styles
         // because setState does not occur immediately and we require the prior one to be placed before placing the next one
-        // holy this the CPS actually works! Thank you compilers :o
+        // wow this the CPS actually works! Thank you compilers :o
         let f = (function(i, limit, cH, cW, cd, func) {
             console.log('CPS - depth ' + i);
             if (i === limit) {
+                this.setState({
+                    spectrumPaneHeight: this.state.maxHeight - this.state.minHeight,
+                    maxHeight: 0,   // reset so it shrinks again if not needed next resize
+                    minHeight: 0
+                });
                 return;
             } else {
                 this.placeItem(
@@ -207,7 +242,12 @@ class SpectrumPane extends React.Component {
     // takes ref, container height/width, and collision detector 
     // places optionin pane
     placeItem(ref, cHeight, cWidth, collisionDetector, callback) {
+
+
         let elem = ReactDOM.findDOMNode(ref);
+
+        console.log('Placing item: ' + elem.innerHTML);
+
 
         let rect = elem.getBoundingClientRect();
 
@@ -219,9 +259,19 @@ class SpectrumPane extends React.Component {
         let toBeLeft = ((ref.props.values.value/10.0) * cWidth - width/2);
 
         let collisions = collisionDetector.collisions(toBeLeft, width);
+
+        console.log('Collisions at given value: ');
+        console.log(collisions);
+
         collisionDetector.insert(ref, toBeLeft, width);
 
         top = this.placeVertical(height, cHeight/2, collisions);
+
+        if (top < this.state.minHeight) {
+            this.setState({minHeight: top});
+        } if (this.state.maxHeight < top + height) {
+            this.setState({maxHeight: top+height});
+        }
 
         ref.setState({
             styles: {
@@ -248,8 +298,6 @@ class SpectrumPane extends React.Component {
                 // so it hasn't reendered yet so the bounding box isn't really up to date
                 // doesn't matter for height, matters for top!
                 // top should be set in state.styles.top = "valpx"
-
-                console.log(option.state.styles);
 
                 let top = parseInt(option.state.styles.top.slice(0,-2));
                 let _t = top - middle;
