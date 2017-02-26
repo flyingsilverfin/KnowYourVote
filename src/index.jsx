@@ -8,6 +8,14 @@ import Topic from '../components/Topic.jsx';
 
 import data from 'json!../dist/data.json';
 
+
+import $ from 'jquery';
+import jQuery from 'jquery';
+// export for others scripts to use
+window.$ = $;
+window.jQuery = jQuery;
+
+
 //have to deal with server side not handlinging it later
 
 
@@ -21,7 +29,7 @@ import data from 'json!../dist/data.json';
 
 // I can't get the dynamic route creation to work for some reason...
 
-//	    
+
 ReactDOM.render(
 	<Router history={browserHistory}>
 		<Route path="/" component={App} data={data} />

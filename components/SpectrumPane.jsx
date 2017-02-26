@@ -20,7 +20,7 @@ class SpectrumPane extends React.Component {
             parties: null,
             seed: 0,
             dividerPositionLeft: null,
-            direction: null,
+            //direction: null,
             minHeight: 0,
             maxHeight: 0,
             spectrumPaneHeight: 0
@@ -60,9 +60,9 @@ class SpectrumPane extends React.Component {
                     name={p} 
                     values={this.props.options[p]} 
                     key={this.state.seed + i}
-                    active={this.state.direction === null ? null : 
-                            ((this.state.direction === 'left' && this.props.options[p].value <= this.props.currentValue)
-                            || (this.state.direction === 'right' && this.props.options[p].value >= this.props.currentValue))? true : false}
+                    active={this.props.direction === null ? null : 
+                            ((this.props.direction === 'left' && this.props.options[p].value <= this.props.currentValue)
+                            || (this.props.direction === 'right' && this.props.options[p].value >= this.props.currentValue))? true : false}
                     />
         );
 
@@ -80,10 +80,17 @@ class SpectrumPane extends React.Component {
         let leftArrowStyle = {
             'right': this.state.dividerPositionLeft
         }
+        /*if (this.props.direction === 'left') {
+            leftArrowStyle['background-color'] = 'red';
+        }*/
 
         let rightArrowStyle = {
             'left' : this.state.dividerPositionLeft
         }
+        /*if (this.props.direction === 'right') {
+            rightArrowStyle['background-color'] = 'red';
+        }*/
+
 
         let spectrumPaneStyle = {
             'height' : this.state.spectrumPaneHeight
@@ -91,44 +98,46 @@ class SpectrumPane extends React.Component {
 
         return (
             <div>
-                <div className="spectrum-pane-container">
-                    <div id="label-container">
-                        <div id="left-arrow" key={this.state.seed} ref="left-arrow" style={leftArrowStyle}>
-                            <h2 className="inline slightly-larger-text">
-                                LESS
-                            </h2> advocating
+                {/* ChoicePane onSelect={this.setDirection.bind(this)} leftQuestion="Question left" rightQuestion="Question right" /> */}
+                <div>
+                    <div className="spectrum-pane-container">
+                        <div id="label-container">
+                            <div id="left-arrow" key={this.state.seed} ref="left-arrow" style={leftArrowStyle}>
+                                <h2 className="inline slightly-larger-text">
+                                    LESS
+                                </h2> advocating
+                            </div>
+                            <div id="right-arrow" key={this.state.seed+1} ref="right-arrow" style={rightArrowStyle}>
+                                <h2 className="inline slightly-larger-text">
+                                    MORE
+                                </h2> advocating
+                            </div>                    
+                            <div id="current-value-divider-label" key={this.state.seed+2} ref="divider-label" style={dividerLabelPosition}>
+                                <h2 className="slightly-larger-text">
+                                    Current State of Affairs
+                                </h2>
+                            </div>
                         </div>
-                        <div id="right-arrow" key={this.state.seed+1} ref="right-arrow" style={rightArrowStyle}>
-                            <h2 className="inline slightly-larger-text">
-                                MORE
-                            </h2> advocating
-                        </div>                    
-                        <div id="current-value-divider-label" key={this.state.seed+2} ref="divider-label" style={dividerLabelPosition}>
-                            <h2 className="slightly-larger-text">
-                                Current State of Affairs
-                            </h2>
+                        <div ref="spectrumPane" className="spectrum-pane" style={spectrumPaneStyle}>
+                            {/*<div className="overlay-container">
+                                <ReactCSSTransitionGroup transitionName="overlay-slide" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
+                                    <div ref="leftOverlay"
+                                        style={{right: 100 - this.props.currentValue/10.0*100 + "%"}}
+                                        className={'spectrum-overlay overlay-slide-enter ' + (this.state.direction === 'left' ? 'overlay-slide-enter-active' : '')}
+                                        key={0}/>
+                                    <div ref="rightOverlay"
+                                        style={{left: this.props.currentValue/10.0*100 + "%"}}
+                                        className={'spectrum-overlay overlay-slide-enter ' + (this.state.direction === 'right' ? 'overlay-slide-enter-active' : '')}
+                                        key={1}/>
+                                </ReactCSSTransitionGroup>
+                            </div>
+                            */}
+                            
+                            <div id="current-value-divider" key={this.state.seed+3} style={dividerPosition}> </div>
+                            {options}
                         </div>
-                    </div>
-                    <div ref="spectrumPane" className="spectrum-pane" style={spectrumPaneStyle}>
-                        {/*<div className="overlay-container">
-                            <ReactCSSTransitionGroup transitionName="overlay-slide" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
-                                <div ref="leftOverlay"
-                                    style={{right: 100 - this.props.currentValue/10.0*100 + "%"}}
-                                    className={'spectrum-overlay overlay-slide-enter ' + (this.state.direction === 'left' ? 'overlay-slide-enter-active' : '')}
-                                    key={0}/>
-                                <div ref="rightOverlay"
-                                    style={{left: this.props.currentValue/10.0*100 + "%"}}
-                                    className={'spectrum-overlay overlay-slide-enter ' + (this.state.direction === 'right' ? 'overlay-slide-enter-active' : '')}
-                                    key={1}/>
-                            </ReactCSSTransitionGroup>
-                        </div>
-                        */}
-                        
-                        <div id="current-value-divider" key={this.state.seed+3} style={dividerPosition}> </div>
-                        {options}
                     </div>
                 </div>
-                <ChoicePane onSelect={this.setDirection.bind(this)} leftQuestion="Question left" rightQuestion="Question right" />
             </div>
         )
     }
@@ -154,9 +163,9 @@ class SpectrumPane extends React.Component {
         }
     }
 
-    setDirection(direction) {
+    /*setDirection(direction) {
         this.setState({direction: direction});
-    }
+    }*/
 
     placeDividerLabels() {
         

@@ -41,7 +41,7 @@ class Home extends React.Component {
                         ) () }
                          </div>
                         <div className="topic-tile-text">
-                            {topic[0].toUpperCase() + topic.slice(1)}
+                            {this.props.data[topic].name[0].toUpperCase() + this.props.data[topic].name.slice(1)}
                         </div>
                     </div>
                 </Link>
@@ -49,11 +49,11 @@ class Home extends React.Component {
         return (
             <div className="full-height">
                 <div className="header">
-                    Election Erection
+                    What Floats YOUR Vote
                 </div>
                 <div className="home-not-header">
                     <div id="home-text">
-                        This topic gets me going
+                        Tell me about
                     </div>
                     <div className="topic-tiles-container">
                         {topicTiles}

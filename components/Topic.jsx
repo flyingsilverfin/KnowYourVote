@@ -5,6 +5,8 @@ import ChoicePane from './ChoicePane';
 import SpectrumPane from './SpectrumPane';
 import {Link} from 'react-router';
 
+import {smooth_scroll_to, getCoords} from '../src/helper';
+
 
 class Topic extends React.Component {
 
@@ -12,9 +14,9 @@ class Topic extends React.Component {
         super(props);
         console.log("constructing Topic");
         this.state = {
-            topic : this.props.name,
+            topic : this.props.data.name,
             data: this.props.data.data,
-            direction: null
+            direction: null,
         };
     }
 
@@ -43,7 +45,6 @@ class Topic extends React.Component {
                 <div className="topic-header">
                     <Link to="/">
                         <div id="topic-header-home-button">
-                            Home
                         </div>
                     </Link>
                     <div id="topic-header-text">
@@ -59,14 +60,27 @@ class Topic extends React.Component {
                         </ol>
                         </div>
                     </div>
-                    {/*
-                        <ChoicePane question={this.props.data.question} onSelect={this.onSelect.bind(this)} />
-                    */}
+                    
+                    <ChoicePane ref="choice-pane" leftQuestion={this.props.data["question-left"]} rightQuestion={this.props.data["question-right"]} onSelect={this.setDirection.bind(this)} />
+
                     <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} />
                 </div>
             </div>
         )
     }
+
+    setDirection(direction) {
+        this.setState({direction: direction});
+
+        let choicePane = this.refs['choice-pane'];
+        choicePane = ReactDOM.findDOMNode(choicePane);
+        
+        $('html, body').animate({
+            scrollTop: $(choicePane).offset().top
+        }, 500);
+    
+    }
+    
 }
 
 export default Topic;
