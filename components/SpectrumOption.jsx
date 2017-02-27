@@ -22,7 +22,7 @@ class SpectrumOption extends React.Component {
 
     render() {
         return (
-            <div ref="child" className="spectrum-option" style={this.state.styles} >
+            <div ref="child" className="spectrum-option" style={this.state.styles} onClick={this.props.onClick}>
             <ReactCSSTransitionGroup transitionName="activate" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
                 <div className={"spectrum-option-enter spectrum-option-deactivate-enter" + (this.props.active === null ? '' : (this.props.active ? ' spectrum-option-enter-activate' : ' spectrum-option-deactivate-enter-activate'))}>
                     <div className="title">

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import ChoicePane from './ChoicePane';
+import Subtopics from './Subtopics';
 import SpectrumPane from './SpectrumPane';
 import {Link} from 'react-router';
 
@@ -17,6 +18,7 @@ class Topic extends React.Component {
             topic : this.props.data.name,
             data: this.props.data.data,
             direction: null,
+            activeParty: null
         };
     }
 
@@ -63,7 +65,10 @@ class Topic extends React.Component {
                     
                     <ChoicePane ref="choice-pane" leftQuestion={this.props.data["question-left"]} rightQuestion={this.props.data["question-right"]} onSelect={this.setDirection.bind(this)} />
 
-                    <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} />
+                    <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} partySelected={this.partySelected.bind(this)}/>
+                
+                    <Subtopics options={this.state.data.options} activeParty={this.state.activeParty} />
+
                 </div>
             </div>
         )
@@ -78,7 +83,13 @@ class Topic extends React.Component {
         $('html, body').animate({
             scrollTop: $(choicePane).offset().top
         }, 500);
-    
+    }
+
+    partySelected(party) {
+        console.log('party selected: ' + party);
+        this.setState({
+            "activeParty" : party
+        })
     }
     
 }
