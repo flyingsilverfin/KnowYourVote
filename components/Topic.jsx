@@ -45,7 +45,7 @@ class Topic extends React.Component {
         return (
             <div className="topic-container">
                 <div className="header">
-                    <Link to="/">
+                    <Link to="/whatfloatsyourvote/">
                         <div id="topic-header-home-button">
                             Home
                         </div>
@@ -71,7 +71,7 @@ class Topic extends React.Component {
 
                     <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} partySelected={this.partySelected.bind(this)} partyStyles={this.props.partyStyles}/>
                 
-                    <Subtopics options={this.state.data.options} activeParty={this.state.activeParty} />
+                    <Subtopics ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} />
 
                 </div>
             </div>
@@ -93,7 +93,14 @@ class Topic extends React.Component {
         console.log('party selected: ' + party);
         this.setState({
             "activeParty" : party
-        })
+        });
+
+        let subtopics = this.refs['subtopics-container'];
+        subtopics = ReactDOM.findDOMNode(subtopics);
+        
+        $('html, body').animate({
+            scrollTop: $(subtopics).offset().top
+        }, 500)
     }
     
 }

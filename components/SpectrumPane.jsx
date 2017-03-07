@@ -24,7 +24,8 @@ class SpectrumPane extends React.Component {
             minHeight: 0,
             maxHeight: 0,
             spectrumPaneHeight: 0,
-            optionsContainerStyle: {}
+            optionsContainerStyle: {},
+            selectedParty: null                
         };
     }
 
@@ -61,12 +62,13 @@ class SpectrumPane extends React.Component {
                     name={p} 
                     values={this.props.options[p]} 
                     key={this.state.seed + i}
-                    onClick={(function() {this.props.partySelected(p)}).bind(this)}
+                    onClick={function() {this.optionSelected(p)}.bind(this)}
                     active={this.props.direction === null ? null : 
                             ((this.props.direction === 'left' && this.props.options[p].value <= this.props.currentValue)
                             || (this.props.direction === 'right' && this.props.options[p].value >= this.props.currentValue))? true : false}
                     partyStyles={this.props.partyStyles}
                     partyName={p}
+                    selected={this.state.selectedParty === p}
                     />
         );
 
@@ -167,6 +169,13 @@ class SpectrumPane extends React.Component {
         {
             this.place();
         }
+    }
+
+    optionSelected(party) {
+        this.props.partySelected(party);
+        this.setState({
+            'selectedParty': party
+        });
     }
 
     /*setDirection(direction) {

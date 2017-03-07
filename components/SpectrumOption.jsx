@@ -15,7 +15,8 @@ class SpectrumOption extends React.Component {
             styles: {
                 top: 0,
                 left: 0
-            }
+            },
+            selected: false
         };
 
     }
@@ -24,6 +25,7 @@ class SpectrumOption extends React.Component {
     render() {
         let bg;
         let transparency;
+        let style = {}
         if (this.props.active === null) {
             transparency = 0.7;
         } else if (this.props.active) {
@@ -38,13 +40,18 @@ class SpectrumOption extends React.Component {
             // default background color
             bg = [68,68,68];
         }
-        console.log(this.props)
 
-        let style = Object.assign(this.state.styles, {
-            "background-color": "rgba(" + bg[0] + "," + bg[1] + "," + bg[2] + "," + transparency + ")"
-        })
+        if (this.props.selected) {
+            style["border"] = "5px solid #600";
+        } else {
+            style["border"] = undefined;
+        }
+        
 
-        console.log(style);
+        let finalColor = "rgba(" + bg[0] + "," + bg[1] + "," + bg[2] + "," + transparency + ")";
+        style["backgroundColor"] = finalColor;
+
+        style = Object.assign(this.state.styles, style);
 
         return (
             <div ref="child" className="spectrum-option" style={style} onClick={this.props.onClick}>

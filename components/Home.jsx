@@ -17,7 +17,7 @@ class Home extends React.Component {
         // let topicTiles = this.state.topics.map(
         let topicTiles = Object.keys(this.props.data).map(
             (topic, i) =>
-                <Link to={"/" + topic} key={i}>
+                <Link to={"/whatfloatsyourvote/" + topic} key={i}>
                     <div className={"topic-tile" +
                                     (this.state.active === topic ? " tile-active" : "")
                                     } 

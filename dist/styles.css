@@ -197,6 +197,8 @@ align-items: center; /* align vertical */
     max-width:1200px;
     flex: 1 1 auto;
 
+    border-bottom: 1px solid #ccc;
+
     display:flex;
     flex-direction: column;
 }
@@ -206,6 +208,7 @@ align-items: center; /* align vertical */
     min-height: 400px;
     min-width: 900px;
     max-width: 1200px;
+    width:100%;
     margin: 0;
     padding: 0;
     text-align: center;
@@ -324,9 +327,19 @@ align-items: center; /* align vertical */
     font-family: Arial, Helvetica, sans-serif;
     max-width: 190px;
     color: #FAFAFA;
+    border: 5px solid rgba(0,0,0,0);
 
-    transition: background-color 2s; /* not sure this will work */
+    transition: background-color 1s; /* not sure this will work. It does! */
+    transition: border 0.5 ease-out;
+    
 }
+
+.spectrum-option:hover {
+    border: 5px solid #600;
+    transition: border 0.5s ease-out;
+}
+
+
 
 .spectrum-option-enter {
     padding: 5px;
@@ -366,6 +379,7 @@ align-items: center; /* align vertical */
 
 .topic-description-container {
     max-width: 1000px;
+    width:100%;
     padding-top: 20px;
     padding-bottom: 20px;
     margin: 0 auto;
@@ -385,6 +399,7 @@ align-items: center; /* align vertical */
 
 .choice-pane {
     max-width: 1000px;
+    width: 85%;
     padding-top: 10px;
     padding-bottom: 20px;
     margin: 0 auto;
@@ -407,6 +422,9 @@ align-items: center; /* align vertical */
 .subtopics-container {
     display:flex;
     flex-direction: row;
+    max-width: 1000px;
+    width:100%;
+    margin: 0 auto;
 }
 
 .subtopics-no-party-selected {
@@ -416,26 +434,38 @@ align-items: center; /* align vertical */
 }
 
 .subtopic-titles-container {
-    width: 25%;
+    width: 35%;
     display: flex;
     justify-content: center;
     flex-direction: column;
+
+    padding: 10px;
 }
 
 .subtopic-title {
     display:block;
     font-size: 1.5em;
-    margin-left:20px;
+    padding: 5px;
+    margin-top: 5px;
+    border-bottom: 1px solid #600;
+    background-color: none;
+    transition: all 0.5s ease-out; 
+}
+
+.subtopic-title:hover {
+    background-color: rgba(96, 0, 0, 0.2);
+    transition: all 0.5s ease-out;
 }
 
 
 .subtopic-facts-container {
     display:inline-block;
-    width:75%;
+    width:65%;
+    font-size: 1.3em;
 }
 
-.subtopic-fact {
-
+.subtopic-facts-container li {
+    margin: 5px;
 }
 
 

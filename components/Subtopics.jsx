@@ -29,12 +29,10 @@ export default class Subtopics extends React.Component {
                 <SubtopicTitle 
                     key={i}
                     subtopic={subtopic}
+                    active={this.state.activeSubtopic === subtopic}
                     onSelect={(function() {this.setState({activeSubtopic: subtopic})}).bind(this)}
                 />
             );
-
-            console.log(this.props.options[this.props.activeParty].subtopics);
-            console.log(this.state.activeSubtopic);
 
             return (
                 <div className="subtopics-container">
