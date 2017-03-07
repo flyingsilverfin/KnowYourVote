@@ -10,6 +10,7 @@ class Home extends React.Component {
         this.state = {
             active: null
         }
+        console.log(props.data);
     }
 
     render() {
@@ -49,11 +50,11 @@ class Home extends React.Component {
         return (
             <div className="full-height">
                 <div className="header">
-                    What Floats YOUR Vote
+                    What Floats Your Vote
                 </div>
                 <div className="home-not-header">
                     <div id="home-text">
-                        Tell me about
+                        Tell me about...
                     </div>
                     <div className="topic-tiles-container">
                         {topicTiles}

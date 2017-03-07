@@ -84,3 +84,7 @@ export function getCoords(elem) { // crossbrowser version
 
     return { top: Math.round(top), left: Math.round(left) };
 }
+
+export function capitalizeWord(str) {
+    return str.substr(0,1).toUpperCase() + str.substr(1);
+}

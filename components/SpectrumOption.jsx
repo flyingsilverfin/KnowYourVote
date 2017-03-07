@@ -17,12 +17,47 @@ class SpectrumOption extends React.Component {
                 left: 0
             }
         };
+
     }
 
 
     render() {
+        let bg;
+        let transparency;
+        if (this.props.active === null) {
+            transparency = 0.7;
+        } else if (this.props.active) {
+            transparency = 1.0;
+        } else {
+            transparency = 0.3;
+        }
+
+        if (this.props.partyStyles[this.props.partyName] !== undefined) {
+            bg = this.props.partyStyles[this.props.partyName]["background-color"];
+        } else {
+            // default background color
+            bg = [68,68,68];
+        }
+        console.log(this.props)
+
+        let style = Object.assign(this.state.styles, {
+            "background-color": "rgba(" + bg[0] + "," + bg[1] + "," + bg[2] + "," + transparency + ")"
+        })
+
+        console.log(style);
+
         return (
-            <div ref="child" className="spectrum-option" style={this.state.styles} onClick={this.props.onClick}>
+            <div ref="child" className="spectrum-option" style={style} onClick={this.props.onClick}>
+                <div className="title">
+                    {this.props.name}
+                </div>
+                <div className="short">
+                    {this.props.values.short}
+                </div>
+            
+        
+        
+            {/*
             <ReactCSSTransitionGroup transitionName="activate" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
                 <div className={"spectrum-option-enter spectrum-option-deactivate-enter" + (this.props.active === null ? '' : (this.props.active ? ' spectrum-option-enter-activate' : ' spectrum-option-deactivate-enter-activate'))}>
                     <div className="title">
@@ -33,6 +68,7 @@ class SpectrumOption extends React.Component {
                     </div>
                 </div>
             </ReactCSSTransitionGroup>
+            */}
             </div>
             
         );

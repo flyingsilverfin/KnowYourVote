@@ -23,7 +23,8 @@ class SpectrumPane extends React.Component {
             //direction: null,
             minHeight: 0,
             maxHeight: 0,
-            spectrumPaneHeight: 0
+            spectrumPaneHeight: 0,
+            optionsContainerStyle: {}
         };
     }
 
@@ -37,7 +38,7 @@ class SpectrumPane extends React.Component {
         let parties = Object.keys(this.props.options);
 
         // we want to put Conservative, Labor, and Green at the front of the list for later
-        let conservativesIndex = parties.indexOf('Conservative');
+        let conservativesIndex = parties.indexOf('Liberal-National Coalition');
         this.swapElements(parties, conservativesIndex, 0);
         let laborIndex = parties.indexOf('Labor');
         this.swapElements(parties, laborIndex, 1);
@@ -64,6 +65,8 @@ class SpectrumPane extends React.Component {
                     active={this.props.direction === null ? null : 
                             ((this.props.direction === 'left' && this.props.options[p].value <= this.props.currentValue)
                             || (this.props.direction === 'right' && this.props.options[p].value >= this.props.currentValue))? true : false}
+                    partyStyles={this.props.partyStyles}
+                    partyName={p}
                     />
         );
 
@@ -100,7 +103,7 @@ class SpectrumPane extends React.Component {
         return (
             <div>
                 {/* ChoicePane onSelect={this.setDirection.bind(this)} leftQuestion="Question left" rightQuestion="Question right" /> */}
-                <div>
+                <div style={{display: 'flex', justifyContent: 'center'}}>
                     <div className="spectrum-pane-container">
                         <div id="label-container">
                             <div id="left-arrow" key={this.state.seed} ref="left-arrow" style={leftArrowStyle}>
@@ -135,7 +138,9 @@ class SpectrumPane extends React.Component {
                             */}
                             
                             <div id="current-value-divider" key={this.state.seed+3} style={dividerPosition}> </div>
-                            {options}
+                            <div id="spectrum-options-container" style={this.state.optionsContainerStyle}>
+                                {options}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -199,8 +204,8 @@ class SpectrumPane extends React.Component {
         let container = ReactDOM.findDOMNode(this.refs.spectrumPane);
 
         let containerWidth = container.getBoundingClientRect().width;
-        let MIN_WIDTH = 1000;
-        if (containerWidth > 1000) {
+        let MIN_WIDTH = 900;
+        if (containerWidth > 900) {
             this.setState({
                seed: Math.random() 
             });
@@ -232,7 +237,10 @@ class SpectrumPane extends React.Component {
                 this.setState({
                     spectrumPaneHeight: this.state.maxHeight - this.state.minHeight,
                     maxHeight: 0,   // reset so it shrinks again if not needed next resize
-                    minHeight: 0
+                    minHeight: 0,
+                    optionsContainerStyle: {
+                        transform: "translate(0px,"+-(this.state.minHeight+5)+"px)"
+                    }
                 });
                 return;
             } else {

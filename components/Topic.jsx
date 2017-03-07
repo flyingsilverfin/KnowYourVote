@@ -6,7 +6,7 @@ import Subtopics from './Subtopics';
 import SpectrumPane from './SpectrumPane';
 import {Link} from 'react-router';
 
-import {smooth_scroll_to, getCoords} from '../src/helper';
+import {smooth_scroll_to, getCoords, capitalizeWord} from '../src/helper';
 
 
 class Topic extends React.Component {
@@ -44,19 +44,23 @@ class Topic extends React.Component {
 
         return (
             <div className="topic-container">
-                <div className="topic-header">
+                <div className="header">
                     <Link to="/">
                         <div id="topic-header-home-button">
+                            Home
                         </div>
                     </Link>
-                    <div id="topic-header-text">
+                    {/*<div id="topic-header-text">
                         {this.state.topic}
                     </div> 
+                    */}
+                    What Floats Your Vote
+                    
                 </div>
                 <div className="topic-content">
                     <div className="topic-description-container">
                         <div className="topic-description">
-                        <h2> Facts </h2>
+                        <h2> <u>{capitalizeWord(this.state.topic)} </u></h2>
                         <ol>
                         {quolist}
                         </ol>
@@ -65,7 +69,7 @@ class Topic extends React.Component {
                     
                     <ChoicePane ref="choice-pane" leftQuestion={this.props.data["question-left"]} rightQuestion={this.props.data["question-right"]} onSelect={this.setDirection.bind(this)} />
 
-                    <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} partySelected={this.partySelected.bind(this)}/>
+                    <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} partySelected={this.partySelected.bind(this)} partyStyles={this.props.partyStyles}/>
                 
                     <Subtopics options={this.state.data.options} activeParty={this.state.activeParty} />
 

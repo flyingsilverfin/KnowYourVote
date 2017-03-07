@@ -16,7 +16,7 @@ class App extends React.Component {
             data: this.props.route.data,    // route contains the params passed to the Route
             humanPath: ['Home'],
             path: ['/'],
-            display: <Home data={this.props.route.data} />
+            display: <Home data={this.props.route.data.topics} />
         }
     }
 
@@ -31,13 +31,13 @@ class App extends React.Component {
             this.setState({
                 path: [''],
                 humanPath: ['Home'],
-                display: <Home data={this.state.data} />
+                display: <Home data={this.state.data.topics} />
             });
         } else {
             this.setState({
                 path: ['', nextTopic],
                 humanPath: ['Home', nextTopic],
-                display: <Topic name={nextTopic} data={this.state.data[nextTopic]} />
+                display: <Topic name={nextTopic} data={this.state.data.topics[nextTopic]} partyStyles={this.state.data.partyStyles}/>
             });
         }
 

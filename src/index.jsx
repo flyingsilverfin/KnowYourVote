@@ -4,7 +4,6 @@ import {Router, Route, browserHistory} from 'react-router';
 
 import App from '../components/App.jsx';
 import Home from '../components/Home.jsx';
-import Topic from '../components/Topic.jsx';
 
 import data from 'json!../dist/data.json';
 
