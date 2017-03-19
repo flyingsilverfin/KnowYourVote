@@ -42,10 +42,12 @@ class Topic extends React.Component {
             <li className="description-listitem" key={i}> {status} </li>
         );
 
+        let headingStyle = {"margin-left": "7%", "font-size":"1.3em", "margin-top": "20px"};
+
         return (
             <div className="topic-container">
                 <div className="header">
-                    <Link to="/whatfloatsyourvote/">
+                    <Link to="/">
                         <div id="topic-header-home-button">
                             Home
                         </div>
@@ -59,16 +61,23 @@ class Topic extends React.Component {
                 </div>
                 <div className="topic-content">
                     <div className="topic-description-container">
+                        <h2 style={{"text-align":"center"}}> {capitalizeWord(this.state.topic)}</h2>
+                        <u style={headingStyle}> Learn </u>
                         <div className="topic-description">
-                        <h2> <u>{capitalizeWord(this.state.topic)} </u></h2>
-                        <ol>
-                        {quolist}
-                        </ol>
+                            <ol>
+                            {quolist}
+                            </ol>
+                        </div>
+                        <div style={headingStyle}>
+                            <u >Choose</u>
+                        </div>
+                        <ChoicePane ref="choice-pane" leftQuestion={this.props.data["question-left"]} rightQuestion={this.props.data["question-right"]} onSelect={this.setDirection.bind(this)} />
+                    
+                    
+                        <div style={headingStyle}>
+                            <u >Explore</u>
                         </div>
                     </div>
-                    
-                    <ChoicePane ref="choice-pane" leftQuestion={this.props.data["question-left"]} rightQuestion={this.props.data["question-right"]} onSelect={this.setDirection.bind(this)} />
-
                     <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} partySelected={this.partySelected.bind(this)} partyStyles={this.props.partyStyles}/>
                 
                     <Subtopics ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} />

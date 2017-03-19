@@ -33,6 +33,7 @@ h2 {
     margin: 0;
     padding: 0;
     font-weight: bold;
+    font-size:1.8em;
 }
 
 ol {
@@ -390,7 +391,9 @@ align-items: center; /* align vertical */
     width: 80%;
     margin-left: 10%;
     color: black;
+    margin-top:10px;
 }
+
 
 .description-listitem {
     font-size: 1.2em;
@@ -399,7 +402,6 @@ align-items: center; /* align vertical */
 
 .choice-pane {
     max-width: 1000px;
-    width: 85%;
     padding-top: 10px;
     padding-bottom: 20px;
     margin: 0 auto;
@@ -473,9 +475,9 @@ align-items: center; /* align vertical */
 .choice-pane  ul{
   list-style: none;
   height: 100%;
-  width: 100%;
   margin: 0;
   padding: 0;
+  margin-left: 5%;
 }
 
 

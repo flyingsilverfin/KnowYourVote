@@ -31,7 +31,7 @@ class Nav extends React.Component {
         let navList = this.state.humanPath.map(
             (p, i) =>
                 <div className="nav-link-container" key={i}>
-                    <Link to={"/KnowYourVote/"+(this.state.path.slice(0, i+1).join('/'))} className="nav-link">
+                    <Link to={"/"+(this.state.path.slice(0, i+1).join('/'))} className="nav-link">
                         {p}
                     </Link>
                     <div className="nav-link-separator">
