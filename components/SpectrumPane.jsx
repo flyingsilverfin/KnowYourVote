@@ -18,6 +18,7 @@ class SpectrumPane extends React.Component {
         */
         this.state = {
             parties: null,
+            subtopics: null,
             seed: 0,
             dividerPositionLeft: null,
             //direction: null,
@@ -25,7 +26,8 @@ class SpectrumPane extends React.Component {
             maxHeight: 0,
             spectrumPaneHeight: 0,
             optionsContainerStyle: {},
-            selectedParty: null                
+            selectedParty: null,
+            selectedTopic: null          
         };
     }
 
@@ -35,8 +37,12 @@ class SpectrumPane extends React.Component {
         }
     }
 
+/*
+    WARNING: EACH PARTY MUST CONTAIN THE SAME SUBTOPICS!!!!
+*/
     componentWillMount() {
         let parties = Object.keys(this.props.options);
+        let subtopics = Object.keys(this.props.options[parties[0]].subtopics);
 
         // we want to put Conservative, Labor, and Green at the front of the list for later
         let conservativesIndex = parties.indexOf('Liberal-National Coalition');
@@ -49,27 +55,34 @@ class SpectrumPane extends React.Component {
 
         this.setState({
             parties: parties,
+            subtopics: subtopics,
             dividerPositionLeft: 100*(this.props.currentValue/10.0) //percentage from left
         });
     }
 
     render() {        
 
+        // the 'key' property now relies on each party having the same number of subtopics or they might not be unique
         let options = this.state.parties.map(
             (p, i) =>
-                <SpectrumOption 
-                    ref={p}
-                    name={p} 
-                    values={this.props.options[p]} 
-                    key={this.state.seed + i}
-                    onClick={function() {this.optionSelected(p)}.bind(this)}
-                    active={this.props.direction === null ? null : 
-                            ((this.props.direction === 'left' && this.props.options[p].value <= this.props.currentValue)
-                            || (this.props.direction === 'right' && this.props.options[p].value >= this.props.currentValue))? true : false}
-                    partyStyles={this.props.partyStyles}
-                    partyName={p}
-                    selected={this.state.selectedParty === p}
+                Object.keys(this.props.options[p].subtopics).map(
+                (subtopic, j) =>
+                    <SpectrumOption 
+                        ref={p + "-" + subtopic}
+                        name={subtopic} 
+                        facts={this.props.options[p].subtopics[subtopic].facts}
+                        value={this.props.options[p].subtopics[subtopic].value}
+                        key={this.state.seed + i*(this.state.subtopics.length) + j}
+                        onClick={function() {this.optionSelected(p, subtopic)}.bind(this)}
+                        active={this.props.direction === null ? null : 
+                                ((this.props.direction === 'left' && this.props.options[p].subtopics[subtopic].value <= this.props.currentValue)
+                                || (this.props.direction === 'right' && this.props.options[p].subtopics[subtopic].value >= this.props.currentValue))? true : false}
+                        partyStyles={this.props.partyStyles}
+                        partyName={p}
+                        topicName={subtopic}
+                        selected={this.state.selectedParty === p && this.state.selectedTopic === subtopic}
                     />
+            )
         );
 
         let dividerPosition = {
@@ -171,10 +184,11 @@ class SpectrumPane extends React.Component {
         }
     }
 
-    optionSelected(party) {
-        this.props.partySelected(party);
+    optionSelected(party, subtopic) {
+        this.props.optionSelected(party, subtopic);
         this.setState({
-            'selectedParty': party
+            'selectedParty': party,
+            'selectedTopic': subtopic
         });
     }
 
@@ -240,9 +254,14 @@ class SpectrumPane extends React.Component {
         // we're doing this CPS sort of styles
         // because setState does not occur immediately and we require the prior one to be placed before placing the next one
         // wow this the CPS actually works! Thank you compilers :o
-        let f = (function(i, limit, cH, cW, cd, func) {
-            console.log('CPS - depth ' + i);
-            if (i === limit) {
+        let f = (function(i, j, ilimit, jlimit, cH, cW, cd, func) {
+            console.log('CPS - depth ' + i + ', ' + j);
+            if (j === jlimit) {
+                j = 0;
+                i += 1;
+            }
+            // if finished (rolled over for the last time)
+            if (i === ilimit) {
                 this.setState({
                     spectrumPaneHeight: this.state.maxHeight - this.state.minHeight,
                     maxHeight: 0,   // reset so it shrinks again if not needed next resize
@@ -253,17 +272,18 @@ class SpectrumPane extends React.Component {
                 });
                 return;
             } else {
+                console.log("placing: " + this.state.parties[i] + '-' + this.state.subtopics[j])
                 this.placeItem(
-                    this.refs[this.state.parties[i]],
+                    this.refs[this.state.parties[i] + '-' + this.state.subtopics[j]],
                     cH, cW, cd,
                     function() {
-                        func(i+1, limit, cH, cW, cd, func);
+                        func(i, j+1, ilimit, jlimit, cH, cW, cd, func);
                     }
                 )
             }
         }).bind(this);
 
-        f(0, this.state.parties.length, containerHeight, containerWidth, cd, f);
+        f(0, 0, this.state.parties.length, this.state.subtopics.length, containerHeight, containerWidth, cd, f);
 
     }
 
@@ -273,6 +293,7 @@ class SpectrumPane extends React.Component {
 
 
         let elem = ReactDOM.findDOMNode(ref);
+
 
         console.log('Placing item: ' + elem.innerHTML);
 
@@ -284,7 +305,7 @@ class SpectrumPane extends React.Component {
         let height = rect.height;
         let top = rect.top;
 
-        let toBeLeft = ((ref.props.values.value/10.0) * cWidth - width/2);
+        let toBeLeft = ((ref.props.value/10.0) * cWidth - width/2);
 
         let collisions = collisionDetector.collisions(toBeLeft, width);
 

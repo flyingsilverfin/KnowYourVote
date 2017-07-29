@@ -326,9 +326,10 @@ align-items: center; /* align vertical */
 .spectrum-option {
     position:absolute;
     font-family: Arial, Helvetica, sans-serif;
-    max-width: 190px;
+    width: 225px;
     color: #FAFAFA;
     border: 5px solid rgba(0,0,0,0);
+    z-index:999;
 
     transition: background-color 1s; /* not sure this will work. It does! */
     transition: border 0.5 ease-out;
@@ -364,18 +365,33 @@ align-items: center; /* align vertical */
     margin: 10px;
 }
 
-.spectrum-option .short {
+.spectrum-option .spectrum-option-facts {
     margin: 9px;
+    text-align: left;
+}
+.spectrum-option .spectrum-option-facts ul {
+    margin: 0px;
+    padding-left: 10px;
+}
+.spectrum-option .spectrum-option-facts li {
+    list-style-type: square;
+    margin: 0px;
+    padding: 0px;
+
 }
 
 .topic-container {
     height:100%;
+
 }
 
 .topic-content {
     display: flex;
     flex-flow: column;
     height:100%;
+    max-width:1200px;
+    background-color: #FDFDFD;
+    margin: 0 auto;
 }
 
 .topic-description-container {
@@ -427,6 +443,7 @@ align-items: center; /* align vertical */
     max-width: 1000px;
     width:100%;
     margin: 0 auto;
+    min-height: 200px;
 }
 
 .subtopics-no-party-selected {
@@ -464,6 +481,8 @@ align-items: center; /* align vertical */
     display:inline-block;
     width:65%;
     font-size: 1.3em;
+    display: flex;
+    align-items: center;
 }
 
 .subtopic-facts-container li {

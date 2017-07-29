@@ -2,8 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import ChoicePane from './ChoicePane';
-import Subtopics from './Subtopics';
+import DetailedSubtopicFacts from './DetailedSubtopicFacts';
 import SpectrumPane from './SpectrumPane';
+import PartiesKey from './PartiesKey';
 import {Link} from 'react-router';
 
 import {smooth_scroll_to, getCoords, capitalizeWord} from '../src/helper';
@@ -47,7 +48,7 @@ class Topic extends React.Component {
         return (
             <div className="topic-container">
                 <div className="header">
-                    <Link to="/">
+                    <Link to="/whatfloatsyourvote/">
                         <div id="topic-header-home-button">
                             Home
                         </div>
@@ -76,11 +77,14 @@ class Topic extends React.Component {
                     
                         <div style={headingStyle}>
                             <u >Explore</u>
+                            <PartiesKey partyStyles={this.props.partyStyles} />
+
                         </div>
                     </div>
-                    <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} partySelected={this.partySelected.bind(this)} partyStyles={this.props.partyStyles}/>
+                    <SpectrumPane topic={this.state.topic} currentValue={this.state.data.current} options={this.state.data.options} direction={this.state.direction} optionSelected={this.optionSelected.bind(this)} partyStyles={this.props.partyStyles}/>
                 
-                    <Subtopics ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} />
+                    {/*<Subtopics ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} />*/}
+                    <DetailedSubtopicFacts ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} activeSubtopic={this.state.activeTopic} />
 
                 </div>
             </div>
@@ -98,10 +102,11 @@ class Topic extends React.Component {
         }, 500);
     }
 
-    partySelected(party) {
-        console.log('party selected: ' + party);
+    optionSelected(party, subtopic) {
+        console.log('party selected: ' + party + ', subtopic: ' + subtopic);
         this.setState({
-            "activeParty" : party
+            "activeParty" : party,
+            "activeTopic": subtopic
         });
 
         let subtopics = this.refs['subtopics-container'];
@@ -110,6 +115,7 @@ class Topic extends React.Component {
         $('html, body').animate({
             scrollTop: $(subtopics).offset().top
         }, 500)
+        
     }
     
 }

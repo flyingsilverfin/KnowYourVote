@@ -58,8 +58,18 @@ class SpectrumOption extends React.Component {
                 <div className="title">
                     {this.props.name}
                 </div>
-                <div className="short">
-                    {this.props.values.short}
+                <div className="spectrum-option-facts">
+                    <ul>
+                        {/*
+                            this.props.facts.map(
+                                (fact, i) =>
+                                    <li>
+                                        {fact}
+                                    </li>
+                            )
+
+                        */}
+                    </ul>
                 </div>
             
         

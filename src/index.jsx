@@ -31,8 +31,8 @@ window.jQuery = jQuery;
 
 ReactDOM.render(
 	<Router history={browserHistory}>
-		<Route path="/" component={App} data={data} />
-		<Route path="/:topic" component={App} data={data} />
+		<Route path="/whatfloatsyourvote/" component={App} data={data} />
+		<Route path="/whatfloatsyourvote/:topic" component={App} data={data} />
 	</Router>,
 	document.getElementById('app')
 ); 
