@@ -48,7 +48,7 @@ class Topic extends React.Component {
         return (
             <div className="topic-container">
                 <div className="header">
-                    <Link to="/whatfloatsyourvote/">
+                    <Link to="/">
                         <div id="topic-header-home-button">
                             Home
                         </div>

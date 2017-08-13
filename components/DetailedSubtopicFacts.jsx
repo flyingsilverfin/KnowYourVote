@@ -12,7 +12,6 @@ export default class DetailedSubtopicfacts extends React.Component {
 
     render() {
 
-debugger
         if (!this.props.activeParty || !this.props.activeSubtopic) {
             return (
                 <div className="subtopics-no-party-selected">
