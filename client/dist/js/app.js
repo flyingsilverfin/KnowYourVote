@@ -35331,6 +35331,10 @@
 
 	var _TopicPage2 = _interopRequireDefault(_TopicPage);
 
+	var _AdminPage = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./containers/AdminPage.jsx\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+
+	var _AdminPage2 = _interopRequireDefault(_AdminPage);
+
 	var _data = __webpack_require__(483);
 
 	var _data2 = _interopRequireDefault(_data);
@@ -35354,6 +35358,9 @@
 	    path: '/topic/*',
 	    component: _TopicPage2.default,
 	    data: _data2.default
+	  }, {
+	    path: '/admin',
+	    component: _AdminPage2.default
 	  }]
 	};
 
@@ -45023,6 +45030,8 @@
 	});
 	exports.getCoords = getCoords;
 	exports.capitalizeWord = capitalizeWord;
+	exports.httpGet = httpGet;
+	exports.httpPost = httpPost;
 	var smooth_scroll_to = exports.smooth_scroll_to = function smooth_scroll_to(element, target, duration) {
 	    target = Math.round(target);
 	    duration = Math.round(duration);
@@ -45115,6 +45124,26 @@
 
 	function capitalizeWord(str) {
 	    return str.substr(0, 1).toUpperCase() + str.substr(1);
+	}
+
+	function httpGet(url, callback) {
+	    var req = new XMLHttpRequest();
+	    req.overrideMimeType("application/json");
+	    req.open('GET', url, true);
+	    req.onreadystatechange = function () {
+	        if (req.readyState === 4 && req.status === 200) {
+	            callback(req.responseText);
+	        }
+	    };
+	    req.send(null);
+	}
+
+	function httpPost(url, data, callback) {
+	    var req = new XMLHttpRequest(); // new HttpRequest instance 
+	    req.open("POST", url);
+	    req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	    req.send(JSON.stringify(data));
+	    req.onloadend = callback; //TODO test this works
 	}
 
 /***/ }),

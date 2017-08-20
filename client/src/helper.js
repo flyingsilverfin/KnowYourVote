@@ -88,3 +88,23 @@ export function getCoords(elem) { // crossbrowser version
 export function capitalizeWord(str) {
     return str.substr(0,1).toUpperCase() + str.substr(1);
 }
+
+export function httpGet(url, callback) {
+    let req = new XMLHttpRequest();
+    req.overrideMimeType("application/json");
+    req.open('GET', url, true);
+    req.onreadystatechange = function() {
+        if (req.readyState === 4 && req.status === 200) {
+            callback(req.responseText);
+        }
+    };
+    req.send(null);
+}
+
+export function httpPost(url, data, callback) {
+    let req = new XMLHttpRequest();   // new HttpRequest instance 
+    req.open("POST", url);
+    req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    req.send(JSON.stringify(data));
+    req.onloadend = callback;   //TODO test this works
+}
