@@ -75,12 +75,12 @@ class TopicPage extends React.Component {
     setDirection(direction) {
         this.setState({direction: direction});
 
-        let choicePane = this.refs['choice-pane'];
+        /*let choicePane = this.refs['choice-pane'];
         choicePane = ReactDOM.findDOMNode(choicePane);
         
         $('html, body').animate({
             scrollTop: $(choicePane).offset().top
-        }, 500);
+        }, 500);*/
     }
 
     optionSelected(party, subtopic) {
@@ -90,12 +90,12 @@ class TopicPage extends React.Component {
             activeSubtopic: subtopic
         });
 
-        let subtopics = this.refs['subtopics-container'];
+        /*let subtopics = this.refs['subtopics-container'];
         subtopics = ReactDOM.findDOMNode(subtopics);
         
         $('html, body').animate({
             scrollTop: $(subtopics).offset().top
-        }, 500)
+        }, 500)*/
         
     }
     

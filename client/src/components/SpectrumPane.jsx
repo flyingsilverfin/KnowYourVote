@@ -12,7 +12,7 @@ class SpectrumPane extends React.Component {
 
     constructor(props) {
         super(props);
-
+debugger
         /*
             Props: props.topic, props.currentValue, props.options
         */
@@ -116,7 +116,7 @@ class SpectrumPane extends React.Component {
         }
 
         return (
-            <div>
+            <div className="spectrum-pane-container-outer">
                 {/* ChoicePane onSelect={this.setDirection.bind(this)} leftQuestion="Question left" rightQuestion="Question right" /> */}
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                     <div className="spectrum-pane-container">

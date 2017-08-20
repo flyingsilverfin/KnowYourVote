@@ -11,7 +11,7 @@ import PartiesKey from './PartiesKey.jsx';
 import {smooth_scroll_to, getCoords, capitalizeWord} from '../helper';
 
 
-let headingStyle = {"margin-left": "7%", "font-size":"1.3em",  "margin-top": "20px"};
+let headingStyle = {"marginLeft": "7%", "fontSize":"1.3em",  "marginTop": "20px"};
 
 
 const Topic = ({
@@ -30,7 +30,7 @@ const Topic = ({
         {/* TODO <Header /> */ }
         <div className="topic-content">
             <div className="topic-description-container">
-                <h2 style={{"text-align":"center"}}> {capitalizeWord(name)}</h2>
+                <h2 style={{"textAlign":"center"}}> {capitalizeWord(name)}</h2>
                 <u style={headingStyle}> Learn </u>
                 <div className="topic-description">
                     <ol>
@@ -46,7 +46,7 @@ const Topic = ({
                 <div style={headingStyle}>
                     <u >Choose</u>
                 </div>
-                <ChoicePane ref="choice-pane" leftQuestion={questions["question-left"]} rightQuestion={questions["question-right"]} onSelect={directionSelected} />
+                <ChoicePane leftQuestion={questions["question-left"]} rightQuestion={questions["question-right"]} onSelect={directionSelected} />
             
             
                 <div style={headingStyle}>
@@ -55,10 +55,10 @@ const Topic = ({
 
                 </div>
             </div>
-            <SpectrumPane topic={name} currentValue={data.currentValue} options={data.options} direction={direction} optionSelected={optionSelected} partyStyles={partyStyles}/>
+            <SpectrumPane topic={name} currentValue={data.current} options={data.options} direction={direction} optionSelected={optionSelected} partyStyles={partyStyles}/>
         
             {/*<Subtopics ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} />*/}
-            <DetailedSubtopicFacts ref="subtopics-container" options={data.options} activeParty={activeParty} activeSubtopic={activeSubtopic} />
+            <DetailedSubtopicFacts options={data.options} activeParty={activeParty} activeSubtopic={activeSubtopic} />
         </div>
     </div>
   );

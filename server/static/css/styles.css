@@ -182,6 +182,10 @@ align-items: center; /* align vertical */
     display: inline-block;
 }
 
+.spectrum-pane-container-outer {
+    background-color: #F5F5F5;;
+}
+
 
 .spectrum-pane-container {
     overflow-y: hidden;

@@ -9,7 +9,7 @@ const TopicTiles = ({
     activateTopic,
     deactivateTopic
   }) => (
-  <div className="topic-tiles-container">
+  <div>
       {
         Object.keys(topics).map((topic, index) =>
           <Link to={"/topic/" + topic} key={index}>
