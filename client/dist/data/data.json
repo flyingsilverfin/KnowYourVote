@@ -12,7 +12,7 @@
     },
     "topics": {
         "environment" : {
-            "name": "environment",
+            "displayName": "environment",
             "image": "images/env.png",
             "styles" :{
                 "backgroundColor": "#00ff00"

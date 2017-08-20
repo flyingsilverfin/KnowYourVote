@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+//import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
-import SpectrumOption from './SpectrumOption';
-import ChoicePane from './ChoicePane';
+import SpectrumOption from './SpectrumOption.jsx';
+import ChoicePane from './ChoicePane.jsx';
 
 
 let MARGIN = 10;

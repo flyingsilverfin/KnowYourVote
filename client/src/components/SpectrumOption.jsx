@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+//import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 // useful link: http://stackoverflow.com/questions/34660385/how-to-position-a-react-component-relative-to-its-parent
 

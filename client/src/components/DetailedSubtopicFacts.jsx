@@ -1,8 +1,8 @@
 import React from 'react';
 
 
-import SubtopicTitle from './SubtopicTitle';
-import SubtopicData from './SubtopicData';
+import SubtopicTitle from './SubtopicTitle.jsx';
+import SubtopicData from './SubtopicData.jsx';
 
 export default class DetailedSubtopicfacts extends React.Component {
 
