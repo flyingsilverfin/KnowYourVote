@@ -17,7 +17,8 @@ class AdminPage extends React.Component {
 
         this.state = {
             data: null,
-            status: "Loading"
+            status: "Loading",
+            saved: true
         }
 
         this.getData();
@@ -43,11 +44,12 @@ class AdminPage extends React.Component {
             c = function() {
                 callback();
                 this.setState({
-                    status: "Ready"
+                    status: "Ready",
+                    saved: true
                 });
             }.bind(this);
         } else {
-            c = () => this.setState({status: "Ready"});
+            c = () => this.setState({status: "Ready", saved: true});
         }
         this.setState({
             status: "Saving"
@@ -57,14 +59,16 @@ class AdminPage extends React.Component {
 
     revertData() {
         this.setState({
-            status: "Reverting"
+            status: "Reverting",
+            saved: true
         })
         httpPost('/admin/revert', {}, this.getData.bind(this));
     }
 
     publishData() {
         this.setState({
-            status: "Saving"
+            status: "Saving",
+            saved: true
         })
         this.saveData(function() {
             this.setState({
@@ -77,6 +81,12 @@ class AdminPage extends React.Component {
                 this.delayedSetState(3000, "status", "Ready");
             }.bind(this));
         });
+    }
+
+    onAnyChange() {
+        this.setState({
+            saved: false
+        })
     }
 
     dataLoaded(raw) {
@@ -94,7 +104,11 @@ class AdminPage extends React.Component {
                     Admin Interface
                 </div>
 
-                {this.state.data ? <Editor data={this.state.data} /> : ""}
+                {this.state.data ? 
+                    <Editor data={this.state.data} onChange={this.onAnyChange.bind(this)} /> 
+                    : 
+                    ""
+                }
             </Card>
         )
     }

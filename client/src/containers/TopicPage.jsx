@@ -58,10 +58,7 @@ class TopicPage extends React.Component {
                     data={data.data}
                     partyStyles={this.props.route.data.partyStyles}
                     statusquo={data.statusquo}
-                    questions={{
-                        'question-left': data['question-left'], 
-                        'question-right': data['question-right']}
-                    }
+                    questions={data.questions}
                     direction={this.state.direction}
                     activeParty={this.state.activeParty}
                     activeSubtopic={this.state.activeSubtopic}

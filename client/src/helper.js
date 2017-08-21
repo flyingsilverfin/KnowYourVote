@@ -108,3 +108,15 @@ export function httpPost(url, data, callback) {
     req.send(JSON.stringify(data));
     req.onloadend = callback;   //TODO test this works
 }
+
+export function strContains(substring, string) {
+    string.indexOf(substring) !== -1;
+}
+
+export function isArray(arr) {
+    if (Array.isArray) {
+        return Array.isArray(arr);
+    } else {
+        return Object.prototype.toString.call(obj) === '[object Array]';
+    }
+}

@@ -20,7 +20,7 @@ export default class SpectrumOption extends React.Component {
                     <div style={{
                             width: "50px",
                             height: "1em",
-                            backgroundColor: "rgb(" + this.props.partyStyles[party]["background-color"].join(',') + ")",
+                            backgroundColor: "rgba(" + this.props.partyStyles[party]["background-color"].join(',') + ")",
                             display: "inline-block",
                             value: "",
                             verticalAlign: "middle"
