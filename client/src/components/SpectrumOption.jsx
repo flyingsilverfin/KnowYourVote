@@ -34,8 +34,8 @@ class SpectrumOption extends React.Component {
             transparency = 0.3;
         }
 
-        if (this.props.partyStyles[this.props.partyName] !== undefined) {
-            bg = this.props.partyStyles[this.props.partyName]["background-color"];
+        if (this.props.parties[this.props.partyName] !== undefined) {
+            bg = this.props.parties[this.props.partyName]["background-color"];
         } else {
             // default background color
             bg = [68,68,68];

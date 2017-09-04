@@ -1,5 +1,5 @@
 {
-    "partyStyles": {
+    "parties": {
         "Liberal-National Coalition" : {
             "background-color" : [0,85,165, 1]
         },

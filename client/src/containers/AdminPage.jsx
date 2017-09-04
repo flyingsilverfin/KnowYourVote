@@ -3,16 +3,12 @@ import ReactDOM from 'react-dom';
 
 import Editor from "../components/admin/Editor.jsx";
 
-import { Card, CardText } from 'material-ui/Card';
-import RaisedButton from 'material-ui/RaisedButton';
-import TextField from 'material-ui/TextField';
-
-import {httpGet, httpPost} from '../src/helper';
+import {httpGet, httpPost} from '../helper.js';
 
 
 class AdminPage extends React.Component {
 
-    contructor() {
+    constructor(props) {
         super(props);
 
         this.state = {
@@ -33,7 +29,7 @@ class AdminPage extends React.Component {
     }
 
     getData() {
-        this.stateState({
+        this.setState({
             status: "Loading"
         })
         httpGet('/data_admin/data.json', this.dataLoaded.bind(this));
@@ -90,7 +86,7 @@ class AdminPage extends React.Component {
     }
 
     dataLoaded(raw) {
-        data = json.parse(raw);
+        let data = JSON.parse(raw);
         this.setState({
             data: data,
             status: "Ready"
@@ -99,18 +95,19 @@ class AdminPage extends React.Component {
 
     render() {
         return (
-            <Card>
+            <div>
                 <div className="header">
                     Admin Interface
                 </div>
 
                 {this.state.data ? 
-                    <Editor data={this.state.data} onChange={this.onAnyChange.bind(this)} /> 
+                    <Editor raw_json={this.state.data} /> 
                     : 
                     ""
                 }
-            </Card>
+            </div>
         )
     }
-
 }
+
+export default AdminPage;

@@ -1,13 +1,13 @@
 {
-    "partyStyles": {
+    "parties": {
         "Liberal-National Coalition" : {
-            "background-color" : [0,85,165]
+            "background-color" : [0,85,165, 1.0]
         },
         "Green" : {
-            "background-color" : [0, 190, 0]
+            "background-color" : [0, 190, 0, 1.0]
         },
         "Labor": {
-            "background-color" : [229,54,65]
+            "background-color" : [229,54,65, 1.0]
         }
     },
     "topics": {

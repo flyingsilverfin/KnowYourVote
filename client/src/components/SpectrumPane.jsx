@@ -12,7 +12,7 @@ class SpectrumPane extends React.Component {
 
     constructor(props) {
         super(props);
-debugger
+
         /*
             Props: props.topic, props.currentValue, props.options
         */
@@ -77,7 +77,7 @@ debugger
                         active={this.props.direction === null ? null : 
                                 ((this.props.direction === 'left' && this.props.options[p].subtopics[subtopic].value <= this.props.currentValue)
                                 || (this.props.direction === 'right' && this.props.options[p].subtopics[subtopic].value >= this.props.currentValue))? true : false}
-                        partyStyles={this.props.partyStyles}
+                        parties={this.props.parties}
                         partyName={p}
                         topicName={subtopic}
                         selected={this.state.selectedParty === p && this.state.selectedTopic === subtopic}

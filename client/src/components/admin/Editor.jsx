@@ -1,39 +1,42 @@
 import React, { PropTypes } from 'react';
-import { Card, CardText } from 'material-ui/Card';
-import RaisedButton from 'material-ui/RaisedButton';
-import TextField from 'material-ui/TextField';
 
-import {strContains, isArray} from '../helper.js';
+import EditorSidebar from './EditorSidebar.jsx';
+import JSONEditor from './JSONEditor.jsx';
 
-const Editor = ({
-    data,
-    onAnyChange
-}) => (
-    <div className="container">
-        {
-            Object.keys(data).map(function(name, index) {
-                if  ( typeof data[name] === 'object' ) {
-                    return (
-                        <div className="json-item-name">
-                            <Editor data={data[name]} onAnyChange={onAnyChange} />
-                        </div>
-                    )
-                } else {
-                    if (strContains("color", name) && isArray(data[name])) {
-                        // TODO color picker display
-                    } else if ( typeof data[name] === "string" ) {
+/*
+Full width with its own side bar
+*/
 
-                    } else if ( typeof data[name] === "number" ) {
 
-                    } else if ( isArray(data[name]) ) {
+class Editor extends React.Component {
+    constructor(props) {
+        super(props);
 
-                    }
-                }
-            })
-
+        this.state = {
+            active: 'parties'
         }
+    }
 
-    </div>
-);
+    setActive(key) {
+        this.setState({
+            active: key
+        });
+    }
+
+    render() {
+        return (
+            <div>
+                <div className="admin-sidebar">
+                    <EditorSidebar choices={Object.keys(this.props.raw_json)} setActive={this.setActive.bind(this)} active={this.state.active} />
+                </div>
+
+                <div className="admin-main-content"> 
+                    <JSONEditor json={this.props.raw_json[this.state.active]} />
+                </div>
+            </div>
+        );
+    }
+}
+
 
 export default Editor;

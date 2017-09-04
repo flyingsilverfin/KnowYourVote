@@ -109,8 +109,8 @@ export function httpPost(url, data, callback) {
     req.onloadend = callback;   //TODO test this works
 }
 
-export function strContains(substring, string) {
-    string.indexOf(substring) !== -1;
+export function strContains(s, substr) {
+    return s.indexOf(substr) !== -1;
 }
 
 export function isArray(arr) {

@@ -11,7 +11,7 @@ export default class SpectrumOption extends React.Component {
 
     render() {
 
-        let partyBlocks = Object.keys(this.props.partyStyles).map(
+        let partyBlocks = Object.keys(this.props.parties).map(
             (party, i) =>
                 <div style={{
                         padding: "20px 50px 0 0px"
@@ -20,7 +20,7 @@ export default class SpectrumOption extends React.Component {
                     <div style={{
                             width: "50px",
                             height: "1em",
-                            backgroundColor: "rgba(" + this.props.partyStyles[party]["background-color"].join(',') + ")",
+                            backgroundColor: "rgba(" + this.props.parties[party]["background-color"].join(',') + ")",
                             display: "inline-block",
                             value: "",
                             verticalAlign: "middle"

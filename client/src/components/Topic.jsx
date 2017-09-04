@@ -19,7 +19,7 @@ const Topic = ({
     data,
     statusquo,
     questions,
-    partyStyles,
+    parties,
     direction,
     activeParty,
     activeSubtopic,
@@ -51,11 +51,11 @@ const Topic = ({
             
                 <div style={headingStyle}>
                     <u >Explore</u>
-                    <PartiesKey partyStyles={partyStyles} />
+                    <PartiesKey parties={parties} />
 
                 </div>
             </div>
-            <SpectrumPane topic={name} currentValue={data.current} options={data.options} direction={direction} optionSelected={optionSelected} partyStyles={partyStyles}/>
+            <SpectrumPane topic={name} currentValue={data.current} options={data.options} direction={direction} optionSelected={optionSelected} parties={parties}/>
         
             {/*<Subtopics ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} />*/}
             <DetailedSubtopicFacts options={data.options} activeParty={activeParty} activeSubtopic={activeSubtopic} />
@@ -69,7 +69,7 @@ Topic.propTypes = {
     data: PropTypes.object.isRequired,
     statusquo: PropTypes.array.isRequired,
     questions: PropTypes.object.isRequired,
-    partyStyles: PropTypes.object.isRequired,
+    parties: PropTypes.object.isRequired,
     direction: PropTypes.string, //.isRequired,
     activeParty: PropTypes.string, //.isRequired,
     activeSubtopic: PropTypes.string, //.isRequired,
