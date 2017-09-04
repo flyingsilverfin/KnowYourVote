@@ -95,7 +95,7 @@ class AdminPage extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className="">
                 <div className="header">
                     Admin Interface
                 </div>

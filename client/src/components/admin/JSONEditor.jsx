@@ -6,7 +6,8 @@ import {strContains, isArray} from '../../helper.js';
 
 const Entry = ({
     name, 
-    data
+    data,
+    no_border
 }) => {
     if (isArray(data)) {
         // special case for colors
@@ -16,7 +17,7 @@ const Entry = ({
             return <ArrayEntry name={name} data={data} />
         }
     } else if (typeof data === 'object') {
-        return <ObjectEntry name={name} data={data} />
+        return <ObjectEntry name={name} data={data} no_border={no_border} />
     } else {
         if ( typeof data === "string" ) {
             // check special case for images
@@ -42,7 +43,7 @@ class ObjectEntry extends React.Component {
         super(props);
 
         this.state = {
-            active: true    // toggle collapse
+            visible: true    // toggle collapse
         };
     }
 
@@ -50,21 +51,34 @@ class ObjectEntry extends React.Component {
         let name = this.props.name;
         let data = this.props.data;
         return (
-        <div className="entry-container"> 
+        <div className="entry-container"
+             style={this.props.no_border? {border:'none', marginLeft:0, paddingLeft:0}: {}} >
+            <div className="entry-heading">
+                <div 
+                    className="entry-collapse"
+                    onClick={() => this.setState({visible:!this.state.visible})}
+                    style={!this.state.visible?{'transform':'rotateZ(0deg)'} : {}}
+                    >
+                    ▶
+                </div>
                 <span className="entry-title">
                     {name}
                 </span>
-                <span className="entry-title-details">
+                <span className={"entry-title-details" + (!this.state.visible ? " entry-title-details-emph" : " entry-title-details-normal")}>
                     object, {Object.keys(data).length} keys
                 </span>
-            <div className="entry-content">
-                {/*<JSONEditor data={data} />*/}
-                {
-                    Object.keys(data).map((n, index) =>
-                        <Entry name={n} data={data[n]} key={index} />
-                    )
-                }
             </div>
+            {this.state.visible ? 
+                <div className="entry-content">
+                    {
+                        Object.keys(data).map((n, index) =>
+                            <Entry name={n} data={data[n]} key={index} />
+                        )
+                    }
+                </div>
+                :
+                ""
+            }
         </div>
         )
     }
@@ -75,7 +89,7 @@ class ArrayEntry extends React.Component {
         super(props);
 
         this.state = {
-            active: true    // toggle collapse
+            visible: true    // toggle collapse
         };
     }
 
@@ -85,20 +99,32 @@ class ArrayEntry extends React.Component {
         return (
         <div className="entry-container">
             <div className="entry-heading">
+                <div 
+                    className="entry-collapse"
+                    onClick={() => this.setState({visible:!this.state.visible})}
+                    style={!this.state.visible?{'transform':'rotateZ(0deg)'} : {}}
+                    >
+                    ▶
+                </div>
+
                 <span className="entry-title">
                     {name}
                 </span>
-                <span className="entry-title-details">
+                <span className={"entry-title-details" + (!this.state.visible ? " entry-title-details-emph" : " entry-title-details-normal")}>
                     array, {data.length} items
                 </span>
             </div>
-            <div className="entry-content">
-                {
-                    data.map((value, index) =>
-                        <Entry name={index} data={value} key={index} /> 
-                    )
-                }
-            </div>
+            {this.state.visible ?
+                <div className="entry-content">
+                    {
+                        data.map((value, index) =>
+                            <Entry name={index+"."} data={value} key={index} /> 
+                        )
+                    }
+                </div>
+                :
+                ""
+            }
         </div>
         );
     }
@@ -124,15 +150,14 @@ class ColorPickerEntry extends React.Component {
 }
 
 
-// TODO make these inline
 const StringEntry = ({
     name, data
 }) => (
     <div className="entry-container">
-        <div className="entry-heading">
+        <div className="entry-heading inline">
             {name}
         </div>
-        <div className="entry-content" contentEditable="true">
+        <div className="entry-content inline value editable-area" contentEditable="true">
             {data}
         </div>
     </div>
@@ -142,10 +167,10 @@ const ImageEntry = ({
     name, src
 }) => (
     <div className="entry-container">
-        <div className="entry-heading">
+        <div className="entry-heading inline">
             {name}
         </div>
-        <div className="entry-content">
+        <div className="entry-content inline">
             <img className="entry-image" src={src} />
         </div>
     </div>
@@ -155,10 +180,10 @@ const NumberEntry = ({
     name, data
 }) => (
     <div className="entry-container">
-        <div className="entry-heading">
+        <div className="entry-heading inline">
             {name}
         </div>
-        <div className="entry-content" contentEditable="true">
+        <div className="entry-content inline value editable-area" contentEditable="true">
             {data}
         </div>
     </div>
@@ -179,7 +204,7 @@ class JSONEditor extends React.Component {
             <div> 
             {
                 Object.keys(this.props.json).map( (name, index) => 
-                   <Entry name={name} data={this.props.json[name]} key={index} />
+                   <Entry name={name} data={this.props.json[name]} key={index} no_border={true}/>
                 )
             }
             </div>

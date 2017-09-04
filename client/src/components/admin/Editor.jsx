@@ -25,7 +25,7 @@ class Editor extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className="admin-container">
                 <div className="admin-sidebar">
                     <EditorSidebar choices={Object.keys(this.props.raw_json)} setActive={this.setActive.bind(this)} active={this.state.active} />
                 </div>

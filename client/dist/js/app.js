@@ -45303,7 +45303,7 @@
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'div',
-	                null,
+	                { className: '' },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'header' },
@@ -45381,7 +45381,7 @@
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'div',
-	                null,
+	                { className: 'admin-container' },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'admin-sidebar' },
@@ -45427,7 +45427,7 @@
 	        choices.map(function (choice, index) {
 	            return _react2.default.createElement(
 	                'div',
-	                { className: "sidebar-choice" + (!active ? '' : " active"), onClick: function onClick() {
+	                { className: "sidebar-choice" + (choice === active ? ' active' : ''), onClick: function onClick() {
 	                        return setActive(choice);
 	                    }, key: index },
 	                choice
@@ -45472,7 +45472,8 @@
 
 	var Entry = function Entry(_ref) {
 	    var name = _ref.name,
-	        data = _ref.data;
+	        data = _ref.data,
+	        no_border = _ref.no_border;
 
 	    if ((0, _helper.isArray)(data)) {
 	        // special case for colors
@@ -45482,7 +45483,7 @@
 	            return _react2.default.createElement(ArrayEntry, { name: name, data: data });
 	        }
 	    } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
-	        return _react2.default.createElement(ObjectEntry, { name: name, data: data });
+	        return _react2.default.createElement(ObjectEntry, { name: name, data: data, no_border: no_border });
 	    } else {
 	        if (typeof data === "string") {
 	            // check special case for images
@@ -45511,7 +45512,7 @@
 	        var _this = _possibleConstructorReturn(this, (ObjectEntry.__proto__ || Object.getPrototypeOf(ObjectEntry)).call(this, props));
 
 	        _this.state = {
-	            active: true // toggle collapse
+	            visible: true // toggle collapse
 	        };
 	        return _this;
 	    }
@@ -45519,30 +45520,48 @@
 	    _createClass(ObjectEntry, [{
 	        key: 'render',
 	        value: function render() {
+	            var _this2 = this;
+
 	            var name = this.props.name;
 	            var data = this.props.data;
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'entry-container' },
+	                { className: 'entry-container',
+	                    style: this.props.no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
 	                _react2.default.createElement(
-	                    'span',
-	                    { className: 'entry-title' },
-	                    name
+	                    'div',
+	                    { className: 'entry-heading' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        {
+	                            className: 'entry-collapse',
+	                            onClick: function onClick() {
+	                                return _this2.setState({ visible: !_this2.state.visible });
+	                            },
+	                            style: !this.state.visible ? { 'transform': 'rotateZ(0deg)' } : {}
+	                        },
+	                        '\u25B6'
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        { className: 'entry-title' },
+	                        name
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        { className: "entry-title-details" + (!this.state.visible ? " entry-title-details-emph" : " entry-title-details-normal") },
+	                        'object, ',
+	                        Object.keys(data).length,
+	                        ' keys'
+	                    )
 	                ),
-	                _react2.default.createElement(
-	                    'span',
-	                    { className: 'entry-title-details' },
-	                    'object, ',
-	                    Object.keys(data).length,
-	                    ' keys'
-	                ),
-	                _react2.default.createElement(
+	                this.state.visible ? _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-content' },
 	                    Object.keys(data).map(function (n, index) {
 	                        return _react2.default.createElement(Entry, { name: n, data: data[n], key: index });
 	                    })
-	                )
+	                ) : ""
 	            );
 	        }
 	    }]);
@@ -45556,17 +45575,19 @@
 	    function ArrayEntry(props) {
 	        _classCallCheck(this, ArrayEntry);
 
-	        var _this2 = _possibleConstructorReturn(this, (ArrayEntry.__proto__ || Object.getPrototypeOf(ArrayEntry)).call(this, props));
+	        var _this3 = _possibleConstructorReturn(this, (ArrayEntry.__proto__ || Object.getPrototypeOf(ArrayEntry)).call(this, props));
 
-	        _this2.state = {
-	            active: true // toggle collapse
+	        _this3.state = {
+	            visible: true // toggle collapse
 	        };
-	        return _this2;
+	        return _this3;
 	    }
 
 	    _createClass(ArrayEntry, [{
 	        key: 'render',
 	        value: function render() {
+	            var _this4 = this;
+
 	            var name = this.props.name;
 	            var data = this.props.data;
 	            return _react2.default.createElement(
@@ -45576,25 +45597,36 @@
 	                    'div',
 	                    { className: 'entry-heading' },
 	                    _react2.default.createElement(
+	                        'div',
+	                        {
+	                            className: 'entry-collapse',
+	                            onClick: function onClick() {
+	                                return _this4.setState({ visible: !_this4.state.visible });
+	                            },
+	                            style: !this.state.visible ? { 'transform': 'rotateZ(0deg)' } : {}
+	                        },
+	                        '\u25B6'
+	                    ),
+	                    _react2.default.createElement(
 	                        'span',
 	                        { className: 'entry-title' },
 	                        name
 	                    ),
 	                    _react2.default.createElement(
 	                        'span',
-	                        { className: 'entry-title-details' },
+	                        { className: "entry-title-details" + (!this.state.visible ? " entry-title-details-emph" : " entry-title-details-normal") },
 	                        'array, ',
 	                        data.length,
 	                        ' items'
 	                    )
 	                ),
-	                _react2.default.createElement(
+	                this.state.visible ? _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-content' },
 	                    data.map(function (value, index) {
-	                        return _react2.default.createElement(Entry, { name: index, data: value, key: index });
+	                        return _react2.default.createElement(Entry, { name: index + ".", data: value, key: index });
 	                    })
-	                )
+	                ) : ""
 	            );
 	        }
 	    }]);
@@ -45634,9 +45666,6 @@
 	    return ColorPickerEntry;
 	}(_react2.default.Component);
 
-	// TODO make these inline
-
-
 	var StringEntry = function StringEntry(_ref2) {
 	    var name = _ref2.name,
 	        data = _ref2.data;
@@ -45645,12 +45674,12 @@
 	        { className: 'entry-container' },
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-heading' },
+	            { className: 'entry-heading inline' },
 	            name
 	        ),
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-content', contentEditable: 'true' },
+	            { className: 'entry-content inline value editable-area', contentEditable: 'true' },
 	            data
 	        )
 	    );
@@ -45664,12 +45693,12 @@
 	        { className: 'entry-container' },
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-heading' },
+	            { className: 'entry-heading inline' },
 	            name
 	        ),
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-content' },
+	            { className: 'entry-content inline' },
 	            _react2.default.createElement('img', { className: 'entry-image', src: src })
 	        )
 	    );
@@ -45683,12 +45712,12 @@
 	        { className: 'entry-container' },
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-heading' },
+	            { className: 'entry-heading inline' },
 	            name
 	        ),
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-content', contentEditable: 'true' },
+	            { className: 'entry-content inline value editable-area', contentEditable: 'true' },
 	            data
 	        )
 	    );
@@ -45700,24 +45729,24 @@
 	    function JSONEditor(props) {
 	        _classCallCheck(this, JSONEditor);
 
-	        var _this4 = _possibleConstructorReturn(this, (JSONEditor.__proto__ || Object.getPrototypeOf(JSONEditor)).call(this, props));
+	        var _this6 = _possibleConstructorReturn(this, (JSONEditor.__proto__ || Object.getPrototypeOf(JSONEditor)).call(this, props));
 
-	        _this4.state = {
+	        _this6.state = {
 	            active: true // toggle collapse
 	        };
-	        return _this4;
+	        return _this6;
 	    }
 
 	    _createClass(JSONEditor, [{
 	        key: 'render',
 	        value: function render() {
-	            var _this5 = this;
+	            var _this7 = this;
 
 	            return _react2.default.createElement(
 	                'div',
 	                null,
 	                Object.keys(this.props.json).map(function (name, index) {
-	                    return _react2.default.createElement(Entry, { name: name, data: _this5.props.json[name], key: index });
+	                    return _react2.default.createElement(Entry, { name: name, data: _this7.props.json[name], key: index, no_border: true });
 	                })
 	            );
 	        }

@@ -9,7 +9,7 @@ const EditorSidebar = ({
 <div>
     {
         choices.map((choice, index) => 
-            <div className={"sidebar-choice" + (!active ? '' : " active")} onClick={() => setActive(choice)} key={index}>
+            <div className={"sidebar-choice" + (choice === active ? ' active' : '')} onClick={() => setActive(choice)} key={index}>
                 {choice}
             </div>
         )
