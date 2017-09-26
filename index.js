@@ -1,9 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const stripJsonComments = require('strip-json-comments');
+const fs = require('fs');
 
 const app = express();
 
-app.use(function(req, res, next) {console.log(req.url); next()});
+// log requests
+app.use(function(req, res, next) {
+  console.log(req.url); 
+  next()}
+);
 
 
 // tell the app to look for static files in these directories
@@ -12,9 +18,33 @@ app.use(express.static('./client/dist/'));
 // tell the app to parse HTTP body messages
 app.use(bodyParser.urlencoded({ extended: false }));
 
+
+
+// serve admin files. HACK
+app.get('/data_admin/:file', (req, res) => {
+  fs.readFile('./server'+req.path, (err, data) => {
+    if (err) throw err;
+    console.log(data)
+    res.send(stripJsonComments(data.toString()));
+  });
+});
+
+/*
+// middleware to strip out json comments
+app.use((req, res, next) => {
+  if (req.path.endsWith('.json')) {
+    console.log(res);
+    res.body = stripJsonComments(res.body);
+  }
+});
+*/
+
+
 // routes
 const authRoutes = require('./server/routes/auth');
 app.use('/auth', authRoutes);
+
+
 
 
 

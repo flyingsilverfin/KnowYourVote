@@ -14,8 +14,10 @@
         "environment" : {
             "displayName": "environment",
             "image": "images/env.png",
-            "question-left" : "I think that we are doing enough or too much to protect our environment",
-            "question-right": "I think that we need to do more to protect our environment",
+            "questions": {
+                "left" : "I think that we are doing enough or too much to protect our environment",
+                "right": "I think that we need to do more to protect our environment"
+            },
             "statusquo": [
                 "Australia is currently are committed to reducing our carbon emissions by 28% by 2030",
                 "The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions",

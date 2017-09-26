@@ -120,3 +120,10 @@ export function isArray(arr) {
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
 }
+
+export function type_of(data) {
+    if (Object.prototype.toString.call(data) == '[object Array]') {
+        return 'array';
+    }
+    return typeof data;
+}

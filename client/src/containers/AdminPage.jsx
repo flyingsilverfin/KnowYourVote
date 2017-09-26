@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import Editor from "../components/admin/Editor.jsx";
+import TypeChecker from "../TypeChecker.js";
 
 import {httpGet, httpPost} from '../helper.js';
 
@@ -13,11 +14,17 @@ class AdminPage extends React.Component {
 
         this.state = {
             data: null,
+            schema: null,
             status: "Loading",
-            saved: true
+            modified: false
         }
 
+
+    }
+
+    componentDidMount() {
         this.getData();
+        this.getSchema();
     }
 
     delayedSetState(delay, v, val) {
@@ -32,76 +39,100 @@ class AdminPage extends React.Component {
         this.setState({
             status: "Loading"
         })
-        httpGet('/data_admin/data.json', this.dataLoaded.bind(this));
+        httpGet('/data_admin/data.json', (raw) => this.dataLoaded(raw));
     }
 
-    saveData(callback) {
-        if (callback) {
-            c = function() {
-                callback();
-                this.setState({
-                    status: "Ready",
-                    saved: true
-                });
-            }.bind(this);
-        } else {
-            c = () => this.setState({status: "Ready", saved: true});
-        }
+    getSchema() {
         this.setState({
-            status: "Saving"
-        })
-        httpPost('/admin/save', this.data, c)
+            status: "Loading"
+        });
+        httpGet('/data_admin/schema.json', (raw) => this.schemaLoaded(raw));
     }
+
 
     revertData() {
         this.setState({
             status: "Reverting",
-            saved: true
-        })
+        });
         httpPost('/admin/revert', {}, this.getData.bind(this));
     }
 
     publishData() {
-        this.setState({
-            status: "Saving",
-            saved: true
-        })
-        this.saveData(function() {
+        httpPost('/admin/publish', {}, () => {
             this.setState({
-                status: 'Publishing'
+                status: "Published. Ready",
+                modified: false
             });
-            httpPost('/admin/publish', {}, function() {
-                this.setState({
-                    status: "Published. Ready"
-                });
-                this.delayedSetState(3000, "status", "Ready");
-            }.bind(this));
+            this.delayedSetState(1500, "status", "Ready");
         });
-    }
-
-    onAnyChange() {
-        this.setState({
-            saved: false
-        })
     }
 
     dataLoaded(raw) {
         let data = JSON.parse(raw);
+        if (this.state.schema != null) {
+            this.setState({
+                data: data,
+                modified: false,
+                status: "Ready"
+            });
+
+            this.typeChecker.check(this.state.data, this.state.schema);
+
+        } else {
+            this.setState({
+                data: data,
+                modified: false
+            });
+        }
+    }
+
+    schemaLoaded(raw) {
+        let schema = JSON.parse(raw);
+        this.typeChecker = new TypeChecker(schema);
+
+        if (this.state.data != null) {
+            this.setState({
+                schema: schema,
+                status: "Ready"
+            });
+
+            this.typeChecker.check(this.state.data);
+
+        } else {
+            this.setState({
+                schema:schema
+            })
+        }
+    }
+
+    onEdit(JSONPath, newValue) {
         this.setState({
-            data: data,
-            status: "Ready"
+            status: "Saving"
+        })
+        httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
+            this.setState({
+                status: "Saved",
+                modified: true
+            })
         });
     }
 
     render() {
         return (
             <div className="">
-                <div className="header">
+                <div className="header admin-header">
                     Admin Interface
                 </div>
 
                 {this.state.data ? 
-                    <Editor raw_json={this.state.data} /> 
+                    <Editor 
+                        raw_json={this.state.data} 
+                        status={this.state.status}
+                        modified={this.state.modified}
+                        onRevert={this.revertData.bind(this)}
+                        onPublish={this.publishData.bind(this)}
+                        onEdit={this.onEdit.bind(this)}
+                        /> 
                     : 
                     ""
                 }

@@ -35335,7 +35335,7 @@
 
 	var _AdminPage2 = _interopRequireDefault(_AdminPage);
 
-	var _data = __webpack_require__(488);
+	var _data = __webpack_require__(719);
 
 	var _data2 = _interopRequireDefault(_data);
 
@@ -45030,12 +45030,16 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 	exports.getCoords = getCoords;
 	exports.capitalizeWord = capitalizeWord;
 	exports.httpGet = httpGet;
 	exports.httpPost = httpPost;
 	exports.strContains = strContains;
 	exports.isArray = isArray;
+	exports.type_of = type_of;
 	var smooth_scroll_to = exports.smooth_scroll_to = function smooth_scroll_to(element, target, duration) {
 	    target = Math.round(target);
 	    duration = Math.round(duration);
@@ -45162,6 +45166,13 @@
 	    }
 	}
 
+	function type_of(data) {
+	    if (Object.prototype.toString.call(data) == '[object Array]') {
+	        return 'array';
+	    }
+	    return typeof data === "undefined" ? "undefined" : _typeof(data);
+	}
+
 /***/ }),
 /* 483 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -45186,6 +45197,10 @@
 
 	var _Editor2 = _interopRequireDefault(_Editor);
 
+	var _TypeChecker = __webpack_require__(718);
+
+	var _TypeChecker2 = _interopRequireDefault(_TypeChecker);
+
 	var _helper = __webpack_require__(482);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -45206,15 +45221,21 @@
 
 	        _this.state = {
 	            data: null,
+	            schema: null,
 	            status: "Loading",
-	            saved: true
+	            modified: false
 	        };
 
-	        _this.getData();
 	        return _this;
 	    }
 
 	    _createClass(AdminPage, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            this.getData();
+	            this.getSchema();
+	        }
+	    }, {
 	        key: 'delayedSetState',
 	        value: function delayedSetState(delay, v, val) {
 	            var newState = {};
@@ -45226,76 +45247,99 @@
 	    }, {
 	        key: 'getData',
 	        value: function getData() {
+	            var _this2 = this;
+
 	            this.setState({
 	                status: "Loading"
 	            });
-	            (0, _helper.httpGet)('/data_admin/data.json', this.dataLoaded.bind(this));
+	            (0, _helper.httpGet)('/data_admin/data.json', function (raw) {
+	                return _this2.dataLoaded(raw);
+	            });
 	        }
 	    }, {
-	        key: 'saveData',
-	        value: function saveData(callback) {
-	            var _this2 = this;
+	        key: 'getSchema',
+	        value: function getSchema() {
+	            var _this3 = this;
 
-	            if (callback) {
-	                c = function () {
-	                    callback();
-	                    this.setState({
-	                        status: "Ready",
-	                        saved: true
-	                    });
-	                }.bind(this);
-	            } else {
-	                c = function c() {
-	                    return _this2.setState({ status: "Ready", saved: true });
-	                };
-	            }
 	            this.setState({
-	                status: "Saving"
+	                status: "Loading"
 	            });
-	            (0, _helper.httpPost)('/admin/save', this.data, c);
+	            (0, _helper.httpGet)('/data_admin/schema.json', function (raw) {
+	                return _this3.schemaLoaded(raw);
+	            });
 	        }
 	    }, {
 	        key: 'revertData',
 	        value: function revertData() {
 	            this.setState({
-	                status: "Reverting",
-	                saved: true
+	                status: "Reverting"
 	            });
 	            (0, _helper.httpPost)('/admin/revert', {}, this.getData.bind(this));
 	        }
 	    }, {
 	        key: 'publishData',
 	        value: function publishData() {
-	            this.setState({
-	                status: "Saving",
-	                saved: true
-	            });
-	            this.saveData(function () {
-	                this.setState({
-	                    status: 'Publishing'
+	            var _this4 = this;
+
+	            (0, _helper.httpPost)('/admin/publish', {}, function () {
+	                _this4.setState({
+	                    status: "Published. Ready",
+	                    modified: false
 	                });
-	                (0, _helper.httpPost)('/admin/publish', {}, function () {
-	                    this.setState({
-	                        status: "Published. Ready"
-	                    });
-	                    this.delayedSetState(3000, "status", "Ready");
-	                }.bind(this));
-	            });
-	        }
-	    }, {
-	        key: 'onAnyChange',
-	        value: function onAnyChange() {
-	            this.setState({
-	                saved: false
+	                _this4.delayedSetState(1500, "status", "Ready");
 	            });
 	        }
 	    }, {
 	        key: 'dataLoaded',
 	        value: function dataLoaded(raw) {
 	            var data = JSON.parse(raw);
+	            if (this.state.schema != null) {
+	                this.setState({
+	                    data: data,
+	                    modified: false,
+	                    status: "Ready"
+	                });
+
+	                this.typeChecker.check(this.state.data, this.state.schema);
+	            } else {
+	                this.setState({
+	                    data: data,
+	                    modified: false
+	                });
+	            }
+	        }
+	    }, {
+	        key: 'schemaLoaded',
+	        value: function schemaLoaded(raw) {
+	            var schema = JSON.parse(raw);
+	            this.typeChecker = new _TypeChecker2.default(schema);
+
+	            if (this.state.data != null) {
+	                this.setState({
+	                    schema: schema,
+	                    status: "Ready"
+	                });
+
+	                this.typeChecker.check(this.state.data);
+	            } else {
+	                this.setState({
+	                    schema: schema
+	                });
+	            }
+	        }
+	    }, {
+	        key: 'onEdit',
+	        value: function onEdit(JSONPath, newValue) {
+	            var _this5 = this;
+
 	            this.setState({
-	                data: data,
-	                status: "Ready"
+	                status: "Saving"
+	            });
+	            (0, _helper.httpPost)('/admin/edit', { path: JSONPath, value: newValue }, function () {
+	                _this5.setState({
+	                    status: "Saved",
+	                    modified: true
+	                });
 	            });
 	        }
 	    }, {
@@ -45306,10 +45350,17 @@
 	                { className: '' },
 	                _react2.default.createElement(
 	                    'div',
-	                    { className: 'header' },
+	                    { className: 'header admin-header' },
 	                    'Admin Interface'
 	                ),
-	                this.state.data ? _react2.default.createElement(_Editor2.default, { raw_json: this.state.data }) : ""
+	                this.state.data ? _react2.default.createElement(_Editor2.default, {
+	                    raw_json: this.state.data,
+	                    status: this.state.status,
+	                    modified: this.state.modified,
+	                    onRevert: this.revertData.bind(this),
+	                    onPublish: this.publishData.bind(this),
+	                    onEdit: this.onEdit.bind(this)
+	                }) : ""
 	            );
 	        }
 	    }]);
@@ -45339,7 +45390,11 @@
 
 	var _EditorSidebar2 = _interopRequireDefault(_EditorSidebar);
 
-	var _JSONEditor = __webpack_require__(486);
+	var _EditorStatusbar = __webpack_require__(486);
+
+	var _EditorStatusbar2 = _interopRequireDefault(_EditorStatusbar);
+
+	var _JSONEditor = __webpack_require__(487);
 
 	var _JSONEditor2 = _interopRequireDefault(_JSONEditor);
 
@@ -45379,18 +45434,46 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+
+	            var choices = ['parties'];
+	            choices = choices.concat(Object.keys(this.props.raw_json.topics));
+
+	            var active_json = null;
+	            if (this.state.active === 'parties') {
+	                active_json = this.props.raw_json[this.state.active];
+	            } else {
+	                active_json = this.props.raw_json.topics[this.state.active];
+	            }
+
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'admin-container' },
 	                _react2.default.createElement(
 	                    'div',
-	                    { className: 'admin-sidebar' },
-	                    _react2.default.createElement(_EditorSidebar2.default, { choices: Object.keys(this.props.raw_json), setActive: this.setActive.bind(this), active: this.state.active })
+	                    { className: 'admin-leftbar' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'admin-sidebar' },
+	                        _react2.default.createElement(_EditorSidebar2.default, {
+	                            choices: choices,
+	                            setActive: this.setActive.bind(this),
+	                            active: this.state.active
+	                        })
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'admin-statusbar' },
+	                        _react2.default.createElement(_EditorStatusbar2.default, {
+	                            status: this.props.status,
+	                            modified: this.props.modified,
+	                            revertData: this.props.revertData
+	                        })
+	                    )
 	                ),
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'admin-main-content' },
-	                    _react2.default.createElement(_JSONEditor2.default, { json: this.props.raw_json[this.state.active] })
+	                    _react2.default.createElement(_JSONEditor2.default, { json: active_json })
 	                )
 	            );
 	        }
@@ -45442,6 +45525,59 @@
 /* 486 */
 /***/ (function(module, exports, __webpack_require__) {
 
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var EditorStatusbar = function EditorStatusbar(_ref) {
+	    var status = _ref.status,
+	        modified = _ref.modified,
+	        revertData = _ref.revertData,
+	        publishData = _ref.publishData;
+	    return _react2.default.createElement(
+	        "div",
+	        { className: "flex-column" },
+	        _react2.default.createElement(
+	            "div",
+	            {
+	                className: "flex-one statusbar-status center-horizontal" },
+	            status
+	        ),
+	        _react2.default.createElement(
+	            "div",
+	            { className: "flex-one flex-row" },
+	            _react2.default.createElement(
+	                "div",
+	                {
+	                    className: "statusbar-revert center-horizontal",
+	                    onClick: modified ? revertData : null },
+	                "Delete"
+	            ),
+	            _react2.default.createElement(
+	                "div",
+	                {
+	                    className: "statusbar-publish center-horizontal",
+	                    onClick: modified ? publishData : null },
+	                "Publish"
+	            )
+	        )
+	    );
+	};
+
+	exports.default = EditorStatusbar;
+
+/***/ }),
+/* 487 */
+/***/ (function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -45456,7 +45592,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _ColorPicker = __webpack_require__(487);
+	var _ColorPicker = __webpack_require__(488);
 
 	var _ColorPicker2 = _interopRequireDefault(_ColorPicker);
 
@@ -45473,30 +45609,51 @@
 	var Entry = function Entry(_ref) {
 	    var name = _ref.name,
 	        data = _ref.data,
-	        no_border = _ref.no_border;
+	        no_border = _ref.no_border,
+	        emptyType = _ref.emptyType;
+
+
+	    if (emptyType === 'any') {
+	        return _react2.default.createElement(
+	            'div',
+	            null,
+	            '  '
+	        );
+	    }
 
 	    if ((0, _helper.isArray)(data)) {
 	        // special case for colors
 	        if ((0, _helper.strContains)(name, "color")) {
-	            return _react2.default.createElement(ColorPickerEntry, { name: name, data: data });
+	            return _react2.default.createElement(ColorPickerEntry, { name: name, data: data, no_border: no_border });
 	        } else {
-	            return _react2.default.createElement(ArrayEntry, { name: name, data: data });
+	            return _react2.default.createElement(ArrayEntry, { name: name, data: data, no_border: no_border });
 	        }
 	    } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
 	        return _react2.default.createElement(ObjectEntry, { name: name, data: data, no_border: no_border });
 	    } else {
-	        if (typeof data === "string") {
+	        if (typeof data === "string" || emptyType === 'string') {
+
+	            // in this case, data is empty so need to avoid using that
+	            if (emptyType === 'string') {
+	                return _react2.default.createElement(StringEntry, { name: name, data: data, no_border: no_border, empty: true });
+	            }
+
 	            // check special case for images
 	            var split = data.split('.');
 	            var suffix = split[split.length - 1].toLowerCase();
 	            var image_types = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'bmp'];
 	            if (image_types.indexOf(suffix) != -1) {
-	                return _react2.default.createElement(ImageEntry, { name: name, src: data });
+	                return _react2.default.createElement(ImageEntry, { name: name, src: data, no_border: no_border });
 	            } else {
-	                return _react2.default.createElement(StringEntry, { name: name, data: data });
+	                return _react2.default.createElement(StringEntry, { name: name, data: data, no_border: no_border });
 	            }
 	        } else if (typeof data === "number") {
-	            return _react2.default.createElement(NumberEntry, { name: name, data: data });
+	            return _react2.default.createElement(NumberEntry, {
+	                name: name,
+	                data: data,
+	                no_border: no_border,
+	                empty: emptyType === 'number' ? true : false
+	            });
 	        } else {
 	            //<GenericEntry name={name} data={data} />
 	        }
@@ -45531,6 +45688,11 @@
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-heading' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'cssCircle inline minus-circle' },
+	                        '\u2013'
+	                    ),
 	                    _react2.default.createElement(
 	                        'div',
 	                        {
@@ -45592,10 +45754,16 @@
 	            var data = this.props.data;
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'entry-container' },
+	                { className: 'entry-container',
+	                    style: this.props.no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-heading' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'cssCircle inline minus-circle' },
+	                        '\u2013'
+	                    ),
 	                    _react2.default.createElement(
 	                        'div',
 	                        {
@@ -45648,7 +45816,8 @@
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'entry-container' },
+	                { className: 'entry-container',
+	                    style: this.props.no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-heading' },
@@ -45668,10 +45837,18 @@
 
 	var StringEntry = function StringEntry(_ref2) {
 	    var name = _ref2.name,
-	        data = _ref2.data;
+	        data = _ref2.data,
+	        no_border = _ref2.no_border,
+	        empty = _ref2.empty;
 	    return _react2.default.createElement(
 	        'div',
-	        { className: 'entry-container' },
+	        { className: 'entry-container entry-container-empty',
+	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'cssCircle inline minus-circle' },
+	            '\u2013'
+	        ),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45687,10 +45864,17 @@
 
 	var ImageEntry = function ImageEntry(_ref3) {
 	    var name = _ref3.name,
-	        src = _ref3.src;
+	        src = _ref3.src,
+	        no_border = _ref3.no_border;
 	    return _react2.default.createElement(
 	        'div',
-	        { className: 'entry-container' },
+	        { className: 'entry-container',
+	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'cssCircle inline minus-circle' },
+	            '\u2013'
+	        ),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45706,10 +45890,17 @@
 
 	var NumberEntry = function NumberEntry(_ref4) {
 	    var name = _ref4.name,
-	        data = _ref4.data;
+	        data = _ref4.data,
+	        no_border = _ref4.no_border;
 	    return _react2.default.createElement(
 	        'div',
-	        { className: 'entry-container' },
+	        { className: 'entry-container',
+	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'cssCircle inline minus-circle' },
+	            '\u2013'
+	        ),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45758,7 +45949,7 @@
 	exports.default = JSONEditor;
 
 /***/ }),
-/* 487 */
+/* 488 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -45883,12 +46074,6 @@
 	}(_react2.default.Component);
 
 	exports.default = ColorPicker;
-
-/***/ }),
-/* 488 */
-/***/ (function(module, exports) {
-
-	module.exports = {"parties":{"Liberal-National Coalition":{"background-color":[0,85,165,1]},"Green":{"background-color":[0,190,0,1]},"Labor":{"background-color":[229,54,65,1]}},"topics":{"environment":{"displayName":"environment","image":"images/env.png","questions":{"left":"I think that we are doing enough or too much to protect our environment","right":"I think that we need to do more to protect our environment"},"statusquo":["Australia is currently are committed to reducing our carbon emissions by 28% by 2030","The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions","90% of the Great Barrier Reef has suffered from bleaching","It is currently legal to test products on animals","Australia is currently the 5th biggest carbon emitter per capita in the world"],"data":{"current":5,"options":{"Liberal-National Coalition":{"subtopics":{"Climate Change":{"value":4.8,"facts":["Reduce emissions by 28% by 2030","Emissions Reduction Fund to incentivise clean business","No carbon tax"]},"Great Barrier Reef":{"value":3.5,"facts":["Ban on dredging, $2B on reef protection","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":4.5,"facts":["23% reliance on renewable energy by 2020","$1B to target innovation projects into renewable energy transition"]},"Forests":{"value":3.4,"facts":["20 million trees to be planted by 2020"]},"Animal Welfare":{"value":4,"facts":["$190 million to protect endangered species"]}}},"Green":{"subtopics":{"Climate Change":{"value":9,"facts":["90% clean energy by 2030","Supports a carbon tax","Opposes Emissions Reduction Fund - pays companies not to pollute"]},"Great Barrier Reef":{"value":9.5,"facts":["$2.18B for reef protection","Ban future coal projects","Increase water quality pollution control to $2B","New national environmental watchdog","Further shipping restrictions"]},"Renewable Energy":{"value":9.6,"facts":["90% clean energy by 2030","Ban on future coal projects","Transition away from coal and gas with $1B clean energy transition fund"]},"Forests":{"value":8.5,"facts":["Stop logging of all high conservation forests"]},"Animal Welfare":{"value":9.6,"facts":["Ban animal testing, live exports, greyhound racing, selective breeding","Reestablish a biodiversity fund","$130M threatened species plan"]}}},"Labor":{"subtopics":{"Climate Change":{"value":6,"facts":["Net zero pollution by 2050 through an Emissions Trading Scheme","Opposes Emissions Reduction Fund - increases emissions and wastes money","No carbon tax"]},"Great Barrier Reef":{"value":4.5,"facts":["$500M invested in science and research, environmental investment and reef management","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":6,"facts":["50% renewables by 2030","Support transition to clean energy industry with a fund of $300M"]},"Forests":{"value":5.1,"facts":["Expand world heritage listed areas"]},"Animal Welfare":{"value":5.2,"facts":["Ban animal testing","Introduce an independent office of animal welfare"]}}}}}}}}
 
 /***/ }),
 /* 489 */
@@ -59268,6 +59453,169 @@
 	};
 
 	exports.default = (0, _common.ColorWrap)(Twitter);
+
+/***/ }),
+/* 718 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _helper = __webpack_require__(482);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var TypeChecker = function () {
+	    function TypeChecker(schema) {
+	        _classCallCheck(this, TypeChecker);
+
+	        this.schema = schema;
+	    }
+
+	    _createClass(TypeChecker, [{
+	        key: '_is_simple_builtin_type',
+	        value: function _is_simple_builtin_type(type) {
+	            return type === 'object' || type === 'array' || type === 'number' || type === 'string' || type === 'boolean';
+	        }
+	    }, {
+	        key: '_user_type_exists',
+	        value: function _user_type_exists(type) {
+	            return this.schema.types[type] !== undefined;
+	        }
+	    }, {
+	        key: '_check',
+	        value: function _check(json, required_type) {
+
+	            console.log("checking: " + JSON.stringify(json) + ", required_type: " + JSON.stringify(required_type));
+
+	            var t = required_type['type'];
+
+	            if (this._is_simple_builtin_type(t)) {
+
+	                // require type to conform if it's one of object, array, string, number
+	                if ((0, _helper.type_of)(json) !== t) {
+	                    throw Error("Expected type " + t + " from " + JSON.stringify(json) + ", got: " + (0, _helper.type_of)(json));
+	                }
+
+	                if (t === "object" || t === 'array') {
+
+	                    // any key/index with values conforming to 'subtype' key in required_type
+	                    // flexible size
+	                    if (required_type['props'] === undefined && required_type['subtype'] !== undefined) {
+
+	                        // check schema for required specs
+	                        if (required_type['min-size'] === undefined || required_type['max-size'] === undefined) {
+	                            throw Error("Flexible size schema type must define min- & max-size");
+	                        }
+
+	                        // check size bounds for flexibly objects and arrays
+	                        var size = Object.keys(json).length;
+	                        if (size < required_type['min-size'] || required_type['max-size'] !== -1 && size > required_type['max-size']) {
+	                            throw Error("Number of keys must be between " + required_type['min-size'] + ' and ' + required_type['max-size'] + ': ' + JSON.stringify(json));
+	                        }
+
+	                        var required_subtype = required_type['subtype'];
+
+	                        for (var key in json) {
+	                            var value = json[key];
+
+	                            // check type of json[key] to match a simple builtin type
+	                            // the schema actually shouldn't define 'object' or 'array' types here
+	                            if (this._is_simple_builtin_type(required_subtype)) {
+	                                if ((0, _helper.type_of)(value) !== required_subtype) {
+	                                    throw Error("Required subtype does not match actual");
+	                                }
+	                                if (required_subtype === 'object' || required_subtype == 'array') {
+	                                    throw Error('ERROR: found a subtype that is object or array. Please move this into a separate, new definition');
+	                                }
+	                            } else {
+	                                // assume uniform types for now ie. no string|number|array
+	                                // check the required user subtype is defined
+	                                if (!this._user_type_exists(required_subtype)) {
+	                                    throw Error("User type " + required_subtype + " is not defined");
+	                                }
+	                                // recursive call
+	                                this._check(value, this.schema.types[required_subtype]);
+	                            }
+	                        }
+	                    }
+	                    // object with prescribed required keys
+	                    // therefore has fixed size
+	                    else if (required_type['props'] !== undefined) {
+	                            var required_props = required_type['props'];
+	                            for (var _key in required_props) {
+
+	                                // array indices are numbers not strings though json keys are strings
+	                                if (t === 'array') {
+	                                    _key = Number(_key);
+	                                }
+	                                // missing key doesn't conform to spec
+	                                if (json[_key] === undefined) {
+	                                    throw Error("Missing key " + _key + " in json " + JSON.stringify(json));
+	                                }
+
+	                                // recursive schema check
+	                                this._check(json[_key], required_props[_key]);
+	                            }
+	                        } else {
+	                            throw Error("Incorrect schema - need either 'props' or 'subtype' to be defined in schema for object types " + JSON.stringify(required_type));
+	                        }
+	                } else if (t === "number") {
+	                    /* number builtin type */
+
+	                    if (required_type['min'] !== undefined && json < required_type['min']) {
+	                        throw Error("Number is too small: " + json);
+	                    }
+
+	                    if (required_type['max'] !== undefined && json > required_type['max']) {
+	                        throw Error("Number is too large:" + json);
+	                    }
+
+	                    // if we get here, all OK!
+	                } else if (t === "string") {/* string builtin type */
+	                    // only require the original type check passes :)
+	                } else if (t === 'boolean') {
+	                    // only require the original type check passes :)
+	                } else {
+	                    throw Error(" ????? how'd we get here...");
+	                }
+	            } else {
+	                /* use user defined types */
+	                if (!this._user_type_exists(t)) {
+	                    throw Error("User type " + t + " is not defined");
+	                }
+
+	                this._check(json, this.schema.types[t]);
+	            }
+	        }
+	    }, {
+	        key: 'check',
+	        value: function check(json) {
+	            var toplevel = this.schema.toplevel;
+	            // anything defined in the JSON must conform to the schema
+	            for (var key in json) {
+	                if (toplevel[key] !== undefined) {
+	                    this._check(json[key], toplevel[key], this.schema.types);
+	                }
+	            }
+	        }
+	    }]);
+
+	    return TypeChecker;
+	}();
+
+	exports.default = TypeChecker;
+
+/***/ }),
+/* 719 */
+/***/ (function(module, exports) {
+
+	module.exports = {"parties":{"Liberal-National Coalition":{"background-color":[0,85,165,1]},"Green":{"background-color":[0,190,0,1]},"Labor":{"background-color":[229,54,65,1]}},"topics":{"environment":{"displayName":"environment","image":"images/env.png","questions":{"left":"I think that we are doing enough or too much to protect our environment","right":"I think that we need to do more to protect our environment"},"statusquo":["Australia is currently are committed to reducing our carbon emissions by 28% by 2030","The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions","90% of the Great Barrier Reef has suffered from bleaching","It is currently legal to test products on animals","Australia is currently the 5th biggest carbon emitter per capita in the world"],"data":{"current":5,"options":{"Liberal-National Coalition":{"subtopics":{"Climate Change":{"value":4.8,"facts":["Reduce emissions by 28% by 2030","Emissions Reduction Fund to incentivise clean business","No carbon tax"]},"Great Barrier Reef":{"value":3.5,"facts":["Ban on dredging, $2B on reef protection","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":4.5,"facts":["23% reliance on renewable energy by 2020","$1B to target innovation projects into renewable energy transition"]},"Forests":{"value":3.4,"facts":["20 million trees to be planted by 2020"]},"Animal Welfare":{"value":4,"facts":["$190 million to protect endangered species"]}}},"Green":{"subtopics":{"Climate Change":{"value":9,"facts":["90% clean energy by 2030","Supports a carbon tax","Opposes Emissions Reduction Fund - pays companies not to pollute"]},"Great Barrier Reef":{"value":9.5,"facts":["$2.18B for reef protection","Ban future coal projects","Increase water quality pollution control to $2B","New national environmental watchdog","Further shipping restrictions"]},"Renewable Energy":{"value":9.6,"facts":["90% clean energy by 2030","Ban on future coal projects","Transition away from coal and gas with $1B clean energy transition fund"]},"Forests":{"value":8.5,"facts":["Stop logging of all high conservation forests"]},"Animal Welfare":{"value":9.6,"facts":["Ban animal testing, live exports, greyhound racing, selective breeding","Reestablish a biodiversity fund","$130M threatened species plan"]}}},"Labor":{"subtopics":{"Climate Change":{"value":6,"facts":["Net zero pollution by 2050 through an Emissions Trading Scheme","Opposes Emissions Reduction Fund - increases emissions and wastes money","No carbon tax"]},"Great Barrier Reef":{"value":4.5,"facts":["$500M invested in science and research, environmental investment and reef management","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":6,"facts":["50% renewables by 2030","Support transition to clean energy industry with a fund of $300M"]},"Forests":{"value":5.1,"facts":["Expand world heritage listed areas"]},"Animal Welfare":{"value":5.2,"facts":["Ban animal testing","Introduce an independent office of animal welfare"]}}}}}}}}
 
 /***/ })
 /******/ ]);

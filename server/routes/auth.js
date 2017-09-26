@@ -101,4 +101,6 @@ router.post('/login', (req, res) => {
 });
 
 
+router.post('/editData')
+
 module.exports = router;
