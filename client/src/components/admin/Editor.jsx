@@ -26,14 +26,25 @@ class Editor extends React.Component {
 
     render() {
 
+        if (this.props.data_json === null || this.props.json_meta === null) {
+            return <div> Loading </div>;
+        }
+
+        debugger
+
         let choices = ['parties'];
         choices = choices.concat(Object.keys(this.props.raw_json.topics));
+        let choices_meta = this.props.json_meta['parties'];
+        choices_meta = Object.assign(choices_meta, this.props.json_meta['topics']);
 
         let active_json = null;
+        let active_meta = null;
         if (this.state.active === 'parties') {
-            active_json = this.props.raw_json[this.state.active];
+            active_json = this.props.raw_json['parties'];
+            active_meta = this.props.json_meta['parties'];
         } else {
             active_json = this.props.raw_json.topics[this.state.active];
+            active_meta = this.props.json_meta.topics[this.state.active];
         }
 
         
@@ -43,6 +54,7 @@ class Editor extends React.Component {
                     <div className="admin-sidebar">
                         <EditorSidebar 
                             choices={choices} 
+                            choices_meta={choices_meta}
                             setActive={this.setActive.bind(this)} 
                             active={this.state.active} 
                             />
@@ -57,7 +69,7 @@ class Editor extends React.Component {
                 </div>
 
                 <div className="admin-main-content"> 
-                    <JSONEditor json={active_json} />
+                    <JSONEditor json={active_json} meta={active_meta} />
                 </div>
             </div>
         );

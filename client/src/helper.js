@@ -122,8 +122,19 @@ export function isArray(arr) {
 }
 
 export function type_of(data) {
-    if (Object.prototype.toString.call(data) == '[object Array]') {
+    if (isArray(data)) {
         return 'array';
     }
     return typeof data;
+}
+
+// https://stackoverflow.com/questions/15313418/what-is-assert-in-javascript
+export function assert(condition, message) {
+    if (!condition) {
+        message = message || "Assertion failed";
+        if (typeof Error !== "undefined") {
+            throw new Error(message);
+        }
+        throw message; // Fallback
+    }
 }

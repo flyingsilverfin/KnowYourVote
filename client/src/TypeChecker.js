@@ -1,9 +1,18 @@
-import {type_of} from './helper.js';
+import {type_of, assert} from './helper.js';
 
 class TypeChecker {
 
     constructor(schema) {
         this.schema = schema;
+    }
+
+    _is_primitive(value) {
+        let type = type_of(value);
+        return this._is_primitive_type(type);
+    }
+
+    _is_primitive_type(type) {
+        return (type === 'number' || type === 'string' || type === 'boolean');      
     }
 
     _is_simple_builtin_type(type) {
@@ -84,11 +93,15 @@ class TypeChecker {
                         if (t === 'array') {    
                             key = Number(key);
                         }
+
                         // missing key doesn't conform to spec
                         if (json[key] === undefined) {
                             throw Error("Missing key " + key + " in json " + JSON.stringify(json));
                         }
                         
+                        // TODO
+                        // Test that this works when the array/object 
+                        // specified props are primitives?
                         
                         // recursive schema check
                         this._check(json[key], required_props[key]);
@@ -134,6 +147,131 @@ class TypeChecker {
             }
         }
     }
+
+
+
+    // generate metadata for object/array subtypes
+    // primitives have already been handled!
+    _generateMeta(json, schema_type) {
+
+        console.log("Generating meta for: " + JSON.stringify(json) + ", " + JSON.stringify(schema_type));
+
+        // values conforming to 'subtype' key in required_type
+        // flexible size
+        // each of these elements are individually NOT required!
+        if (schema_type['props'] === undefined && schema_type['subtype'] !== undefined) {
+
+            for (let key in json) {
+                if (key === '_deletable') { // skip this special key
+                    continue;
+                }
+                if (this._is_primitive(json[key])) {    // primitive subtype
+                    json[key] = true;   // NOT required
+                } else {    // compound subtype
+                    json[key]['_deletable'] = true; // NOT required
+
+                    if (this._is_simple_builtin_type(schema_type['subtype'])) {
+                        json[key] = false;
+                    } else {
+                        this._generateMeta(json[key], this.schema.types[schema_type['subtype']]);
+                    }
+
+                    
+                }
+            }
+        }
+        // object with prescribed required keys
+        // therefore has fixed size
+        // and we require each prop to exist and not be deleted!
+        else if (schema_type['props'] !== undefined) {
+            let required_props = schema_type['props'];
+
+            for (let key in json) {
+                if (key === '_deletable') { // skip special key
+                    continue;
+                }
+                if (required_props[key] === undefined) {
+                    // these are all keys in the JSON not defined in the schema, therefore NOT required
+                    if (this._is_primitive_type(toplevel[key].type)) {
+                        json[key] = true;
+                    } else {
+                        json[key]['_deletable'] = true;
+                        this._mark_all_children_deletable(json[key]);
+                    }
+                }
+            }
+
+            for (let key in required_props) {
+
+                // array indices are numbers not strings though json keys are strings
+                if (schema_type['type'] === 'array') {    
+                    key = Number(key);
+                }
+
+                if (this._is_primitive(json[key])) {
+                    json[key] = false;  // REQUIRED!
+                } else {      
+                    json[key]['_deletable'] = false; // REQUIRED!
+                    // recurse on compound types
+                    this._generateMeta(json[key], required_props[key]);
+                }
+            }
+        } else  {   // both 'props' and 'subtype' undefined implies it's just got 'type' and we need to recurse on this user type...
+            assert(!this._is_simple_builtin_type(schema_type['type']));
+            this._generateMeta(json, this.schema.types[schema_type['type']]);
+        }
+    }
+
+
+    // takes a JSON conforming to the schema
+    // then generates a skeleton of the same keys/values etc
+    // but all primitives are replaced with booleans for deletable/not deletable
+    // and objects/arrays gain an additional property _deletable
+    // making full use of JS arrays being objects!
+    generateMetaJson(json_original) {
+        let toplevel = this.schema.toplevel;
+        // clone JSON
+        let json = JSON.parse(JSON.stringify(json_original));
+
+        for (let key in json) {
+            // key not in schema is definitely not required!
+            // can be deleted
+            if (toplevel[key] === undefined) {
+                if (this._is_primitive_type(toplevel[key].type)) {
+                    json[key] = true;
+                } else {
+                    json[key]['_deletable'] = true;
+                    this._mark_all_children_deletable(json[key]);
+                }
+            } else {    // in schema
+                if (this._is_primitive_type(toplevel[key].type)) {
+                    // rare, unlikely case
+                    // assume toplevel keys that are defined in schema are required...
+                    json[key] = false;  
+                } else {
+                    json[key]['_deletable'] = false; // toplevels never deleteable
+                    this._generateMeta(json[key], toplevel[key]);
+                }
+            }
+        }
+        return json;
+    }
+
+    _mark_all_children_deletable(json) {
+        for (let key in json) {
+            if (key === '_deletable') { // skip special keys
+                continue;
+            }
+            if (this._is_primitive(json[key])) {
+                json[key] = true;
+            } else {
+                json[key]['_deletable'] = true;
+                this._mark_all_children_deletable(json[key]);   //recurse
+            }
+        }
+    }
+
+
 
 }
 

@@ -45040,6 +45040,7 @@
 	exports.strContains = strContains;
 	exports.isArray = isArray;
 	exports.type_of = type_of;
+	exports.assert = assert;
 	var smooth_scroll_to = exports.smooth_scroll_to = function smooth_scroll_to(element, target, duration) {
 	    target = Math.round(target);
 	    duration = Math.round(duration);
@@ -45167,10 +45168,21 @@
 	}
 
 	function type_of(data) {
-	    if (Object.prototype.toString.call(data) == '[object Array]') {
+	    if (isArray(data)) {
 	        return 'array';
 	    }
 	    return typeof data === "undefined" ? "undefined" : _typeof(data);
+	}
+
+	// https://stackoverflow.com/questions/15313418/what-is-assert-in-javascript
+	function assert(condition, message) {
+	    if (!condition) {
+	        message = message || "Assertion failed";
+	        if (typeof Error !== "undefined") {
+	            throw new Error(message);
+	        }
+	        throw message; // Fallback
+	    }
 	}
 
 /***/ }),
@@ -45222,10 +45234,10 @@
 	        _this.state = {
 	            data: null,
 	            schema: null,
+	            meta: null,
 	            status: "Loading",
 	            modified: false
 	        };
-
 	        return _this;
 	    }
 
@@ -45300,7 +45312,7 @@
 	                    status: "Ready"
 	                });
 
-	                this.typeChecker.check(this.state.data, this.state.schema);
+	                this.checkDataWithSchema();
 	            } else {
 	                this.setState({
 	                    data: data,
@@ -45320,12 +45332,28 @@
 	                    status: "Ready"
 	                });
 
-	                this.typeChecker.check(this.state.data);
+	                this.checkDataWithSchema();
 	            } else {
 	                this.setState({
 	                    schema: schema
 	                });
 	            }
+	        }
+	    }, {
+	        key: 'checkDataWithSchema',
+	        value: function checkDataWithSchema() {
+	            try {
+	                this.typeChecker.check(this.state.data);
+	                console.log("data.json passed schema check");
+	            } catch (err) {
+	                console.error("data.json failed schema check.");
+	                console.error(err.toString());
+	                throw err; // maybe skip this?
+	            }
+
+	            var meta = this.typeChecker.generateMetaJson(this.state.data);
+	            // console.log(JSON.stringify(meta, null, 3));
+	            this.setState({ meta: meta });
 	        }
 	    }, {
 	        key: 'onEdit',
@@ -45345,6 +45373,7 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+
 	            return _react2.default.createElement(
 	                'div',
 	                { className: '' },
@@ -45355,6 +45384,7 @@
 	                ),
 	                this.state.data ? _react2.default.createElement(_Editor2.default, {
 	                    raw_json: this.state.data,
+	                    json_meta: this.state.meta,
 	                    status: this.state.status,
 	                    modified: this.state.modified,
 	                    onRevert: this.revertData.bind(this),
@@ -45435,14 +45465,29 @@
 	        key: 'render',
 	        value: function render() {
 
+	            if (this.props.data_json === null || this.props.json_meta === null) {
+	                return _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    ' Loading '
+	                );
+	            }
+
+	            debugger;
+
 	            var choices = ['parties'];
 	            choices = choices.concat(Object.keys(this.props.raw_json.topics));
+	            var choices_meta = this.props.json_meta['parties'];
+	            choices_meta = Object.assign(choices_meta, this.props.json_meta['topics']);
 
 	            var active_json = null;
+	            var active_meta = null;
 	            if (this.state.active === 'parties') {
-	                active_json = this.props.raw_json[this.state.active];
+	                active_json = this.props.raw_json['parties'];
+	                active_meta = this.props.json_meta['parties'];
 	            } else {
 	                active_json = this.props.raw_json.topics[this.state.active];
+	                active_meta = this.props.json_meta.topics[this.state.active];
 	            }
 
 	            return _react2.default.createElement(
@@ -45456,6 +45501,7 @@
 	                        { className: 'admin-sidebar' },
 	                        _react2.default.createElement(_EditorSidebar2.default, {
 	                            choices: choices,
+	                            choices_meta: choices_meta,
 	                            setActive: this.setActive.bind(this),
 	                            active: this.state.active
 	                        })
@@ -45473,7 +45519,7 @@
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'admin-main-content' },
-	                    _react2.default.createElement(_JSONEditor2.default, { json: active_json })
+	                    _react2.default.createElement(_JSONEditor2.default, { json: active_json, meta: active_meta })
 	                )
 	            );
 	        }
@@ -45609,9 +45655,12 @@
 	var Entry = function Entry(_ref) {
 	    var name = _ref.name,
 	        data = _ref.data,
+	        meta = _ref.meta,
 	        no_border = _ref.no_border,
 	        emptyType = _ref.emptyType;
 
+
+	    debugger;
 
 	    if (emptyType === 'any') {
 	        return _react2.default.createElement(
@@ -45624,18 +45673,18 @@
 	    if ((0, _helper.isArray)(data)) {
 	        // special case for colors
 	        if ((0, _helper.strContains)(name, "color")) {
-	            return _react2.default.createElement(ColorPickerEntry, { name: name, data: data, no_border: no_border });
+	            return _react2.default.createElement(ColorPickerEntry, { name: name, data: data, meta: meta, no_border: no_border });
 	        } else {
-	            return _react2.default.createElement(ArrayEntry, { name: name, data: data, no_border: no_border });
+	            return _react2.default.createElement(ArrayEntry, { name: name, data: data, meta: meta, no_border: no_border });
 	        }
 	    } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
-	        return _react2.default.createElement(ObjectEntry, { name: name, data: data, no_border: no_border });
+	        return _react2.default.createElement(ObjectEntry, { name: name, data: data, meta: meta, no_border: no_border });
 	    } else {
 	        if (typeof data === "string" || emptyType === 'string') {
 
 	            // in this case, data is empty so need to avoid using that
 	            if (emptyType === 'string') {
-	                return _react2.default.createElement(StringEntry, { name: name, data: data, no_border: no_border, empty: true });
+	                return _react2.default.createElement(StringEntry, { name: name, data: data, deletable: meta, no_border: no_border, empty: true });
 	            }
 
 	            // check special case for images
@@ -45643,14 +45692,15 @@
 	            var suffix = split[split.length - 1].toLowerCase();
 	            var image_types = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'bmp'];
 	            if (image_types.indexOf(suffix) != -1) {
-	                return _react2.default.createElement(ImageEntry, { name: name, src: data, no_border: no_border });
+	                return _react2.default.createElement(ImageEntry, { name: name, src: data, deletable: meta, no_border: no_border });
 	            } else {
-	                return _react2.default.createElement(StringEntry, { name: name, data: data, no_border: no_border });
+	                return _react2.default.createElement(StringEntry, { name: name, data: data, deletable: meta, no_border: no_border });
 	            }
 	        } else if (typeof data === "number") {
 	            return _react2.default.createElement(NumberEntry, {
 	                name: name,
 	                data: data,
+	                deletable: meta,
 	                no_border: no_border,
 	                empty: emptyType === 'number' ? true : false
 	            });
@@ -45688,11 +45738,9 @@
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-heading' },
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'cssCircle inline minus-circle' },
-	                        '\u2013'
-	                    ),
+	                    this.props.meta._deletable ? _react2.default.createElement('div', {
+	                        className: 'item-button item-delete',
+	                        title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	                    _react2.default.createElement(
 	                        'div',
 	                        {
@@ -45721,7 +45769,7 @@
 	                    'div',
 	                    { className: 'entry-content' },
 	                    Object.keys(data).map(function (n, index) {
-	                        return _react2.default.createElement(Entry, { name: n, data: data[n], key: index });
+	                        return _react2.default.createElement(Entry, { name: n, data: data[n], meta: _this2.props.meta[n], key: index });
 	                    })
 	                ) : ""
 	            );
@@ -45750,6 +45798,7 @@
 	        value: function render() {
 	            var _this4 = this;
 
+	            debugger;
 	            var name = this.props.name;
 	            var data = this.props.data;
 	            return _react2.default.createElement(
@@ -45759,11 +45808,9 @@
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-heading' },
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'cssCircle inline minus-circle' },
-	                        '\u2013'
-	                    ),
+	                    this.props.meta._deletable ? _react2.default.createElement('div', {
+	                        className: 'item-button item-delete',
+	                        title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	                    _react2.default.createElement(
 	                        'div',
 	                        {
@@ -45792,7 +45839,8 @@
 	                    'div',
 	                    { className: 'entry-content' },
 	                    data.map(function (value, index) {
-	                        return _react2.default.createElement(Entry, { name: index + ".", data: value, key: index });
+	                        debugger;
+	                        return _react2.default.createElement(Entry, { name: index + ".", data: value, meta: _this4.props.meta[index], key: index });
 	                    })
 	                ) : ""
 	            );
@@ -45838,17 +45886,14 @@
 	var StringEntry = function StringEntry(_ref2) {
 	    var name = _ref2.name,
 	        data = _ref2.data,
+	        deletable = _ref2.deletable,
 	        no_border = _ref2.no_border,
 	        empty = _ref2.empty;
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'entry-container entry-container-empty',
 	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'cssCircle inline minus-circle' },
-	            '\u2013'
-	        ),
+	        deletable ? _react2.default.createElement('div', { className: 'item-button item-delete', title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45865,16 +45910,13 @@
 	var ImageEntry = function ImageEntry(_ref3) {
 	    var name = _ref3.name,
 	        src = _ref3.src,
+	        deletable = _ref3.deletable,
 	        no_border = _ref3.no_border;
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'entry-container',
 	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'cssCircle inline minus-circle' },
-	            '\u2013'
-	        ),
+	        deletable ? _react2.default.createElement('div', { className: 'item-button item-delete', title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45891,16 +45933,13 @@
 	var NumberEntry = function NumberEntry(_ref4) {
 	    var name = _ref4.name,
 	        data = _ref4.data,
+	        deletable = _ref4.deletable,
 	        no_border = _ref4.no_border;
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'entry-container',
 	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'cssCircle inline minus-circle' },
-	            '\u2013'
-	        ),
+	        deletable ? _react2.default.createElement('div', { className: 'item-button item-delete', title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45933,11 +45972,19 @@
 	        value: function render() {
 	            var _this7 = this;
 
+	            if (this.props.meta === null || this.props.json === null) {
+	                return _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    ' Loading '
+	                );
+	            }
+
 	            return _react2.default.createElement(
 	                'div',
 	                null,
 	                Object.keys(this.props.json).map(function (name, index) {
-	                    return _react2.default.createElement(Entry, { name: name, data: _this7.props.json[name], key: index, no_border: true });
+	                    return _react2.default.createElement(Entry, { name: name, data: _this7.props.json[name], meta: _this7.props.meta[name], key: index, no_border: true });
 	                })
 	            );
 	        }
@@ -59478,6 +59525,17 @@
 	    }
 
 	    _createClass(TypeChecker, [{
+	        key: '_is_primitive',
+	        value: function _is_primitive(value) {
+	            var type = (0, _helper.type_of)(value);
+	            return this._is_primitive_type(type);
+	        }
+	    }, {
+	        key: '_is_primitive_type',
+	        value: function _is_primitive_type(type) {
+	            return type === 'number' || type === 'string' || type === 'boolean';
+	        }
+	    }, {
 	        key: '_is_simple_builtin_type',
 	        value: function _is_simple_builtin_type(type) {
 	            return type === 'object' || type === 'array' || type === 'number' || type === 'string' || type === 'boolean';
@@ -59554,10 +59612,15 @@
 	                                if (t === 'array') {
 	                                    _key = Number(_key);
 	                                }
+
 	                                // missing key doesn't conform to spec
 	                                if (json[_key] === undefined) {
 	                                    throw Error("Missing key " + _key + " in json " + JSON.stringify(json));
 	                                }
+
+	                                // TODO
+	                                // Test that this works when the array/object 
+	                                // specified props are primitives?
 
 	                                // recursive schema check
 	                                this._check(json[_key], required_props[_key]);
@@ -59601,6 +59664,138 @@
 	            for (var key in json) {
 	                if (toplevel[key] !== undefined) {
 	                    this._check(json[key], toplevel[key], this.schema.types);
+	                }
+	            }
+	        }
+
+	        // generate metadata for object/array subtypes
+	        // primitives have already been handled!
+
+	    }, {
+	        key: '_generateMeta',
+	        value: function _generateMeta(json, schema_type) {
+
+	            console.log("Generating meta for: " + JSON.stringify(json) + ", " + JSON.stringify(schema_type));
+
+	            // values conforming to 'subtype' key in required_type
+	            // flexible size
+	            // each of these elements are individually NOT required!
+	            if (schema_type['props'] === undefined && schema_type['subtype'] !== undefined) {
+
+	                for (var key in json) {
+	                    if (key === '_deletable') {
+	                        // skip this special key
+	                        continue;
+	                    }
+	                    if (this._is_primitive(json[key])) {
+	                        // primitive subtype
+	                        json[key] = true; // NOT required
+	                    } else {
+	                        // compound subtype
+	                        json[key]['_deletable'] = true; // NOT required
+
+	                        if (this._is_simple_builtin_type(schema_type['subtype'])) {
+	                            json[key] = false;
+	                        } else {
+	                            this._generateMeta(json[key], this.schema.types[schema_type['subtype']]);
+	                        }
+	                    }
+	                }
+	            }
+	            // object with prescribed required keys
+	            // therefore has fixed size
+	            // and we require each prop to exist and not be deleted!
+	            else if (schema_type['props'] !== undefined) {
+	                    var required_props = schema_type['props'];
+
+	                    for (var _key2 in json) {
+	                        if (_key2 === '_deletable') {
+	                            // skip special key
+	                            continue;
+	                        }
+	                        if (required_props[_key2] === undefined) {
+	                            // these are all keys in the JSON not defined in the schema, therefore NOT required
+	                            if (this._is_primitive_type(toplevel[_key2].type)) {
+	                                json[_key2] = true;
+	                            } else {
+	                                json[_key2]['_deletable'] = true;
+	                                this._mark_all_children_deletable(json[_key2]);
+	                            }
+	                        }
+	                    }
+
+	                    for (var _key3 in required_props) {
+
+	                        // array indices are numbers not strings though json keys are strings
+	                        if (schema_type['type'] === 'array') {
+	                            _key3 = Number(_key3);
+	                        }
+
+	                        if (this._is_primitive(json[_key3])) {
+	                            json[_key3] = false; // REQUIRED!
+	                        } else {
+	                            json[_key3]['_deletable'] = false; // REQUIRED!
+	                            // recurse on compound types
+	                            this._generateMeta(json[_key3], required_props[_key3]);
+	                        }
+	                    }
+	                } else {
+	                    // both 'props' and 'subtype' undefined implies it's just got 'type' and we need to recurse on this user type...
+	                    (0, _helper.assert)(!this._is_simple_builtin_type(schema_type['type']));
+	                    this._generateMeta(json, this.schema.types[schema_type['type']]);
+	                }
+	        }
+
+	        // takes a JSON conforming to the schema
+	        // then generates a skeleton of the same keys/values etc
+	        // but all primitives are replaced with booleans for deletable/not deletable
+	        // and objects/arrays gain an additional property _deletable
+	        // making full use of JS arrays being objects!
+
+	    }, {
+	        key: 'generateMetaJson',
+	        value: function generateMetaJson(json_original) {
+	            var toplevel = this.schema.toplevel;
+	            // clone JSON
+	            var json = JSON.parse(JSON.stringify(json_original));
+
+	            for (var key in json) {
+	                // key not in schema is definitely not required!
+	                // can be deleted
+	                if (toplevel[key] === undefined) {
+	                    if (this._is_primitive_type(toplevel[key].type)) {
+	                        json[key] = true;
+	                    } else {
+	                        json[key]['_deletable'] = true;
+	                        this._mark_all_children_deletable(json[key]);
+	                    }
+	                } else {
+	                    // in schema
+	                    if (this._is_primitive_type(toplevel[key].type)) {
+	                        // rare, unlikely case
+	                        // assume toplevel keys that are defined in schema are required...
+	                        json[key] = false;
+	                    } else {
+	                        json[key]['_deletable'] = false; // toplevels never deleteable
+	                        this._generateMeta(json[key], toplevel[key]);
+	                    }
+	                }
+	            }
+	            return json;
+	        }
+	    }, {
+	        key: '_mark_all_children_deletable',
+	        value: function _mark_all_children_deletable(json) {
+	            for (var key in json) {
+	                if (key === '_deletable') {
+	                    // skip special keys
+	                    continue;
+	                }
+	                if (this._is_primitive(json[key])) {
+	                    json[key] = true;
+	                } else {
+	                    json[key]['_deletable'] = true;
+	                    this._mark_all_children_deletable(json[key]); //recurse
 	                }
 	            }
 	        }

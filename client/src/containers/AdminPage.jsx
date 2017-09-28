@@ -15,11 +15,10 @@ class AdminPage extends React.Component {
         this.state = {
             data: null,
             schema: null,
+            meta: null,
             status: "Loading",
             modified: false
         }
-
-
     }
 
     componentDidMount() {
@@ -76,7 +75,7 @@ class AdminPage extends React.Component {
                 status: "Ready"
             });
 
-            this.typeChecker.check(this.state.data, this.state.schema);
+            this.checkDataWithSchema();
 
         } else {
             this.setState({
@@ -96,13 +95,29 @@ class AdminPage extends React.Component {
                 status: "Ready"
             });
 
-            this.typeChecker.check(this.state.data);
+            this.checkDataWithSchema();
+
 
         } else {
             this.setState({
                 schema:schema
             })
         }
+    }
+
+    checkDataWithSchema() {
+        try {
+            this.typeChecker.check(this.state.data);
+            console.log("data.json passed schema check");
+        } catch (err) {
+            console.error("data.json failed schema check.");
+            console.error(err.toString());
+            throw err;  // maybe skip this?
+        }
+
+        let meta = this.typeChecker.generateMetaJson(this.state.data);
+        // console.log(JSON.stringify(meta, null, 3));
+        this.setState({meta: meta});
     }
 
     onEdit(JSONPath, newValue) {
@@ -118,6 +133,7 @@ class AdminPage extends React.Component {
     }
 
     render() {
+        
         return (
             <div className="">
                 <div className="header admin-header">
@@ -127,6 +143,7 @@ class AdminPage extends React.Component {
                 {this.state.data ? 
                     <Editor 
                         raw_json={this.state.data} 
+                        json_meta={this.state.meta}
                         status={this.state.status}
                         modified={this.state.modified}
                         onRevert={this.revertData.bind(this)}

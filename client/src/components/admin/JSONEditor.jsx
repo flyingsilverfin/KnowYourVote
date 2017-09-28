@@ -7,10 +7,12 @@ import {strContains, isArray} from '../../helper.js';
 const Entry = ({
     name, 
     data,
+    meta,
     no_border,
     emptyType
 }) => {
 
+    debugger
 
     if (emptyType === 'any') {
         return <div>  </div>
@@ -20,18 +22,18 @@ const Entry = ({
     if (isArray(data)) {
         // special case for colors
         if (strContains(name, "color")) {
-            return <ColorPickerEntry name={name} data={data} no_border={no_border} />
+            return <ColorPickerEntry name={name} data={data} meta={meta} no_border={no_border} />
         } else {
-            return <ArrayEntry name={name} data={data} no_border={no_border} />
+            return <ArrayEntry name={name} data={data} meta={meta} no_border={no_border} />
         }
     } else if (typeof data === 'object') {
-        return <ObjectEntry name={name} data={data} no_border={no_border} />
+        return <ObjectEntry name={name} data={data} meta={meta} no_border={no_border} />
     } else {
         if ( typeof data === "string" || emptyType === 'string') {
 
             // in this case, data is empty so need to avoid using that
             if (emptyType === 'string') {
-                return <StringEntry name={name} data={data} no_border={no_border} empty={true} />
+                return <StringEntry name={name} data={data} deletable={meta} no_border={no_border} empty={true} />
             }
 
             // check special case for images
@@ -39,14 +41,15 @@ const Entry = ({
             let suffix = split[split.length - 1].toLowerCase();
             let image_types = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'bmp'];
             if (image_types.indexOf(suffix) != -1) {
-                return <ImageEntry name={name} src={data} no_border={no_border} />
+                return <ImageEntry name={name} src={data} deletable={meta} no_border={no_border} />
             } else {
-                return <StringEntry name={name} data={data} no_border={no_border} />
+                return <StringEntry name={name} data={data} deletable={meta} no_border={no_border} />
             }
         } else if ( typeof data=== "number" ) {
             return <NumberEntry 
                         name={name} 
                         data={data}
+                        deletable={meta}
                         no_border={no_border} 
                         empty={emptyType==='number'? true : false}
                    />
@@ -75,9 +78,16 @@ class ObjectEntry extends React.Component {
             <div className="entry-heading">
 
 
-                <div className="cssCircle inline minus-circle">
-                    &#8211;
-                </div>
+                { this.props.meta._deletable ?
+                    <div 
+                    className="item-button item-delete"
+                    title="delete">
+                    </div>
+                    :
+                    <div className="item-button item-required" title="Required item">
+                    </div>
+                }
+                
 
                 <div 
                     className="entry-collapse"
@@ -97,7 +107,7 @@ class ObjectEntry extends React.Component {
                 <div className="entry-content">
                     {
                         Object.keys(data).map((n, index) =>
-                            <Entry name={n} data={data[n]} key={index} />
+                            <Entry name={n} data={data[n]} meta={this.props.meta[n]} key={index} />
                         )
                     }
 
@@ -121,6 +131,7 @@ class ArrayEntry extends React.Component {
     }
 
     render() {
+        debugger
         let name = this.props.name;
         let data = this.props.data;
         return (
@@ -128,9 +139,15 @@ class ArrayEntry extends React.Component {
             style={this.props.no_border? {border:'none', marginLeft:0, paddingLeft:0}: {}} >
             <div className="entry-heading">
 
-                <div className="cssCircle inline minus-circle">
-                    &#8211;
-                </div>
+                { this.props.meta._deletable ?
+                    <div 
+                    className="item-button item-delete"
+                    title="delete">
+                    </div>
+                    :
+                    <div className="item-button item-required" title="Required item">
+                    </div>
+                }
 
 
                 <div 
@@ -151,8 +168,10 @@ class ArrayEntry extends React.Component {
             {this.state.visible ?
                 <div className="entry-content">
                     {
-                        data.map((value, index) =>
-                            <Entry name={index+"."} data={value} key={index} /> 
+                        data.map((value, index) => {
+                            debugger;
+                            return <Entry name={index+"."} data={value} meta={this.props.meta[index]} key={index} /> 
+                        }
                         )
                     }
                 </div>
@@ -186,15 +205,19 @@ class ColorPickerEntry extends React.Component {
 
 
 const StringEntry = ({
-    name, data, no_border, empty
+    name, data, deletable, no_border, empty
 }) => (
     <div className="entry-container entry-container-empty"
         style={no_border? {border:'none', marginLeft:0, paddingLeft:0}: {}} >
 
 
-        <div className="cssCircle inline minus-circle">
-            &#8211;
-        </div>
+        {deletable ?
+            <div className="item-button item-delete" title="delete">
+            </div>
+            :
+            <div className="item-button item-required" title="Required item">
+            </div>
+        }
         
         <div className="entry-heading inline">
             {name}
@@ -206,15 +229,19 @@ const StringEntry = ({
 );
 
 const ImageEntry = ({
-    name, src, no_border
+    name, src, deletable, no_border
 }) => (
     <div className="entry-container"
         style={no_border? {border:'none', marginLeft:0, paddingLeft:0}: {}} >
 
 
-        <div className="cssCircle inline minus-circle">
-            &#8211;
-        </div>
+        {deletable ?
+            <div className="item-button item-delete" title="delete">
+            </div>
+            :
+            <div className="item-button item-required" title="Required item">
+            </div>
+        }
 
         <div className="entry-heading inline">
             {name}
@@ -226,15 +253,19 @@ const ImageEntry = ({
 );
 
 const NumberEntry = ({
-    name, data, no_border
+    name, data, deletable, no_border
 }) => (
     <div className="entry-container"
         style={no_border? {border:'none', marginLeft:0, paddingLeft:0}: {}} >
 
 
-        <div className="cssCircle inline minus-circle">
-            &#8211;
-        </div>
+        {deletable ?
+            <div className="item-button item-delete" title="delete">
+            </div>
+            :
+            <div className="item-button item-required" title="Required item">
+            </div>
+        }
 
         <div className="entry-heading inline">
             {name}
@@ -255,12 +286,15 @@ class JSONEditor extends React.Component {
     }
 
     render() {
+        if (this.props.meta === null || this.props.json === null) {
+            return <div> Loading </div>
+        }
 
         return (
             <div> 
             {
                 Object.keys(this.props.json).map( (name, index) => 
-                   <Entry name={name} data={this.props.json[name]} key={index} no_border={true}/>
+                   <Entry name={name} data={this.props.json[name]} meta={this.props.meta[name]} key={index} no_border={true}/>
                 )
             }
             </div>

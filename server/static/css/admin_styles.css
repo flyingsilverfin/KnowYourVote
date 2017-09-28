@@ -120,7 +120,7 @@
 
 .admin-main-content 
     .entry-content {
-    margin-left: 8px;
+    margin-left: 14px;
 }
 
 .admin-main-content
@@ -196,5 +196,29 @@
 }
 
 .entry-container-empty {
+    
+}
+
+.item-button {
+    width: 15px;
+    height: 17px;
+    padding: 0px;
+    background-size: cover;
+    display: inline-block;
+    margin-right: 8px;
+    margin-bottom: -3px;
+}
+
+.item-delete {
+    background-image: url('/images/Delete.png');
+    cursor: pointer;
+}
+
+.item-required {
+    /*background-color: rgba(0,0,100,0.5);
+    -webkit-border-radius: 999px;
+    -moz-border-radius: 999px;
+    border-radius: 999px;
+    height:15px;*/
     
 }

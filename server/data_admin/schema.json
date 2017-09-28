@@ -1,4 +1,6 @@
 {
+    /* no recursive schema definitions please! */
+
     "types": { /* all types */
         "party_type" : {
             "type": "object",   /* specify object with following props */
