@@ -125,6 +125,11 @@ class AdminPage extends React.Component {
     
 
     onAdd(json_path, key) {
+
+        this.setState({
+            status: "Saving"
+        })
+
         let new_structure = this.schemaChecker.get_required_data_structure(json_path);
         let ptr = this.state.data;
         for (let elem of json_path) {
@@ -163,11 +168,77 @@ class AdminPage extends React.Component {
 
 
 
-    onEdit(json_path, event) {
+    onEdit(json_path, get_value_fn, set_value_fn) {
+
+        // TODO this may not be a primitive - take a color picker for example, it's compound
+
+        
+        
+
+
+        // retrieve correct place to update JSON
+        let ptr = this.state.data;
+        for (let elem of json_path.slice(0,json_path.length-1)) {
+            ptr = ptr[elem];
+        }
+
+        let old_value = ptr[json_path[json_path.length-1]];
+        let new_value;
+        try {
+            new_value = get_value_fn(); // attempts to retrieve correctly typed value eg a number
+            if (isNaN(new_value)) {
+                throw Error("Number required");
+            }
+        } catch (err) {
+            console.error(err);
+            //TODO some sort of error handling to notify user
+            
+
+            // hack to set the editabletext back
+            set_value_fn(old_value);
+
+        }        
+
+        // skip if unchanged
+        if (new_value === old_value) {
+            return;
+        }
+
+
+        let valid = this.validate_edit(json_path, new_value);
+
+        if (valid !== undefined) {
+            // TODO error notification
+
+
+            // hack to set the editabletext back
+            set_value_fn(old_value);
+
+        } else {
+            this.setState({
+                status: "Saving"
+            });
+            
+            ptr[json_path[json_path.length-1]] = new_value;
+
+            // TODO post change
+
+            // httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
+            //     this.setState({
+            //         status: "Saved",
+            //         modified: true
+            //     })
+            // });
+        }
         
     }
 
     onDelete(json_path) {
+
+        this.setState({
+            status: "Saving"
+        });
+
         let ptr = this.state.data;
         for (let elem of json_path.slice(0,json_path.length-1)) {
             ptr = ptr[elem];
@@ -177,29 +248,87 @@ class AdminPage extends React.Component {
             ptr.splice(json_path[json_path.length-1], 1);   
         } else {
             // deleting works fine in objects
+            debugger
             delete ptr[json_path[json_path.length-1]];
         }
         this.regenerate_meta();
+
+        // TODO post change
     }
 
-    onRename(json_path, event) {
+    // rename only possible for Object props
+    onRename(json_path, get_value_fn, set_value_fn, new_name_in_sidebar) {
+        
 
-    }
+        let ptr = this.state.data;
+        for (let elem of json_path.slice(0,json_path.length-1)) {
+            ptr = ptr[elem];
+        }
+
+        let old_name = json_path[json_path.length-1];
+        let new_name;
+        try {
+            new_name = get_value_fn();
+        } catch (err) {
+            console.error(err);
+
+            // hack to set the editabletext back
+            set_value_fn(old_name);
+
+            return;
+        }
+
+        if (old_name === new_name) {
+            return;
+        }
 
 
-    onEdit(JSONPath, newValue) {
-        /*
-        this.setState({
-            status: "Saving"
-        })
-        httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
+        let valid = this.validate_rename(json_path, old_name, new_name, ptr);
+        if (valid !== undefined) {
+
+            // SOME kind of alert mechanism telling user the validation failed?
+            // TODO
+            
+            // hack to set the editabletext back
+            set_value_fn(old_name);
+            
+
+        } else {
             this.setState({
-                status: "Saved",
-                modified: true
-            })
-        });
-        */
+                status: "Saving"
+            });
+
+            let value = ptr[old_name];
+            delete ptr[old_name];
+            ptr[new_name] = value;
+
+            if (new_name_in_sidebar) {
+                new_name_in_sidebar(value);
+            }
+            
+            this.regenerate_meta();
+
+            // TODO post change
+
+        }
+
     }
+
+    validate_edit(json_path, new_value) {
+        let err = this.schemaChecker.validate_value(json_path, new_value);
+        if (err) {
+            return err;
+        }
+    }
+
+    validate_rename(json_path, old_name, new_name, object_to_rename_in) {
+        // nothing to do with json_path atm
+        if (object_to_rename_in[new_name] !== undefined) {
+            return "Name already exists, use unique name"; 
+        }
+    }
+
+
 
     render() {
         if (!this.schemaChecker) {

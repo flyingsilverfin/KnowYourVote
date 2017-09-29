@@ -12,11 +12,9 @@
 .admin-leftbar {
     width: 12vw;
     min-width:110px;
-    line-height: 10vh;
 
     margin-right: 10px;
     margin-top:10px;
-    padding-left: 10px;
     border-right: 1px solid black;
     height: calc(90vh - 10px);
 
@@ -35,11 +33,39 @@
 
 .admin-sidebar 
   .sidebar-choice {
-    padding-left: 5px;
+    padding-left: 3px;
+    height: 10vh;
+
+    display: flex;
+    align-items: center; /* align vertical */
+    vertical-align: middle;
+    font-size: 1.3em;
+    margin-left: 10px;
 }
 
 .admin-sidebar .active {
-    background-color: rgba(150, 150, 150, 1.0);
+    /*background-color: rgba(150, 150, 150, 1.0);*/
+    margin-left: 0;
+    border-left: 10px solid #600;
+    background-color: rgba(96, 0, 0, 0.15);
+}
+
+.admin-sidebar
+  .sidebar-title {
+    line-height: 1.3em;
+    width: 70%;
+    margin-right: 10%;
+    min-height: 0;
+}
+
+.admin-sidebar
+    .item-delete {
+    margin: auto;
+}
+
+.admin-sidebar 
+  .item-add {
+    margin: 10px auto;
 }
 
 .admin-statusbar {
@@ -98,7 +124,6 @@
 
 .admin-main-content
     .entry-title {
-    color: rgba(0,0,0,1);
 }
 
 .admin-main-content
@@ -123,16 +148,14 @@
     margin-left: 14px;
 }
 
-.admin-main-content
-    .inline {
+.inline {
     display: inline-block;
     vertical-align: middle;
     min-height:100%;
 }
 
 
-.admin-main-content
-    .editable-area {
+.editable-area {
     border: 1px solid #7d7d7d;
     border-radius: 4px;
     padding: 1px 5px;
@@ -213,19 +236,19 @@
     cursor: pointer;
     width: 15px;
     height: 17px;
+    background-size: cover;
 }
 
 .item-add {
     background-image: url('/images/plus_circle.png');
     height: 20px;
     width: 20px;
+    background-size: cover;
+    cursor: pointer;
 }
 
 .item-required {
-    /*background-color: rgba(0,0,100,0.5);
-    -webkit-border-radius: 999px;
-    -moz-border-radius: 999px;
-    border-radius: 999px;
-    height:15px;*/
-    
+    width: 15px;
+    height: 17px;
+    visibility: hidden;
 }

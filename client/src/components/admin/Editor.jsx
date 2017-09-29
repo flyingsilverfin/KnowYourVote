@@ -30,10 +30,11 @@ class Editor extends React.Component {
             return <div> Loading </div>;
         }
 
-        let choices = ['parties'];
-        choices = choices.concat(Object.keys(this.props.raw_json.topics));
-        let choices_meta = this.props.json_meta['parties'];
-        choices_meta = Object.assign(choices_meta, this.props.json_meta['topics']);
+        let choices_paths = [['parties']];
+        for (let topic in this.props.raw_json.topics) {
+            choices_paths.push(['topics', topic]);
+        }
+        let choices_meta = this.props.json_meta;
 
         let active_json = null;
         let active_meta = null;
@@ -54,10 +55,14 @@ class Editor extends React.Component {
                 <div className="admin-leftbar">
                     <div className="admin-sidebar">
                         <EditorSidebar 
-                            choices={choices} 
-                            choices_meta={choices_meta}
-                            setActive={this.setActive.bind(this)} 
+                            choices_paths={choices_paths} 
                             active={this.state.active} 
+                            setActive={this.setActive.bind(this)} 
+
+                            meta={choices_meta}
+                            on_add={() => this.props.on_add(['topics'], null)}
+                            on_delete={this.props.on_delete}
+                            on_rename={this.props.on_rename}
                             />
                     </div>
                     <div className="admin-statusbar">
@@ -74,7 +79,6 @@ class Editor extends React.Component {
                         json={active_json}
                         meta={active_meta} 
                         json_path={active_path} 
-                        get_dummy_structure={this.props.get_dummy_structure}
 
                         on_add={this.props.on_add}
                         on_edit={this.props.on_edit}

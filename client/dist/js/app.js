@@ -45376,6 +45376,11 @@
 	    }, {
 	        key: 'onAdd',
 	        value: function onAdd(json_path, key) {
+
+	            this.setState({
+	                status: "Saving"
+	            });
+
 	            var new_structure = this.schemaChecker.get_required_data_structure(json_path);
 	            var ptr = this.state.data;
 	            var _iteratorNormalCompletion = true;
@@ -45434,10 +45439,12 @@
 	        }
 	    }, {
 	        key: 'onEdit',
-	        value: function onEdit(json_path, event) {}
-	    }, {
-	        key: 'onDelete',
-	        value: function onDelete(json_path) {
+	        value: function onEdit(json_path, get_value_fn, set_value_fn) {
+
+	            // TODO this may not be a primitive - take a color picker for example, it's compound
+
+
+	            // retrieve correct place to update JSON
 	            var ptr = this.state.data;
 	            var _iteratorNormalCompletion2 = true;
 	            var _didIteratorError2 = false;
@@ -45464,32 +45471,189 @@
 	                }
 	            }
 
+	            var old_value = ptr[json_path[json_path.length - 1]];
+	            var new_value = void 0;
+	            try {
+	                new_value = get_value_fn(); // attempts to retrieve correctly typed value eg a number
+	                if (isNaN(new_value)) {
+	                    throw Error("Number required");
+	                }
+	            } catch (err) {
+	                console.error(err);
+	                //TODO some sort of error handling to notify user
+
+
+	                // hack to set the editabletext back
+	                set_value_fn(old_value);
+	            }
+
+	            // skip if unchanged
+	            if (new_value === old_value) {
+	                return;
+	            }
+
+	            var valid = this.validate_edit(json_path, new_value);
+
+	            if (valid !== undefined) {
+	                // TODO error notification
+
+
+	                // hack to set the editabletext back
+	                set_value_fn(old_value);
+	            } else {
+	                this.setState({
+	                    status: "Saving"
+	                });
+
+	                ptr[json_path[json_path.length - 1]] = new_value;
+
+	                // TODO post change
+
+	                // httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
+	                //     this.setState({
+	                //         status: "Saved",
+	                //         modified: true
+	                //     })
+	                // });
+	            }
+	        }
+	    }, {
+	        key: 'onDelete',
+	        value: function onDelete(json_path) {
+
+	            this.setState({
+	                status: "Saving"
+	            });
+
+	            var ptr = this.state.data;
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
+
+	            try {
+	                for (var _iterator3 = json_path.slice(0, json_path.length - 1)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var elem = _step3.value;
+
+	                    ptr = ptr[elem];
+	                }
+	            } catch (err) {
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
+	                    }
+	                }
+	            }
+
 	            if ((0, _helper.isArray)(ptr)) {
 	                // cut out array and reindex array, saves much pain elsewhere in exchange for inefficiency
 	                ptr.splice(json_path[json_path.length - 1], 1);
 	            } else {
 	                // deleting works fine in objects
+	                debugger;
 	                delete ptr[json_path[json_path.length - 1]];
 	            }
 	            this.regenerate_meta();
+
+	            // TODO post change
 	        }
+
+	        // rename only possible for Object props
+
 	    }, {
 	        key: 'onRename',
-	        value: function onRename(json_path, event) {}
-	    }, {
-	        key: 'onEdit',
-	        value: function onEdit(JSONPath, newValue) {
-	            /*
-	            this.setState({
-	                status: "Saving"
-	            })
-	            httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
+	        value: function onRename(json_path, get_value_fn, set_value_fn, new_name_in_sidebar) {
+
+	            var ptr = this.state.data;
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
+
+	            try {
+	                for (var _iterator4 = json_path.slice(0, json_path.length - 1)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var elem = _step4.value;
+
+	                    ptr = ptr[elem];
+	                }
+	            } catch (err) {
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
+	                    }
+	                }
+	            }
+
+	            var old_name = json_path[json_path.length - 1];
+	            var new_name = void 0;
+	            try {
+	                new_name = get_value_fn();
+	            } catch (err) {
+	                console.error(err);
+
+	                // hack to set the editabletext back
+	                set_value_fn(old_name);
+
+	                return;
+	            }
+
+	            if (old_name === new_name) {
+	                return;
+	            }
+
+	            var valid = this.validate_rename(json_path, old_name, new_name, ptr);
+	            if (valid !== undefined) {
+
+	                // SOME kind of alert mechanism telling user the validation failed?
+	                // TODO
+
+	                // hack to set the editabletext back
+	                set_value_fn(old_name);
+	            } else {
 	                this.setState({
-	                    status: "Saved",
-	                    modified: true
-	                })
-	            });
-	            */
+	                    status: "Saving"
+	                });
+
+	                var value = ptr[old_name];
+	                delete ptr[old_name];
+	                ptr[new_name] = value;
+
+	                if (new_name_in_sidebar) {
+	                    new_name_in_sidebar(value);
+	                }
+
+	                this.regenerate_meta();
+
+	                // TODO post change
+	            }
+	        }
+	    }, {
+	        key: 'validate_edit',
+	        value: function validate_edit(json_path, new_value) {
+	            var err = this.schemaChecker.validate_value(json_path, new_value);
+	            if (err) {
+	                return err;
+	            }
+	        }
+	    }, {
+	        key: 'validate_rename',
+	        value: function validate_rename(json_path, old_name, new_name, object_to_rename_in) {
+	            // nothing to do with json_path atm
+	            if (object_to_rename_in[new_name] !== undefined) {
+	                return "Name already exists, use unique name";
+	            }
 	        }
 	    }, {
 	        key: 'render',
@@ -45593,6 +45757,7 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var _this2 = this;
 
 	            if (this.props.data_json === null || this.props.json_meta === null) {
 	                return _react2.default.createElement(
@@ -45602,10 +45767,11 @@
 	                );
 	            }
 
-	            var choices = ['parties'];
-	            choices = choices.concat(Object.keys(this.props.raw_json.topics));
-	            var choices_meta = this.props.json_meta['parties'];
-	            choices_meta = Object.assign(choices_meta, this.props.json_meta['topics']);
+	            var choices_paths = [['parties']];
+	            for (var topic in this.props.raw_json.topics) {
+	                choices_paths.push(['topics', topic]);
+	            }
+	            var choices_meta = this.props.json_meta;
 
 	            var active_json = null;
 	            var active_meta = null;
@@ -45630,10 +45796,16 @@
 	                        'div',
 	                        { className: 'admin-sidebar' },
 	                        _react2.default.createElement(_EditorSidebar2.default, {
-	                            choices: choices,
-	                            choices_meta: choices_meta,
+	                            choices_paths: choices_paths,
+	                            active: this.state.active,
 	                            setActive: this.setActive.bind(this),
-	                            active: this.state.active
+
+	                            meta: choices_meta,
+	                            on_add: function on_add() {
+	                                return _this2.props.on_add(['topics'], null);
+	                            },
+	                            on_delete: this.props.on_delete,
+	                            on_rename: this.props.on_rename
 	                        })
 	                    ),
 	                    _react2.default.createElement(
@@ -45653,7 +45825,6 @@
 	                        json: active_json,
 	                        meta: active_meta,
 	                        json_path: active_path,
-	                        get_dummy_structure: this.props.get_dummy_structure,
 
 	                        on_add: this.props.on_add,
 	                        on_edit: this.props.on_edit,
@@ -45684,24 +45855,99 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _helper = __webpack_require__(482);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var EditorSidebar = function EditorSidebar(_ref) {
-	    var choices = _ref.choices,
+	    var choices_paths = _ref.choices_paths,
+	        active = _ref.active,
 	        setActive = _ref.setActive,
-	        active = _ref.active;
+	        meta = _ref.meta,
+	        on_add = _ref.on_add,
+	        on_delete = _ref.on_delete,
+	        on_rename = _ref.on_rename;
 	    return _react2.default.createElement(
 	        'div',
 	        null,
-	        choices.map(function (choice, index) {
+	        choices_paths.map(function (choice_path, index) {
+	            debugger;
+	            var choice = choice_path[choice_path.length - 1]; // last element is name
+	            var deletable_root = meta;
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = choice_path[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var key = _step.value;
+
+	                    deletable_root = deletable_root[key];
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            var deletable = void 0; //if deletable then also editable! at least in this case
+	            if (!(0, _helper.is_primitive)(deletable_root)) {
+	                deletable = deletable_root['_deletable'];
+	            } else {
+	                deletable = deletable_root;
+	            }
+
 	            return _react2.default.createElement(
 	                'div',
-	                { className: "sidebar-choice" + (choice === active ? ' active' : ''), onClick: function onClick() {
+	                {
+	                    className: "sidebar-choice" + (choice === active ? ' active' : ''),
+	                    onClick: function onClick() {
 	                        return setActive(choice);
-	                    }, key: index },
-	                choice
+	                    },
+	                    key: index },
+	                deletable ? _react2.default.createElement('div', {
+	                    className: 'item-delete',
+	                    onClick: function onClick(event) {
+	                        on_delete(choice_path);
+	                        event.stopPropagation();
+	                        if (choice === active) {
+	                            setActive("parties");
+	                        }
+	                    } }) : _react2.default.createElement('div', {
+	                    className: 'item-delete', style: { visibility: 'hidden' } }),
+	                _react2.default.createElement(
+	                    'div',
+	                    {
+	                        className: "sidebar-title " + (deletable ? "editable-area inline" : ''),
+	                        contentEditable: deletable ? true : false,
+	                        onClick: function onClick(event) {
+	                            return deletable ? event.stopPropagation() : null;
+	                        },
+	                        onBlur: (function (event) {
+	                            return on_rename(choice_path, function () {
+	                                return event.target.textContent;
+	                            }, function (new_value) {
+	                                return event.target.textContent = new_value;
+	                            });
+	                        }, function (old_name, new_name) {
+	                            return old_name === active ? setActive(new_name) : null;
+	                        }) },
+	                    choice
+	                )
 	            );
-	        })
+	        }),
+	        _react2.default.createElement('div', {
+	            className: 'item-add',
+	            onClick: on_add })
 	    );
 	};
 
@@ -45845,7 +46091,8 @@
 	        json_path = _ref.json_path,
 	        on_add = _ref.on_add,
 	        on_edit = _ref.on_edit,
-	        on_delete = _ref.on_delete;
+	        on_delete = _ref.on_delete,
+	        on_rename = _ref.on_rename;
 
 
 	    if ((0, _helper.isArray)(data)) {
@@ -45873,7 +46120,8 @@
 
 	                on_add: on_add,
 	                on_edit: on_edit,
-	                on_delete: on_delete
+	                on_delete: on_delete,
+	                on_rename: on_rename
 	            });
 	        }
 	    } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
@@ -45887,7 +46135,8 @@
 
 	            on_add: on_add,
 	            on_edit: on_edit,
-	            on_delete: on_delete
+	            on_delete: on_delete,
+	            on_rename: on_rename
 	        });
 	    } else {
 	        if (typeof data === "string") {
@@ -45973,6 +46222,7 @@
 	            //     debugger
 	            // }
 
+
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'entry-container',
@@ -45998,8 +46248,19 @@
 	                        '\u25B6'
 	                    ),
 	                    _react2.default.createElement(
-	                        'span',
-	                        { className: 'entry-title' },
+	                        'div',
+	                        {
+	                            className: this.props.meta._deletable ? "entry-title inline editable-area" : "entry-title inline",
+	                            contentEditable: this.props.meta._deletable ? "true" : "false",
+	                            onBlur: this.props.meta._deletable ? function (event) {
+	                                return _this2.props.on_rename(_this2.props.json_path, function () {
+	                                    return event.target.textContent;
+	                                }, function (new_value) {
+	                                    return event.target.textContent = new_value;
+	                                });
+	                            } : null,
+	                            title: 'Rename this property'
+	                        },
 	                        name
 	                    ),
 	                    _react2.default.createElement(
@@ -46023,7 +46284,8 @@
 	                            json_path: _this2.props.json_path.concat([n]),
 	                            on_add: _this2.props.on_add,
 	                            on_edit: _this2.props.on_edit,
-	                            on_delete: _this2.props.on_delete
+	                            on_delete: _this2.props.on_delete,
+	                            on_rename: _this2.props.on_rename
 	                        });
 	                    }),
 	                    extendable ? _react2.default.createElement(AddEntry, {
@@ -46124,13 +46386,13 @@
 	                            key: index,
 	                            not_collapsed_levels: _this4.props.not_collapsed_levels - 1,
 	                            json_path: _this4.props.json_path.concat([index]),
+
 	                            on_add: _this4.props.on_add,
 	                            on_edit: _this4.props.on_edit,
-	                            on_delete: _this4.props.on_delete
+	                            on_delete: _this4.props.on_delete,
+	                            on_rename: _this4.props.on_rename
 	                        });
 	                    }),
-
-	                    /* all children primitive means show ghost directly TODO */
 	                    extendable ? _react2.default.createElement(AddEntry, {
 	                        on_click: function on_click() {
 	                            return _this4.props.on_add(_this4.props.json_path, next_index);
@@ -46172,8 +46434,8 @@
 	                    { className: 'entry-content' },
 	                    _react2.default.createElement(_ColorPicker2.default /* I think this modifies rgba in props.data directly */
 	                    , { rgba: this.props.data,
-	                        onBlur: function onBlur() {
-	                            return _this6.props.on_edit(_this6.props.json_path);
+	                        onBlur: function onBlur(event) {
+	                            return _this6.props.on_edit(_this6.props.json_path, event);
 	                        } })
 	                )
 	            );
@@ -46208,7 +46470,16 @@
 	        ),
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-content inline value editable-area', contentEditable: 'true' },
+	            {
+	                className: 'entry-content inline value editable-area',
+	                contentEditable: 'true',
+	                onBlur: function onBlur(event) {
+	                    return on_edit(json_path, function () {
+	                        return event.target.textContent;
+	                    }, function (new_value) {
+	                        return event.target.textContent = new_value;
+	                    });
+	                } },
 	            data
 	        )
 	    );
@@ -46270,17 +46541,28 @@
 	        ),
 	        _react2.default.createElement(
 	            'div',
-	            { className: 'entry-content inline value editable-area', contentEditable: 'true' },
+	            {
+	                className: 'entry-content inline value editable-area',
+	                contentEditable: 'true',
+	                onBlur: function onBlur(event) {
+	                    return on_edit(json_path, function () {
+	                        return Number(event.target.textContent);
+	                    }, function (new_value) {
+	                        return event.target.textContent = new_value;
+	                    });
+	                } },
 	            data
 	        )
 	    );
 	};
 
 	var AddEntry = function AddEntry(_ref5) {
-	    var on_click = _ref5.on_click;
+	    var on_click = _ref5.on_click,
+	        no_border = _ref5.no_border;
 	    return _react2.default.createElement(
 	        'div',
-	        { className: 'entry-container' },
+	        { className: 'entry-container',
+	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
 	        _react2.default.createElement('div', {
 	            className: 'item-button item-add',
 	            title: 'Add Entry',
@@ -46330,9 +46612,16 @@
 
 	                        on_add: _this8.props.on_add,
 	                        on_edit: _this8.props.on_edit,
-	                        on_delete: _this8.props.on_delete
+	                        on_delete: _this8.props.on_delete,
+	                        on_rename: _this8.props.on_rename
 	                    });
-	                })
+	                }),
+	                all_children_deletable(this.props.meta) ? _react2.default.createElement(AddEntry, {
+	                    on_click: function on_click() {
+	                        return _this8.props.on_add(_this8.props.json_path, null);
+	                    },
+	                    no_border: true
+	                }) : null
 	            );
 	        }
 	    }]);
@@ -59979,11 +60268,11 @@
 	                    /* number builtin type */
 
 	                    if (required_type['min'] !== undefined && json < required_type['min']) {
-	                        throw Error("Number is too small: " + json);
+	                        throw Error("Number is too small");
 	                    }
 
 	                    if (required_type['max'] !== undefined && json > required_type['max']) {
-	                        throw Error("Number is too large:" + json);
+	                        throw Error("Number is too large");
 	                    }
 
 	                    // if we get here, all OK!
@@ -60151,24 +60440,7 @@
 	        key: 'get_required_data_structure',
 	        value: function get_required_data_structure(json_path) {
 
-	            var schema = this.schema.toplevel[json_path[0]];
-	            var i = 1;
-	            // traverse down the tree to the point we need
-	            // these are all going to be compond types so need to check for primitives
-	            while (i < json_path.length) {
-	                if (schema.props === undefined && schema.subtype !== undefined) {
-	                    // this must be a user-defined type for the schema to be well formed
-	                    schema = this.schema.types[schema.subtype];
-	                } else if (schema.props !== undefined) {
-	                    schema = schema.props[json_path[i]];
-	                } else {
-	                    if (this._user_type_exists(schema.type)) {
-	                        schema = this.schema.types[schema.type];
-	                        continue; //descend one level without incrementing
-	                    }
-	                }
-	                i++;
-	            }
+	            var schema = this._get_schema_for_json_path(json_path);
 
 	            // schema now points to the place we want to retrieve a data structure from
 
@@ -60296,12 +60568,56 @@
 
 	        /*
 	            Validator code
-	             this should be merged with _check at some point // TODO
 	        */
 
 	    }, {
-	        key: 'validate',
-	        value: function validate(json, schema) {}
+	        key: 'validate_value',
+	        value: function validate_value(json_path, value) {
+	            var schema_type = this._get_schema_for_json_path(json_path);
+	            if ((0, _helper.is_primitive_type)(schema_type)) {
+	                // string, boolean or number
+	                if ((0, _helper.type_of)(value) !== schema_type) {
+	                    return "Type mismatch, require " + schema_type;
+	                }
+	            } else {
+	                (0, _helper.assert)((0, _helper.is_primitive_type)(schema_type.type), "Schema type returned is not primitive type");
+	                try {
+	                    this._check(value, schema_type); //TODO test this works as expected 
+	                } catch (err) {
+	                    return err.message;
+	                }
+	            }
+	        }
+	    }, {
+	        key: '_get_schema_for_json_path',
+	        value: function _get_schema_for_json_path(json_path) {
+	            var schema = this.schema.toplevel[json_path[0]];
+	            var i = 1;
+	            // traverse down the tree to the point we need
+	            // these are all going to be compond types so need to check for primitives
+	            while (i < json_path.length) {
+	                if (schema.props === undefined && schema.subtype !== undefined) {
+
+	                    // this must be a user-defined type for the schema to be well formed
+	                    // or a primitive! (eg. array of strings)
+	                    var subtype = schema.subtype;
+	                    if ((0, _helper.is_primitive_type)(subtype)) {
+	                        return subtype;
+	                    } else {
+	                        schema = this.schema.types[schema.subtype];
+	                    }
+	                } else if (schema.props !== undefined) {
+	                    schema = schema.props[json_path[i]];
+	                } else {
+	                    if (this._user_type_exists(schema.type)) {
+	                        schema = this.schema.types[schema.type];
+	                        continue; //descend one level without incrementing
+	                    }
+	                }
+	                i++;
+	            }
+	            return schema;
+	        }
 	    }, {
 	        key: '_user_type_exists',
 	        value: function _user_type_exists(type) {

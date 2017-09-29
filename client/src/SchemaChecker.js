@@ -105,11 +105,11 @@ export class SchemaChecker {
             } else if (t === "number") { /* number builtin type */
 
                 if (required_type['min'] !== undefined && json < required_type['min']) {
-                    throw Error("Number is too small: " + json);
+                    throw Error("Number is too small");
                 }
 
                 if (required_type['max'] !== undefined && json > required_type['max']) {
-                    throw Error("Number is too large:" + json);
+                    throw Error("Number is too large");
                 }
 
                 // if we get here, all OK!
@@ -275,24 +275,7 @@ export class SchemaChecker {
 
     get_required_data_structure(json_path) {
         
-        let schema = this.schema.toplevel[json_path[0]];
-        let i = 1;
-        // traverse down the tree to the point we need
-        // these are all going to be compond types so need to check for primitives
-        while (i < json_path.length) {
-            if (schema.props === undefined && schema.subtype !== undefined) {
-                // this must be a user-defined type for the schema to be well formed
-                schema = this.schema.types[schema.subtype];
-            } else if (schema.props !== undefined) {
-                schema = schema.props[json_path[i]];
-            } else {
-                if (this._user_type_exists(schema.type)) {
-                    schema = this.schema.types[schema.type];
-                    continue; //descend one level without incrementing
-                }
-            }
-            i++;
-        }
+        let schema = this._get_schema_for_json_path(json_path);
 
         // schema now points to the place we want to retrieve a data structure from
 
@@ -419,14 +402,53 @@ export class SchemaChecker {
 
     /*
         Validator code
-
-        this should be merged with _check at some point // TODO
     */
 
-    validate(json, schema) {
-
+    validate_value(json_path, value) {
+        let schema_type = this._get_schema_for_json_path(json_path);
+        if (is_primitive_type(schema_type)) {   // string, boolean or number
+            if (type_of(value) !== schema_type) {
+                return "Type mismatch, require " + schema_type;
+            }
+        } else {
+            assert(is_primitive_type(schema_type.type), "Schema type returned is not primitive type");
+            try {
+                this._check(value, schema_type); //TODO test this works as expected 
+            } catch (err) {
+                return err.message;
+            }
+        }
     }
 
+
+    _get_schema_for_json_path(json_path) {
+        let schema = this.schema.toplevel[json_path[0]];
+        let i = 1;
+        // traverse down the tree to the point we need
+        // these are all going to be compond types so need to check for primitives
+        while (i < json_path.length) {
+            if (schema.props === undefined && schema.subtype !== undefined) {
+
+                // this must be a user-defined type for the schema to be well formed
+                // or a primitive! (eg. array of strings)
+                let subtype = schema.subtype;
+                if (is_primitive_type(subtype)) {
+                    return subtype;
+                } else {
+                    schema = this.schema.types[schema.subtype];
+                }
+            } else if (schema.props !== undefined) {
+                schema = schema.props[json_path[i]];
+            } else {
+                if (this._user_type_exists(schema.type)) {
+                    schema = this.schema.types[schema.type];
+                    continue; //descend one level without incrementing
+                }
+            }
+            i++;
+        }
+        return schema;
+    }
 
     _user_type_exists(type) {
         return this.schema.types[type] !== undefined;

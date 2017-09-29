@@ -58,7 +58,8 @@ const Entry = ({
     json_path,
     on_add,
     on_edit,
-    on_delete
+    on_delete,
+    on_rename
 }) => {
 
 
@@ -89,6 +90,7 @@ const Entry = ({
                     on_add={on_add}
                     on_edit={on_edit}
                     on_delete={on_delete}
+                    on_rename={on_rename}
                 />
             )
         }
@@ -105,6 +107,7 @@ const Entry = ({
                 on_add={on_add}
                 on_edit={on_edit}
                 on_delete={on_delete}
+                on_rename={on_rename}
             />
             )
     } else {
@@ -183,6 +186,7 @@ class ObjectEntry extends React.Component {
         //     debugger
         // }
 
+
         return (
         <div className="entry-container"
              style={this.props.no_border? {border:'none', marginLeft:0, paddingLeft:0}: {}} >
@@ -208,9 +212,24 @@ class ObjectEntry extends React.Component {
                     >
                     ▶
                 </div>
-                <span className="entry-title">
+                <div 
+                    className={
+                        this.props.meta._deletable ?
+                            "entry-title inline editable-area" 
+                        :   "entry-title inline"
+                    }
+                    contentEditable={
+                        this.props.meta._deletable ? 
+                            "true" 
+                            : "false"
+                    }
+                    onBlur={this.props.meta._deletable ? 
+                                (event) => this.props.on_rename(this.props.json_path, () => event.target.textContent, (new_value) => event.target.textContent = new_value)
+                                : null }
+                    title="Rename this property"
+                    >
                     {name}
-                </span>
+                </div>
                 <span className={"entry-title-details" + (!this.state.visible ? " entry-title-details-emph" : " entry-title-details-normal")}>
                     object, {Object.keys(data).length} keys
                 </span>
@@ -229,6 +248,7 @@ class ObjectEntry extends React.Component {
                                 on_add={this.props.on_add}
                                 on_edit={this.props.on_edit}
                                 on_delete={this.props.on_delete}
+                                on_rename={this.props.on_rename}
                                 />
                         )
                     }
@@ -325,15 +345,16 @@ class ArrayEntry extends React.Component {
                                     key={index} 
                                     not_collapsed_levels={this.props.not_collapsed_levels-1}
                                     json_path={this.props.json_path.concat([index])}
+
                                     on_add={this.props.on_add}
                                     on_edit={this.props.on_edit}
                                     on_delete={this.props.on_delete}
+                                    on_rename={this.props.on_rename}
                                     /> 
                         )
                     }
 
                     { 
-                        /* all children primitive means show ghost directly TODO */
                         extendable ? 
                             <AddEntry
                                 on_click={() => this.props.on_add(this.props.json_path, next_index)}
@@ -364,7 +385,7 @@ class ColorPickerEntry extends React.Component {
                 <div className="entry-content">
                     <ColorPicker /* I think this modifies rgba in props.data directly */
                         rgba={this.props.data} 
-                        onBlur={() => this.props.on_edit(this.props.json_path)}/>
+                        onBlur={(event) => this.props.on_edit(this.props.json_path, event)}/>
                 </div>
             </div>
         )
@@ -400,7 +421,10 @@ const StringEntry = ({
         <div className="entry-heading inline">
             {name}
         </div>
-        <div className="entry-content inline value editable-area" contentEditable="true">
+        <div 
+            className="entry-content inline value editable-area" 
+            contentEditable="true"
+            onBlur={(event) => on_edit(json_path, () => event.target.textContent, (new_value) => event.target.textContent = new_value)}>
             {data}
         </div>
     </div>
@@ -468,16 +492,20 @@ const NumberEntry = ({
         <div className="entry-heading inline">
             {name}
         </div>
-        <div className="entry-content inline value editable-area" contentEditable="true">
+        <div 
+            className="entry-content inline value editable-area"
+            contentEditable="true"
+            onBlur={(event) => on_edit(json_path, () => Number(event.target.textContent), (new_value) => event.target.textContent = new_value)}>
             {data}
         </div>
     </div>
 );
 
 const AddEntry = ({
-    on_click
+    on_click, no_border
 }) => (
-    <div className="entry-container">
+    <div className="entry-container"
+        style={no_border? {border:'none', marginLeft:0, paddingLeft:0}: {}}>
         <div 
             className="item-button item-add" 
             title="Add Entry"
@@ -516,8 +544,18 @@ class JSONEditor extends React.Component {
                         on_add={this.props.on_add}
                         on_edit={this.props.on_edit}
                         on_delete={this.props.on_delete}
+                        on_rename={this.props.on_rename}
                         />
                 )
+            }
+            {
+                all_children_deletable(this.props.meta) ? 
+                    <AddEntry
+                        on_click={() => this.props.on_add(this.props.json_path, null)}
+                        no_border={true}
+                        />
+                    :
+                    null
             }
             </div>
         )
