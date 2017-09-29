@@ -45950,7 +45950,15 @@
 	                            });
 	                        }, function (old_name, new_name) {
 	                            return old_name === active ? setActive(new_name) : null;
-	                        }) },
+	                        }),
+	                        onKeyDown: function onKeyDown(e) {
+	                            if (e.which == 13) {
+	                                // Enter key pressed
+	                                e.preventDefault();
+	                                e.target.blur();
+	                            }
+	                        }
+	                    },
 	                    choice
 	                )
 	            );
@@ -46268,6 +46276,15 @@
 	                                    return event.target.textContent = new_value;
 	                                });
 	                            } : null,
+
+	                            onKeyDown: function onKeyDown(e) {
+	                                if (e.which == 13) {
+	                                    // Enter key pressed
+	                                    e.preventDefault();
+	                                    e.target.blur();
+	                                }
+	                            },
+
 	                            title: 'Rename this property'
 	                        },
 	                        name
@@ -46491,7 +46508,15 @@
 	                    }, function (new_value) {
 	                        return event.target.textContent = new_value;
 	                    });
-	                } },
+	                },
+	                onKeyDown: function onKeyDown(e) {
+	                    if (e.which == 13) {
+	                        // Enter key pressed
+	                        e.preventDefault();
+	                        e.target.blur();
+	                    }
+	                }
+	            },
 	            data
 	        )
 	    );
@@ -46562,7 +46587,15 @@
 	                    }, function (new_value) {
 	                        return event.target.textContent = new_value;
 	                    });
-	                } },
+	                },
+	                onKeyDown: function onKeyDown(e) {
+	                    if (e.which == 13) {
+	                        // Enter key pressed
+	                        e.preventDefault();
+	                        e.target.blur();
+	                    }
+	                }
+	            },
 	            data
 	        )
 	    );

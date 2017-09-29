@@ -225,6 +225,17 @@ class ObjectEntry extends React.Component {
                     onBlur={this.props.meta._deletable ? 
                                 (event) => this.props.on_rename(this.props.json_path, () => event.target.textContent, (new_value) => event.target.textContent = new_value)
                                 : null }
+
+                    onKeyDown={
+                        (e) => {
+                            if (e.which == 13) {
+                            // Enter key pressed
+                            e.preventDefault();
+                            e.target.blur();
+                            }
+                        }   
+                    }
+
                     title="Rename this property"
                     >
                     {name}
@@ -428,7 +439,24 @@ const StringEntry = ({
         <div 
             className="entry-content inline value editable-area" 
             contentEditable="true"
-            onBlur={(event) => on_edit(json_path, () => event.target.textContent, (new_value) => event.target.textContent = new_value)}>
+            onBlur={
+                (event) => 
+                    on_edit(
+                        json_path,
+                        () => event.target.textContent, 
+                        (new_value) => event.target.textContent = new_value
+                    )
+            }
+            onKeyDown={
+                (e) => {
+                    if (e.which == 13) {
+                        // Enter key pressed
+                        e.preventDefault();
+                        e.target.blur();
+                    }
+                }   
+            }
+            >
             {data}
         </div>
     </div>
@@ -499,7 +527,17 @@ const NumberEntry = ({
         <div 
             className="entry-content inline value editable-area"
             contentEditable="true"
-            onBlur={(event) => on_edit(json_path, () => Number(event.target.textContent), (new_value) => event.target.textContent = new_value)}>
+            onBlur={(event) => on_edit(json_path, () => Number(event.target.textContent), (new_value) => event.target.textContent = new_value)}
+            onKeyDown={
+                (e) => {
+                    if (e.which == 13) {
+                        // Enter key pressed
+                        e.preventDefault();
+                        e.target.blur();
+                    }
+                }   
+            }
+            >
             {data}
         </div>
     </div>

@@ -28,7 +28,7 @@
 }
 
 .admin-sidebar {
-    /*should auto fill remaing height not used by statusbar */
+    overflow-y: scroll;
 }
 
 .admin-sidebar 
