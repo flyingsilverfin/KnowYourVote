@@ -136,6 +136,9 @@ class AdminPage extends React.Component {
             ptr = ptr[elem];
         }
 
+        // record for sending to server
+        let modified = {};
+
         // key is null if new_structure is an object ie. we are not extending an array
         if (key === null) {
             assert(type_of(new_structure) === 'object', "New Structure being added is not object (array) and key is null, ??");
@@ -157,11 +160,29 @@ class AdminPage extends React.Component {
                 default_name_split[default_name_split.length-1] = start_new_prop_name_index + "";
                 let new_prop_name = default_name_split.join("_");
                 ptr[new_prop_name] = new_structure[default_name];
+
+                // record to send to server
+                modified[new_prop_name] = new_structure[default_name];
             }
         } else {
             assert(type_of(new_structure) === 'array', "new structure being added is not an array and key is not null, ??")
             ptr[key] = new_structure[0];
+
+            //record to send to server
+            modified[key] = new_structure[0];
         }
+
+        
+
+        httpPost('/auth/staged/add', {
+            json_path: json_path,
+            value: modified
+        }, () => {
+            this.setState({
+                status: "Saved",
+                modified: true
+            })
+        })
 
         this.regenerate_meta();
     }
@@ -169,12 +190,6 @@ class AdminPage extends React.Component {
 
 
     onEdit(json_path, get_value_fn, set_value_fn) {
-
-        // TODO this may not be a primitive - take a color picker for example, it's compound
-
-        
-        
-
 
         // retrieve correct place to update JSON
         let ptr = this.state.data;
@@ -193,8 +208,6 @@ class AdminPage extends React.Component {
             console.error(err);
             //TODO some sort of error handling to notify user
             
-        debugger
-
             // hack to set the editabletext back
             if (set_value_fn) {
                 set_value_fn(old_value);
@@ -206,7 +219,6 @@ class AdminPage extends React.Component {
             return;
         }
 
-        debugger
 
         let valid = this.validate_edit(json_path, new_value);
 
@@ -226,14 +238,13 @@ class AdminPage extends React.Component {
             
             ptr[json_path[json_path.length-1]] = new_value;
 
-            // TODO post change
 
-            // httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
-            //     this.setState({
-            //         status: "Saved",
-            //         modified: true
-            //     })
-            // });
+            httpPost('/auth/staged/edit', {json_path: json_path, value: new_value}, () => {
+                this.setState({
+                    status: "Saved",
+                    modified: true
+                })
+            });
         }
         
     }
@@ -258,12 +269,18 @@ class AdminPage extends React.Component {
         }
         this.regenerate_meta();
 
-        // TODO post change
+        httpPost('/auth/staged/delete', {json_path: json_path}, () => {
+            this.setState({
+                status: "Saved",
+                modified: true
+            })
+        });
     }
 
     // rename only possible for Object props
-    onRename(json_path, get_value_fn, set_value_fn, new_name_in_sidebar) {
+    onRename(json_path, get_value_fn, set_value_fn, set_new_name_in_sidebar) {
         
+        debugger
 
         let ptr = this.state.data;
         for (let elem of json_path.slice(0,json_path.length-1)) {
@@ -310,14 +327,18 @@ class AdminPage extends React.Component {
             delete ptr[old_name];
             ptr[new_name] = value;
 
-            if (new_name_in_sidebar) {
-                new_name_in_sidebar(value);
+            if (set_new_name_in_sidebar) {
+                set_new_name_in_sidebar(value);
             }
             
             this.regenerate_meta();
 
-            // TODO post change
-
+            httpPost('/auth/staged/rename', {json_path: json_path, new_name:new_name}, () => {
+                this.setState({
+                    status: "Saved",
+                    modified: true
+                })
+            });
         }
 
     }

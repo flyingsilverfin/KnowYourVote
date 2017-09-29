@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const stripJsonComments = require('strip-json-comments');
 const fs = require('fs');
 
+
 const app = express();
 
 // log requests
@@ -17,6 +18,8 @@ app.use(express.static('./server/static/'));
 app.use(express.static('./client/dist/'));
 // tell the app to parse HTTP body messages
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json()); // support json encoded bodies
+
 
 
 

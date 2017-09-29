@@ -45225,7 +45225,7 @@
 
 	var _Editor2 = _interopRequireDefault(_Editor);
 
-	var _SchemaChecker = __webpack_require__(720);
+	var _SchemaChecker = __webpack_require__(718);
 
 	var _helper = __webpack_require__(482);
 
@@ -45376,6 +45376,7 @@
 	    }, {
 	        key: 'onAdd',
 	        value: function onAdd(json_path, key) {
+	            var _this5 = this;
 
 	            this.setState({
 	                status: "Saving"
@@ -45394,7 +45395,7 @@
 	                    ptr = ptr[elem];
 	                }
 
-	                // key is null if new_structure is an object ie. we are not extending an array
+	                // record for sending to server
 	            } catch (err) {
 	                _didIteratorError = true;
 	                _iteratorError = err;
@@ -45410,6 +45411,9 @@
 	                }
 	            }
 
+	            var modified = {};
+
+	            // key is null if new_structure is an object ie. we are not extending an array
 	            if (key === null) {
 	                (0, _helper.assert)((0, _helper.type_of)(new_structure) === 'object', "New Structure being added is not object (array) and key is null, ??");
 
@@ -45429,20 +45433,34 @@
 	                    default_name_split[default_name_split.length - 1] = start_new_prop_name_index + "";
 	                    var new_prop_name = default_name_split.join("_");
 	                    ptr[new_prop_name] = new_structure[default_name];
+
+	                    // record to send to server
+	                    modified[new_prop_name] = new_structure[default_name];
 	                }
 	            } else {
 	                (0, _helper.assert)((0, _helper.type_of)(new_structure) === 'array', "new structure being added is not an array and key is not null, ??");
 	                ptr[key] = new_structure[0];
+
+	                //record to send to server
+	                modified[key] = new_structure[0];
 	            }
+
+	            (0, _helper.httpPost)('/auth/staged/add', {
+	                json_path: json_path,
+	                value: modified
+	            }, function () {
+	                _this5.setState({
+	                    status: "Saved",
+	                    modified: true
+	                });
+	            });
 
 	            this.regenerate_meta();
 	        }
 	    }, {
 	        key: 'onEdit',
 	        value: function onEdit(json_path, get_value_fn, set_value_fn) {
-
-	            // TODO this may not be a primitive - take a color picker for example, it's compound
-
+	            var _this6 = this;
 
 	            // retrieve correct place to update JSON
 	            var ptr = this.state.data;
@@ -45483,8 +45501,6 @@
 	                console.error(err);
 	                //TODO some sort of error handling to notify user
 
-	                debugger;
-
 	                // hack to set the editabletext back
 	                if (set_value_fn) {
 	                    set_value_fn(old_value);
@@ -45495,8 +45511,6 @@
 	            if (new_value === old_value) {
 	                return;
 	            }
-
-	            debugger;
 
 	            var valid = this.validate_edit(json_path, new_value);
 
@@ -45515,19 +45529,18 @@
 
 	                ptr[json_path[json_path.length - 1]] = new_value;
 
-	                // TODO post change
-
-	                // httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
-	                //     this.setState({
-	                //         status: "Saved",
-	                //         modified: true
-	                //     })
-	                // });
+	                (0, _helper.httpPost)('/auth/staged/edit', { json_path: json_path, value: new_value }, function () {
+	                    _this6.setState({
+	                        status: "Saved",
+	                        modified: true
+	                    });
+	                });
 	            }
 	        }
 	    }, {
 	        key: 'onDelete',
 	        value: function onDelete(json_path) {
+	            var _this7 = this;
 
 	            this.setState({
 	                status: "Saving"
@@ -45569,14 +45582,22 @@
 	            }
 	            this.regenerate_meta();
 
-	            // TODO post change
+	            (0, _helper.httpPost)('/auth/staged/delete', { json_path: json_path }, function () {
+	                _this7.setState({
+	                    status: "Saved",
+	                    modified: true
+	                });
+	            });
 	        }
 
 	        // rename only possible for Object props
 
 	    }, {
 	        key: 'onRename',
-	        value: function onRename(json_path, get_value_fn, set_value_fn, new_name_in_sidebar) {
+	        value: function onRename(json_path, get_value_fn, set_value_fn, set_new_name_in_sidebar) {
+	            var _this8 = this;
+
+	            debugger;
 
 	            var ptr = this.state.data;
 	            var _iteratorNormalCompletion4 = true;
@@ -45641,13 +45662,18 @@
 	                delete ptr[old_name];
 	                ptr[new_name] = value;
 
-	                if (new_name_in_sidebar) {
-	                    new_name_in_sidebar(value);
+	                if (set_new_name_in_sidebar) {
+	                    set_new_name_in_sidebar(value);
 	                }
 
 	                this.regenerate_meta();
 
-	                // TODO post change
+	                (0, _helper.httpPost)('/auth/staged/rename', { json_path: json_path, new_name: new_name }, function () {
+	                    _this8.setState({
+	                        status: "Saved",
+	                        modified: true
+	                    });
+	                });
 	            }
 	        }
 	    }, {
@@ -45942,15 +45968,15 @@
 	                        onClick: function onClick(event) {
 	                            return deletable ? event.stopPropagation() : null;
 	                        },
-	                        onBlur: (function (event) {
-	                            return on_rename(choice_path, function () {
+	                        onBlur: function onBlur(event) {
+	                            console.log('why is this needed?');on_rename(choice_path, function () {
 	                                return event.target.textContent;
 	                            }, function (new_value) {
 	                                return event.target.textContent = new_value;
-	                            });
-	                        }, function (old_name, new_name) {
-	                            return old_name === active ? setActive(new_name) : null;
-	                        }),
+	                            }), function (old_name, new_name) {
+	                                return old_name === active ? setActive(new_name) : null;
+	                            };
+	                        },
 	                        onKeyDown: function onKeyDown(e) {
 	                            if (e.which == 13) {
 	                                // Enter key pressed
@@ -60189,14 +60215,7 @@
 	exports.default = (0, _common.ColorWrap)(Twitter);
 
 /***/ }),
-/* 718 */,
-/* 719 */
-/***/ (function(module, exports) {
-
-	module.exports = {"parties":{"Liberal-National Coalition":{"background-color":[0,85,165,1]},"Green":{"background-color":[0,190,0,1]},"Labor":{"background-color":[229,54,65,1]}},"topics":{"environment":{"displayName":"environment","image":"images/env.png","questions":{"left":"I think that we are doing enough or too much to protect our environment","right":"I think that we need to do more to protect our environment"},"statusquo":["Australia is currently are committed to reducing our carbon emissions by 28% by 2030","The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions","90% of the Great Barrier Reef has suffered from bleaching","It is currently legal to test products on animals","Australia is currently the 5th biggest carbon emitter per capita in the world"],"data":{"current":5,"options":{"Liberal-National Coalition":{"subtopics":{"Climate Change":{"value":4.8,"facts":["Reduce emissions by 28% by 2030","Emissions Reduction Fund to incentivise clean business","No carbon tax"]},"Great Barrier Reef":{"value":3.5,"facts":["Ban on dredging, $2B on reef protection","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":4.5,"facts":["23% reliance on renewable energy by 2020","$1B to target innovation projects into renewable energy transition"]},"Forests":{"value":3.4,"facts":["20 million trees to be planted by 2020"]},"Animal Welfare":{"value":4,"facts":["$190 million to protect endangered species"]}}},"Green":{"subtopics":{"Climate Change":{"value":9,"facts":["90% clean energy by 2030","Supports a carbon tax","Opposes Emissions Reduction Fund - pays companies not to pollute"]},"Great Barrier Reef":{"value":9.5,"facts":["$2.18B for reef protection","Ban future coal projects","Increase water quality pollution control to $2B","New national environmental watchdog","Further shipping restrictions"]},"Renewable Energy":{"value":9.6,"facts":["90% clean energy by 2030","Ban on future coal projects","Transition away from coal and gas with $1B clean energy transition fund"]},"Forests":{"value":8.5,"facts":["Stop logging of all high conservation forests"]},"Animal Welfare":{"value":9.6,"facts":["Ban animal testing, live exports, greyhound racing, selective breeding","Reestablish a biodiversity fund","$130M threatened species plan"]}}},"Labor":{"subtopics":{"Climate Change":{"value":6,"facts":["Net zero pollution by 2050 through an Emissions Trading Scheme","Opposes Emissions Reduction Fund - increases emissions and wastes money","No carbon tax"]},"Great Barrier Reef":{"value":4.5,"facts":["$500M invested in science and research, environmental investment and reef management","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":6,"facts":["50% renewables by 2030","Support transition to clean energy industry with a fund of $300M"]},"Forests":{"value":5.1,"facts":["Expand world heritage listed areas"]},"Animal Welfare":{"value":5.2,"facts":["Ban animal testing","Introduce an independent office of animal welfare"]}}}}}}}}
-
-/***/ }),
-/* 720 */
+/* 718 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60675,6 +60694,12 @@
 
 	    return SchemaChecker;
 	}();
+
+/***/ }),
+/* 719 */
+/***/ (function(module, exports) {
+
+	module.exports = {"parties":{"Liberal-National Coalition":{"background-color":[0,85,165,1]},"Green":{"background-color":[0,190,0,1]},"Labor":{"background-color":[229,54,65,1]}},"topics":{"environment":{"displayName":"environment","image":"images/env.png","questions":{"left":"I think that we are doing enough or too much to protect our environment","right":"I think that we need to do more to protect our environment"},"statusquo":["Australia is currently are committed to reducing our carbon emissions by 28% by 2030","The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions","90% of the Great Barrier Reef has suffered from bleaching","It is currently legal to test products on animals","Australia is currently the 5th biggest carbon emitter per capita in the world"],"data":{"current":5,"options":{"Liberal-National Coalition":{"subtopics":{"Climate Change":{"value":4.8,"facts":["Reduce emissions by 28% by 2030","Emissions Reduction Fund to incentivise clean business","No carbon tax"]},"Great Barrier Reef":{"value":3.5,"facts":["Ban on dredging, $2B on reef protection","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":4.5,"facts":["23% reliance on renewable energy by 2020","$1B to target innovation projects into renewable energy transition"]},"Forests":{"value":3.4,"facts":["20 million trees to be planted by 2020"]},"Animal Welfare":{"value":4,"facts":["$190 million to protect endangered species"]}}},"Green":{"subtopics":{"Climate Change":{"value":9,"facts":["90% clean energy by 2030","Supports a carbon tax","Opposes Emissions Reduction Fund - pays companies not to pollute"]},"Great Barrier Reef":{"value":9.5,"facts":["$2.18B for reef protection","Ban future coal projects","Increase water quality pollution control to $2B","New national environmental watchdog","Further shipping restrictions"]},"Renewable Energy":{"value":9.6,"facts":["90% clean energy by 2030","Ban on future coal projects","Transition away from coal and gas with $1B clean energy transition fund"]},"Forests":{"value":8.5,"facts":["Stop logging of all high conservation forests"]},"Animal Welfare":{"value":9.6,"facts":["Ban animal testing, live exports, greyhound racing, selective breeding","Reestablish a biodiversity fund","$130M threatened species plan"]}}},"Labor":{"subtopics":{"Climate Change":{"value":6,"facts":["Net zero pollution by 2050 through an Emissions Trading Scheme","Opposes Emissions Reduction Fund - increases emissions and wastes money","No carbon tax"]},"Great Barrier Reef":{"value":4.5,"facts":["$500M invested in science and research, environmental investment and reef management","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":6,"facts":["50% renewables by 2030","Support transition to clean energy industry with a fund of $300M"]},"Forests":{"value":5.1,"facts":["Expand world heritage listed areas"]},"Animal Welfare":{"value":5.2,"facts":["Ban animal testing","Introduce an independent office of animal welfare"]}}}}}}}}
 
 /***/ })
 /******/ ]);

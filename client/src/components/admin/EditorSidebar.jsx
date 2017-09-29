@@ -60,16 +60,16 @@ const EditorSidebar = ({
                         contentEditable={deletable ? true : false}
                         onClick={(event) => deletable ? event.stopPropagation() : null}
                         onBlur={
-                            (event) => on_rename(choice_path, 
+                            (event) => {console.log('why is this needed?');on_rename(choice_path, 
                                 () => event.target.textContent, 
                                 (new_value) => event.target.textContent = new_value),
-                                (old_name, new_name) => old_name === active ? setActive(new_name) : null}
+                                (old_name, new_name) => old_name === active ? setActive(new_name) : null}}
                         onKeyDown={
                             (e) => {
                                 if (e.which == 13) {
-                                // Enter key pressed
-                                e.preventDefault();
-                                e.target.blur();
+                                    // Enter key pressed
+                                    e.preventDefault();
+                                    e.target.blur();
                                 }
                             }   
                         }
