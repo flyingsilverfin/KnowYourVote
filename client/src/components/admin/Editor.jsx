@@ -30,8 +30,6 @@ class Editor extends React.Component {
             return <div> Loading </div>;
         }
 
-        debugger
-
         let choices = ['parties'];
         choices = choices.concat(Object.keys(this.props.raw_json.topics));
         let choices_meta = this.props.json_meta['parties'];
@@ -39,12 +37,15 @@ class Editor extends React.Component {
 
         let active_json = null;
         let active_meta = null;
+        let active_path = null;
         if (this.state.active === 'parties') {
             active_json = this.props.raw_json['parties'];
             active_meta = this.props.json_meta['parties'];
+            active_path = ['parties'];
         } else {
             active_json = this.props.raw_json.topics[this.state.active];
             active_meta = this.props.json_meta.topics[this.state.active];
+            active_path = ['topics', this.state.active];
         }
 
         
@@ -69,7 +70,17 @@ class Editor extends React.Component {
                 </div>
 
                 <div className="admin-main-content"> 
-                    <JSONEditor json={active_json} meta={active_meta} />
+                    <JSONEditor 
+                        json={active_json}
+                        meta={active_meta} 
+                        json_path={active_path} 
+                        get_dummy_structure={this.props.get_dummy_structure}
+
+                        on_add={this.props.on_add}
+                        on_edit={this.props.on_edit}
+                        on_delete={this.props.on_delete}
+                        on_rename={this.props.on_rename}
+                        />
                 </div>
             </div>
         );

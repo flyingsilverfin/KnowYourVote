@@ -45040,6 +45040,9 @@
 	exports.strContains = strContains;
 	exports.isArray = isArray;
 	exports.type_of = type_of;
+	exports.is_primitive = is_primitive;
+	exports.is_primitive_type = is_primitive_type;
+	exports.is_simple_builtin_type = is_simple_builtin_type;
 	exports.assert = assert;
 	var smooth_scroll_to = exports.smooth_scroll_to = function smooth_scroll_to(element, target, duration) {
 	    target = Math.round(target);
@@ -45174,6 +45177,19 @@
 	    return typeof data === "undefined" ? "undefined" : _typeof(data);
 	}
 
+	function is_primitive(value) {
+	    var type = type_of(value);
+	    return is_primitive_type(type);
+	}
+
+	function is_primitive_type(type) {
+	    return type === 'number' || type === 'string' || type === 'boolean';
+	}
+
+	function is_simple_builtin_type(type) {
+	    return type === 'object' || type === 'array' || type === 'number' || type === 'string' || type === 'boolean';
+	}
+
 	// https://stackoverflow.com/questions/15313418/what-is-assert-in-javascript
 	function assert(condition, message) {
 	    if (!condition) {
@@ -45209,9 +45225,7 @@
 
 	var _Editor2 = _interopRequireDefault(_Editor);
 
-	var _TypeChecker = __webpack_require__(718);
-
-	var _TypeChecker2 = _interopRequireDefault(_TypeChecker);
+	var _SchemaChecker = __webpack_require__(720);
 
 	var _helper = __webpack_require__(482);
 
@@ -45324,7 +45338,7 @@
 	        key: 'schemaLoaded',
 	        value: function schemaLoaded(raw) {
 	            var schema = JSON.parse(raw);
-	            this.typeChecker = new _TypeChecker2.default(schema);
+	            this.schemaChecker = new _SchemaChecker.SchemaChecker(schema);
 
 	            if (this.state.data != null) {
 	                this.setState({
@@ -45343,7 +45357,7 @@
 	        key: 'checkDataWithSchema',
 	        value: function checkDataWithSchema() {
 	            try {
-	                this.typeChecker.check(this.state.data);
+	                this.schemaChecker.check(this.state.data);
 	                console.log("data.json passed schema check");
 	            } catch (err) {
 	                console.error("data.json failed schema check.");
@@ -45351,28 +45365,138 @@
 	                throw err; // maybe skip this?
 	            }
 
-	            var meta = this.typeChecker.generateMetaJson(this.state.data);
-	            // console.log(JSON.stringify(meta, null, 3));
+	            this.regenerate_meta();
+	        }
+	    }, {
+	        key: 'regenerate_meta',
+	        value: function regenerate_meta() {
+	            var meta = this.schemaChecker.generateMetaJson(this.state.data);
 	            this.setState({ meta: meta });
 	        }
 	    }, {
+	        key: 'onAdd',
+	        value: function onAdd(json_path, key) {
+	            var new_structure = this.schemaChecker.get_required_data_structure(json_path);
+	            var ptr = this.state.data;
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = json_path[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var elem = _step.value;
+
+	                    ptr = ptr[elem];
+	                }
+
+	                // key is null if new_structure is an object ie. we are not extending an array
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            if (key === null) {
+	                (0, _helper.assert)((0, _helper.type_of)(new_structure) === 'object', "New Structure being added is not object (array) and key is null, ??");
+
+	                var start_new_prop_name_index = 0;
+	                for (var existing_key in ptr) {
+	                    if (existing_key.startsWith(_SchemaChecker.DEFAULT_NEW_OBJECT_PROP_PREFIX)) {
+	                        var tmp = existing_key.split('_');
+	                        if (start_new_prop_name_index < Number(tmp[tmp.length - 1])) {
+	                            start_new_prop_name_index = Number(tmp[tmp.length - 1]);
+	                        }
+	                    }
+	                }
+	                start_new_prop_name_index++;
+
+	                for (var default_name in new_structure) {
+	                    var default_name_split = default_name.split("_");
+	                    default_name_split[default_name_split.length - 1] = start_new_prop_name_index + "";
+	                    var new_prop_name = default_name_split.join("_");
+	                    ptr[new_prop_name] = new_structure[default_name];
+	                }
+	            } else {
+	                (0, _helper.assert)((0, _helper.type_of)(new_structure) === 'array', "new structure being added is not an array and key is not null, ??");
+	                ptr[key] = new_structure[0];
+	            }
+
+	            this.regenerate_meta();
+	        }
+	    }, {
+	        key: 'onEdit',
+	        value: function onEdit(json_path, event) {}
+	    }, {
+	        key: 'onDelete',
+	        value: function onDelete(json_path) {
+	            var ptr = this.state.data;
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
+
+	            try {
+	                for (var _iterator2 = json_path.slice(0, json_path.length - 1)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var elem = _step2.value;
+
+	                    ptr = ptr[elem];
+	                }
+	            } catch (err) {
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
+	                    }
+	                }
+	            }
+
+	            if ((0, _helper.isArray)(ptr)) {
+	                // cut out array and reindex array, saves much pain elsewhere in exchange for inefficiency
+	                ptr.splice(json_path[json_path.length - 1], 1);
+	            } else {
+	                // deleting works fine in objects
+	                delete ptr[json_path[json_path.length - 1]];
+	            }
+	            this.regenerate_meta();
+	        }
+	    }, {
+	        key: 'onRename',
+	        value: function onRename(json_path, event) {}
+	    }, {
 	        key: 'onEdit',
 	        value: function onEdit(JSONPath, newValue) {
-	            var _this5 = this;
-
+	            /*
 	            this.setState({
 	                status: "Saving"
-	            });
-	            (0, _helper.httpPost)('/admin/edit', { path: JSONPath, value: newValue }, function () {
-	                _this5.setState({
+	            })
+	            httpPost('/admin/edit', {path: JSONPath, value: newValue}, () => {
+	                this.setState({
 	                    status: "Saved",
 	                    modified: true
-	                });
+	                })
 	            });
+	            */
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            if (!this.schemaChecker) {
+	                return null;
+	            }
 
 	            return _react2.default.createElement(
 	                'div',
@@ -45389,7 +45513,12 @@
 	                    modified: this.state.modified,
 	                    onRevert: this.revertData.bind(this),
 	                    onPublish: this.publishData.bind(this),
-	                    onEdit: this.onEdit.bind(this)
+
+	                    on_add: this.onAdd.bind(this),
+	                    on_edit: this.onEdit.bind(this),
+	                    on_delete: this.onDelete.bind(this),
+	                    on_rename: this.onRename.bind(this)
+
 	                }) : ""
 	            );
 	        }
@@ -45473,8 +45602,6 @@
 	                );
 	            }
 
-	            debugger;
-
 	            var choices = ['parties'];
 	            choices = choices.concat(Object.keys(this.props.raw_json.topics));
 	            var choices_meta = this.props.json_meta['parties'];
@@ -45482,12 +45609,15 @@
 
 	            var active_json = null;
 	            var active_meta = null;
+	            var active_path = null;
 	            if (this.state.active === 'parties') {
 	                active_json = this.props.raw_json['parties'];
 	                active_meta = this.props.json_meta['parties'];
+	                active_path = ['parties'];
 	            } else {
 	                active_json = this.props.raw_json.topics[this.state.active];
 	                active_meta = this.props.json_meta.topics[this.state.active];
+	                active_path = ['topics', this.state.active];
 	            }
 
 	            return _react2.default.createElement(
@@ -45519,7 +45649,17 @@
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'admin-main-content' },
-	                    _react2.default.createElement(_JSONEditor2.default, { json: active_json, meta: active_meta })
+	                    _react2.default.createElement(_JSONEditor2.default, {
+	                        json: active_json,
+	                        meta: active_meta,
+	                        json_path: active_path,
+	                        get_dummy_structure: this.props.get_dummy_structure,
+
+	                        on_add: this.props.on_add,
+	                        on_edit: this.props.on_edit,
+	                        on_delete: this.props.on_delete,
+	                        on_rename: this.props.on_rename
+	                    })
 	                )
 	            );
 	        }
@@ -45652,49 +45792,132 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	// used to determine which places to put an "add" button
+	// only allow growing objects/arrays following the schema 
+	// and not inserting arbitrary properties that way!
+	// NB this might not be desireable: requires developer to be ahead of data person
+	function all_children_deletable(json_meta) {
+	    for (var key in json_meta) {
+	        if (key === '_deletable') {
+	            // this refers to the deletability of the parent
+	            // so skip it
+	            continue;
+	        }
+	        if ((0, _helper.is_primitive)(json_meta[key])) {
+	            if (!json_meta[key]) {
+	                // ie. a false boolean and not object/array
+	                return false;
+	            }
+	        } else {
+	            if (!json_meta[key]['_deletable']) {
+	                return false;
+	            }
+	        }
+	    }
+	    return true;
+	}
+
+	// used for deciding whether to show next line/entry as a dummy/ghost
+	// or a "+" which expands after
+	function all_children_primitive(json_meta) {
+	    for (var key in json_meta) {
+	        if (key === '_deletable') {
+	            // this refers to the deletability of the parent, skip
+	            continue;
+	        }
+	        if (!(0, _helper.is_primitive)(json_meta[key])) {
+	            return false;
+	        }
+	    }
+	    return true;
+	}
+
+	// for existing JSON data these are all filled out
+	// for 'future' Entries that might be entered
+	// we only pass in name (for arrays) which may or may not be used
+	// data is null, meta is REQUIRED
 	var Entry = function Entry(_ref) {
 	    var name = _ref.name,
 	        data = _ref.data,
 	        meta = _ref.meta,
 	        no_border = _ref.no_border,
-	        emptyType = _ref.emptyType;
+	        not_collapsed_levels = _ref.not_collapsed_levels,
+	        json_path = _ref.json_path,
+	        on_add = _ref.on_add,
+	        on_edit = _ref.on_edit,
+	        on_delete = _ref.on_delete;
 
-
-	    debugger;
-
-	    if (emptyType === 'any') {
-	        return _react2.default.createElement(
-	            'div',
-	            null,
-	            '  '
-	        );
-	    }
 
 	    if ((0, _helper.isArray)(data)) {
 	        // special case for colors
 	        if ((0, _helper.strContains)(name, "color")) {
-	            return _react2.default.createElement(ColorPickerEntry, { name: name, data: data, meta: meta, no_border: no_border });
+	            return _react2.default.createElement(ColorPickerEntry, {
+	                name: name,
+	                data: data,
+	                meta: meta,
+	                no_border: no_border,
+	                json_path: json_path,
+
+	                on_add: on_add,
+	                on_edit: on_edit,
+	                on_delete: on_delete
+	            });
 	        } else {
-	            return _react2.default.createElement(ArrayEntry, { name: name, data: data, meta: meta, no_border: no_border });
+	            return _react2.default.createElement(ArrayEntry, {
+	                name: name,
+	                data: data,
+	                meta: meta,
+	                no_border: no_border,
+	                not_collapsed_levels: not_collapsed_levels,
+	                json_path: json_path,
+
+	                on_add: on_add,
+	                on_edit: on_edit,
+	                on_delete: on_delete
+	            });
 	        }
 	    } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
-	        return _react2.default.createElement(ObjectEntry, { name: name, data: data, meta: meta, no_border: no_border });
-	    } else {
-	        if (typeof data === "string" || emptyType === 'string') {
+	        return _react2.default.createElement(ObjectEntry, {
+	            name: name,
+	            data: data,
+	            meta: meta,
+	            no_border: no_border,
+	            not_collapsed_levels: not_collapsed_levels,
+	            json_path: json_path,
 
-	            // in this case, data is empty so need to avoid using that
-	            if (emptyType === 'string') {
-	                return _react2.default.createElement(StringEntry, { name: name, data: data, deletable: meta, no_border: no_border, empty: true });
-	            }
+	            on_add: on_add,
+	            on_edit: on_edit,
+	            on_delete: on_delete
+	        });
+	    } else {
+	        if (typeof data === "string") {
 
 	            // check special case for images
 	            var split = data.split('.');
 	            var suffix = split[split.length - 1].toLowerCase();
 	            var image_types = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'bmp'];
 	            if (image_types.indexOf(suffix) != -1) {
-	                return _react2.default.createElement(ImageEntry, { name: name, src: data, deletable: meta, no_border: no_border });
+	                return _react2.default.createElement(ImageEntry, {
+	                    name: name,
+	                    src: data,
+	                    deletable: meta,
+	                    no_border: no_border,
+	                    json_path: json_path,
+
+	                    on_edit: on_edit,
+	                    on_delete: on_delete
+	                });
 	            } else {
-	                return _react2.default.createElement(StringEntry, { name: name, data: data, deletable: meta, no_border: no_border });
+	                return _react2.default.createElement(StringEntry, {
+	                    name: name,
+	                    data: data,
+	                    deletable: meta,
+	                    no_border: no_border,
+	                    json_path: json_path,
+
+	                    on_edit: on_edit,
+	                    on_delete: on_delete
+	                });
 	            }
 	        } else if (typeof data === "number") {
 	            return _react2.default.createElement(NumberEntry, {
@@ -45702,7 +45925,10 @@
 	                data: data,
 	                deletable: meta,
 	                no_border: no_border,
-	                empty: emptyType === 'number' ? true : false
+	                json_path: json_path,
+
+	                on_edit: on_edit,
+	                on_delete: on_delete
 	            });
 	        } else {
 	            //<GenericEntry name={name} data={data} />
@@ -45718,8 +45944,10 @@
 
 	        var _this = _possibleConstructorReturn(this, (ObjectEntry.__proto__ || Object.getPrototypeOf(ObjectEntry)).call(this, props));
 
+	        var visible = _this.props.not_collapsed_levels > 0 ? true : false;
+
 	        _this.state = {
-	            visible: true // toggle collapse
+	            visible: visible // toggle collapse
 	        };
 	        return _this;
 	    }
@@ -45731,6 +45959,20 @@
 
 	            var name = this.props.name;
 	            var data = this.props.data;
+	            debugger;
+
+	            // whether or not to render functionality to add another child
+	            var extendable = all_children_deletable(this.props.meta);
+	            // let dummy_structure;
+	            // let dummy_meta;
+	            // if (extendable) {
+	            //     let data_structure = this.props.get_dummy_structure(this.props.json_path);
+	            //     //dummy_structure = dummy_data.json;
+	            //     //dummy_meta = dummy_data.meta;
+	            //     assert(typeof dummy_structure === 'object', "ArrayEntry dummy data generated is not in an array!");
+	            //     debugger
+	            // }
+
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'entry-container',
@@ -45740,7 +45982,10 @@
 	                    { className: 'entry-heading' },
 	                    this.props.meta._deletable ? _react2.default.createElement('div', {
 	                        className: 'item-button item-delete',
-	                        title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
+	                        title: 'delete',
+	                        onClick: function onClick() {
+	                            return _this2.props.on_delete(_this2.props.json_path);
+	                        } }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	                    _react2.default.createElement(
 	                        'div',
 	                        {
@@ -45769,8 +46014,23 @@
 	                    'div',
 	                    { className: 'entry-content' },
 	                    Object.keys(data).map(function (n, index) {
-	                        return _react2.default.createElement(Entry, { name: n, data: data[n], meta: _this2.props.meta[n], key: index });
-	                    })
+	                        return _react2.default.createElement(Entry, {
+	                            name: n,
+	                            data: data[n],
+	                            meta: _this2.props.meta[n],
+	                            key: index,
+	                            not_collapsed_levels: _this2.props.not_collapsed_levels - 1,
+	                            json_path: _this2.props.json_path.concat([n]),
+	                            on_add: _this2.props.on_add,
+	                            on_edit: _this2.props.on_edit,
+	                            on_delete: _this2.props.on_delete
+	                        });
+	                    }),
+	                    extendable ? _react2.default.createElement(AddEntry, {
+	                        on_click: function on_click() {
+	                            return _this2.props.on_add(_this2.props.json_path, null);
+	                        }
+	                    }) : null
 	                ) : ""
 	            );
 	        }
@@ -45787,8 +46047,10 @@
 
 	        var _this3 = _possibleConstructorReturn(this, (ArrayEntry.__proto__ || Object.getPrototypeOf(ArrayEntry)).call(this, props));
 
+	        var visible = _this3.props.not_collapsed_levels > 0 ? true : false;
+
 	        _this3.state = {
-	            visible: true // toggle collapse
+	            visible: visible // toggle collapse
 	        };
 	        return _this3;
 	    }
@@ -45798,9 +46060,22 @@
 	        value: function render() {
 	            var _this4 = this;
 
-	            debugger;
 	            var name = this.props.name;
 	            var data = this.props.data;
+
+	            // whether or not to render functionality to add another child
+	            var extendable = all_children_deletable(this.props.meta);
+	            // let dummy_structure;
+	            // let dummy_meta;
+	            var next_index = void 0;
+	            if (extendable) {
+	                //     let dummy_data = this.props.get_dummy_structure(this.props.json_path);
+	                //     dummy_structure = dummy_data.json;
+	                //     dummy_meta = dummy_data.meta;
+	                //     assert(isArray(dummy_structure), "ArrayEntry dummy data generated is not in an array!");
+	                next_index = data.length;
+	            }
+
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'entry-container',
@@ -45810,7 +46085,10 @@
 	                    { className: 'entry-heading' },
 	                    this.props.meta._deletable ? _react2.default.createElement('div', {
 	                        className: 'item-button item-delete',
-	                        title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
+	                        title: 'delete',
+	                        onClick: function onClick() {
+	                            return _this4.props.on_delete(_this4.props.json_path);
+	                        } }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	                    _react2.default.createElement(
 	                        'div',
 	                        {
@@ -45839,9 +46117,25 @@
 	                    'div',
 	                    { className: 'entry-content' },
 	                    data.map(function (value, index) {
-	                        debugger;
-	                        return _react2.default.createElement(Entry, { name: index + ".", data: value, meta: _this4.props.meta[index], key: index });
-	                    })
+	                        return _react2.default.createElement(Entry, {
+	                            name: index + ".",
+	                            data: value,
+	                            meta: _this4.props.meta[index],
+	                            key: index,
+	                            not_collapsed_levels: _this4.props.not_collapsed_levels - 1,
+	                            json_path: _this4.props.json_path.concat([index]),
+	                            on_add: _this4.props.on_add,
+	                            on_edit: _this4.props.on_edit,
+	                            on_delete: _this4.props.on_delete
+	                        });
+	                    }),
+
+	                    /* all children primitive means show ghost directly TODO */
+	                    extendable ? _react2.default.createElement(AddEntry, {
+	                        on_click: function on_click() {
+	                            return _this4.props.on_add(_this4.props.json_path, next_index);
+	                        }
+	                    }) : null
 	                ) : ""
 	            );
 	        }
@@ -45862,6 +46156,8 @@
 	    _createClass(ColorPickerEntry, [{
 	        key: 'render',
 	        value: function render() {
+	            var _this6 = this;
+
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'entry-container',
@@ -45874,7 +46170,11 @@
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'entry-content' },
-	                    _react2.default.createElement(_ColorPicker2.default, { rgba: this.props.data })
+	                    _react2.default.createElement(_ColorPicker2.default /* I think this modifies rgba in props.data directly */
+	                    , { rgba: this.props.data,
+	                        onBlur: function onBlur() {
+	                            return _this6.props.on_edit(_this6.props.json_path);
+	                        } })
 	                )
 	            );
 	        }
@@ -45888,12 +46188,19 @@
 	        data = _ref2.data,
 	        deletable = _ref2.deletable,
 	        no_border = _ref2.no_border,
-	        empty = _ref2.empty;
+	        json_path = _ref2.json_path,
+	        on_edit = _ref2.on_edit,
+	        on_delete = _ref2.on_delete;
 	    return _react2.default.createElement(
 	        'div',
-	        { className: 'entry-container entry-container-empty',
+	        { className: 'entry-container',
 	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
-	        deletable ? _react2.default.createElement('div', { className: 'item-button item-delete', title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
+	        deletable ? _react2.default.createElement('div', {
+	            className: 'item-button item-delete',
+	            title: 'delete',
+	            onClick: function onClick() {
+	                return on_delete(json_path);
+	            } }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45911,12 +46218,20 @@
 	    var name = _ref3.name,
 	        src = _ref3.src,
 	        deletable = _ref3.deletable,
-	        no_border = _ref3.no_border;
+	        no_border = _ref3.no_border,
+	        json_path = _ref3.json_path,
+	        on_edit = _ref3.on_edit,
+	        on_delete = _ref3.on_delete;
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'entry-container',
 	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
-	        deletable ? _react2.default.createElement('div', { className: 'item-button item-delete', title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
+	        deletable ? _react2.default.createElement('div', {
+	            className: 'item-button item-delete',
+	            title: 'delete',
+	            onClick: function onClick() {
+	                return on_delete(json_path);
+	            } }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45934,12 +46249,20 @@
 	    var name = _ref4.name,
 	        data = _ref4.data,
 	        deletable = _ref4.deletable,
-	        no_border = _ref4.no_border;
+	        no_border = _ref4.no_border,
+	        json_path = _ref4.json_path,
+	        on_edit = _ref4.on_edit,
+	        on_delete = _ref4.on_delete;
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'entry-container',
 	            style: no_border ? { border: 'none', marginLeft: 0, paddingLeft: 0 } : {} },
-	        deletable ? _react2.default.createElement('div', { className: 'item-button item-delete', title: 'delete' }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
+	        deletable ? _react2.default.createElement('div', {
+	            className: 'item-button item-delete',
+	            title: 'delete',
+	            onClick: function onClick() {
+	                return on_delete(json_path);
+	            } }) : _react2.default.createElement('div', { className: 'item-button item-required', title: 'Required item' }),
 	        _react2.default.createElement(
 	            'div',
 	            { className: 'entry-heading inline' },
@@ -45953,24 +46276,36 @@
 	    );
 	};
 
+	var AddEntry = function AddEntry(_ref5) {
+	    var on_click = _ref5.on_click;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'entry-container' },
+	        _react2.default.createElement('div', {
+	            className: 'item-button item-add',
+	            title: 'Add Entry',
+	            onClick: on_click })
+	    );
+	};
+
 	var JSONEditor = function (_React$Component4) {
 	    _inherits(JSONEditor, _React$Component4);
 
 	    function JSONEditor(props) {
 	        _classCallCheck(this, JSONEditor);
 
-	        var _this6 = _possibleConstructorReturn(this, (JSONEditor.__proto__ || Object.getPrototypeOf(JSONEditor)).call(this, props));
+	        var _this7 = _possibleConstructorReturn(this, (JSONEditor.__proto__ || Object.getPrototypeOf(JSONEditor)).call(this, props));
 
-	        _this6.state = {
+	        _this7.state = {
 	            active: true // toggle collapse
 	        };
-	        return _this6;
+	        return _this7;
 	    }
 
 	    _createClass(JSONEditor, [{
 	        key: 'render',
 	        value: function render() {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            if (this.props.meta === null || this.props.json === null) {
 	                return _react2.default.createElement(
@@ -45984,7 +46319,19 @@
 	                'div',
 	                null,
 	                Object.keys(this.props.json).map(function (name, index) {
-	                    return _react2.default.createElement(Entry, { name: name, data: _this7.props.json[name], meta: _this7.props.meta[name], key: index, no_border: true });
+	                    return _react2.default.createElement(Entry, {
+	                        name: name,
+	                        data: _this8.props.json[name],
+	                        meta: _this8.props.meta[name],
+	                        key: index,
+	                        no_border: true,
+	                        not_collapsed_levels: 3,
+	                        json_path: _this8.props.json_path.concat([name]),
+
+	                        on_add: _this8.props.on_add,
+	                        on_edit: _this8.props.on_edit,
+	                        on_delete: _this8.props.on_delete
+	                    });
 	                })
 	            );
 	        }
@@ -59502,7 +59849,14 @@
 	exports.default = (0, _common.ColorWrap)(Twitter);
 
 /***/ }),
-/* 718 */
+/* 718 */,
+/* 719 */
+/***/ (function(module, exports) {
+
+	module.exports = {"parties":{"Liberal-National Coalition":{"background-color":[0,85,165,1]},"Green":{"background-color":[0,190,0,1]},"Labor":{"background-color":[229,54,65,1]}},"topics":{"environment":{"displayName":"environment","image":"images/env.png","questions":{"left":"I think that we are doing enough or too much to protect our environment","right":"I think that we need to do more to protect our environment"},"statusquo":["Australia is currently are committed to reducing our carbon emissions by 28% by 2030","The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions","90% of the Great Barrier Reef has suffered from bleaching","It is currently legal to test products on animals","Australia is currently the 5th biggest carbon emitter per capita in the world"],"data":{"current":5,"options":{"Liberal-National Coalition":{"subtopics":{"Climate Change":{"value":4.8,"facts":["Reduce emissions by 28% by 2030","Emissions Reduction Fund to incentivise clean business","No carbon tax"]},"Great Barrier Reef":{"value":3.5,"facts":["Ban on dredging, $2B on reef protection","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":4.5,"facts":["23% reliance on renewable energy by 2020","$1B to target innovation projects into renewable energy transition"]},"Forests":{"value":3.4,"facts":["20 million trees to be planted by 2020"]},"Animal Welfare":{"value":4,"facts":["$190 million to protect endangered species"]}}},"Green":{"subtopics":{"Climate Change":{"value":9,"facts":["90% clean energy by 2030","Supports a carbon tax","Opposes Emissions Reduction Fund - pays companies not to pollute"]},"Great Barrier Reef":{"value":9.5,"facts":["$2.18B for reef protection","Ban future coal projects","Increase water quality pollution control to $2B","New national environmental watchdog","Further shipping restrictions"]},"Renewable Energy":{"value":9.6,"facts":["90% clean energy by 2030","Ban on future coal projects","Transition away from coal and gas with $1B clean energy transition fund"]},"Forests":{"value":8.5,"facts":["Stop logging of all high conservation forests"]},"Animal Welfare":{"value":9.6,"facts":["Ban animal testing, live exports, greyhound racing, selective breeding","Reestablish a biodiversity fund","$130M threatened species plan"]}}},"Labor":{"subtopics":{"Climate Change":{"value":6,"facts":["Net zero pollution by 2050 through an Emissions Trading Scheme","Opposes Emissions Reduction Fund - increases emissions and wastes money","No carbon tax"]},"Great Barrier Reef":{"value":4.5,"facts":["$500M invested in science and research, environmental investment and reef management","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":6,"facts":["50% renewables by 2030","Support transition to clean energy industry with a fund of $300M"]},"Forests":{"value":5.1,"facts":["Expand world heritage listed areas"]},"Animal Welfare":{"value":5.2,"facts":["Ban animal testing","Introduce an independent office of animal welfare"]}}}}}}}}
+
+/***/ }),
+/* 720 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -59510,6 +59864,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.SchemaChecker = exports.DEFAULT_NEW_OBJECT_PROP_PREFIX = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -59517,43 +59872,35 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var TypeChecker = function () {
-	    function TypeChecker(schema) {
-	        _classCallCheck(this, TypeChecker);
+	var DEFAULT_NEW_OBJECT_PROP_PREFIX = exports.DEFAULT_NEW_OBJECT_PROP_PREFIX = "Name me";
+
+	var SchemaChecker = exports.SchemaChecker = function () {
+	    function SchemaChecker(schema) {
+	        _classCallCheck(this, SchemaChecker);
 
 	        this.schema = schema;
 	    }
 
-	    _createClass(TypeChecker, [{
-	        key: '_is_primitive',
-	        value: function _is_primitive(value) {
-	            var type = (0, _helper.type_of)(value);
-	            return this._is_primitive_type(type);
-	        }
-	    }, {
-	        key: '_is_primitive_type',
-	        value: function _is_primitive_type(type) {
-	            return type === 'number' || type === 'string' || type === 'boolean';
-	        }
-	    }, {
-	        key: '_is_simple_builtin_type',
-	        value: function _is_simple_builtin_type(type) {
-	            return type === 'object' || type === 'array' || type === 'number' || type === 'string' || type === 'boolean';
-	        }
-	    }, {
-	        key: '_user_type_exists',
-	        value: function _user_type_exists(type) {
-	            return this.schema.types[type] !== undefined;
+	    _createClass(SchemaChecker, [{
+	        key: 'check',
+	        value: function check(json) {
+	            var toplevel = this.schema.toplevel;
+	            // anything defined in the JSON must conform to the schema
+	            for (var key in json) {
+	                if (toplevel[key] !== undefined) {
+	                    this._check(json[key], toplevel[key], this.schema.types);
+	                }
+	            }
 	        }
 	    }, {
 	        key: '_check',
 	        value: function _check(json, required_type) {
 
-	            console.log("checking: " + JSON.stringify(json) + ", required_type: " + JSON.stringify(required_type));
+	            //console.log("checking: " + JSON.stringify(json) + ", required_type: " + JSON.stringify(required_type));
 
 	            var t = required_type['type'];
 
-	            if (this._is_simple_builtin_type(t)) {
+	            if ((0, _helper.is_simple_builtin_type)(t)) {
 
 	                // require type to conform if it's one of object, array, string, number
 	                if ((0, _helper.type_of)(json) !== t) {
@@ -59584,7 +59931,7 @@
 
 	                            // check type of json[key] to match a simple builtin type
 	                            // the schema actually shouldn't define 'object' or 'array' types here
-	                            if (this._is_simple_builtin_type(required_subtype)) {
+	                            if ((0, _helper.is_simple_builtin_type)(required_subtype)) {
 	                                if ((0, _helper.type_of)(value) !== required_subtype) {
 	                                    throw Error("Required subtype does not match actual");
 	                                }
@@ -59656,16 +60003,46 @@
 	                this._check(json, this.schema.types[t]);
 	            }
 	        }
+
+	        /* TODO this would be better if it stripped out all original data
+	         and only returned the bare structure with _deletable tags and booleans */
+
+	        // takes a JSON conforming to the schema
+	        // then generates a skeleton of the same keys/values etc
+	        // but all primitives are replaced with booleans for deletable/not deletable
+	        // and objects/arrays gain an additional property _deletable
+	        // making full use of JS arrays being objects!
+
 	    }, {
-	        key: 'check',
-	        value: function check(json) {
+	        key: 'generateMetaJson',
+	        value: function generateMetaJson(json_original) {
 	            var toplevel = this.schema.toplevel;
-	            // anything defined in the JSON must conform to the schema
+	            // clone JSON
+	            var json = JSON.parse(JSON.stringify(json_original));
+
 	            for (var key in json) {
-	                if (toplevel[key] !== undefined) {
-	                    this._check(json[key], toplevel[key], this.schema.types);
+	                // key not in schema is definitely not required!
+	                // can be deleted
+	                if (toplevel[key] === undefined) {
+	                    if ((0, _helper.is_primitive_type)(toplevel[key].type)) {
+	                        json[key] = true;
+	                    } else {
+	                        json[key]['_deletable'] = true;
+	                        this._mark_all_children_deletable(json[key]);
+	                    }
+	                } else {
+	                    // in schema
+	                    if ((0, _helper.is_primitive_type)(toplevel[key].type)) {
+	                        // rare, unlikely case
+	                        // assume toplevel keys that are defined in schema are required...
+	                        json[key] = false;
+	                    } else {
+	                        json[key]['_deletable'] = false; // toplevels never deleteable
+	                        this._generateMeta(json[key], toplevel[key]);
+	                    }
 	                }
 	            }
+	            return json;
 	        }
 
 	        // generate metadata for object/array subtypes
@@ -59675,7 +60052,7 @@
 	        key: '_generateMeta',
 	        value: function _generateMeta(json, schema_type) {
 
-	            console.log("Generating meta for: " + JSON.stringify(json) + ", " + JSON.stringify(schema_type));
+	            //console.log("Generating meta for: " + JSON.stringify(json) + ", " + JSON.stringify(schema_type));
 
 	            // values conforming to 'subtype' key in required_type
 	            // flexible size
@@ -59687,14 +60064,14 @@
 	                        // skip this special key
 	                        continue;
 	                    }
-	                    if (this._is_primitive(json[key])) {
+	                    if ((0, _helper.is_primitive)(json[key])) {
 	                        // primitive subtype
 	                        json[key] = true; // NOT required
 	                    } else {
 	                        // compound subtype
 	                        json[key]['_deletable'] = true; // NOT required
 
-	                        if (this._is_simple_builtin_type(schema_type['subtype'])) {
+	                        if ((0, _helper.is_simple_builtin_type)(schema_type['subtype'])) {
 	                            json[key] = false;
 	                        } else {
 	                            this._generateMeta(json[key], this.schema.types[schema_type['subtype']]);
@@ -59715,7 +60092,7 @@
 	                        }
 	                        if (required_props[_key2] === undefined) {
 	                            // these are all keys in the JSON not defined in the schema, therefore NOT required
-	                            if (this._is_primitive_type(toplevel[_key2].type)) {
+	                            if ((0, _helper.is_primitive_type)(toplevel[_key2].type)) {
 	                                json[_key2] = true;
 	                            } else {
 	                                json[_key2]['_deletable'] = true;
@@ -59731,7 +60108,7 @@
 	                            _key3 = Number(_key3);
 	                        }
 
-	                        if (this._is_primitive(json[_key3])) {
+	                        if ((0, _helper.is_primitive)(json[_key3])) {
 	                            json[_key3] = false; // REQUIRED!
 	                        } else {
 	                            json[_key3]['_deletable'] = false; // REQUIRED!
@@ -59741,47 +60118,9 @@
 	                    }
 	                } else {
 	                    // both 'props' and 'subtype' undefined implies it's just got 'type' and we need to recurse on this user type...
-	                    (0, _helper.assert)(!this._is_simple_builtin_type(schema_type['type']));
+	                    (0, _helper.assert)(!(0, _helper.is_simple_builtin_type)(schema_type['type']));
 	                    this._generateMeta(json, this.schema.types[schema_type['type']]);
 	                }
-	        }
-
-	        // takes a JSON conforming to the schema
-	        // then generates a skeleton of the same keys/values etc
-	        // but all primitives are replaced with booleans for deletable/not deletable
-	        // and objects/arrays gain an additional property _deletable
-	        // making full use of JS arrays being objects!
-
-	    }, {
-	        key: 'generateMetaJson',
-	        value: function generateMetaJson(json_original) {
-	            var toplevel = this.schema.toplevel;
-	            // clone JSON
-	            var json = JSON.parse(JSON.stringify(json_original));
-
-	            for (var key in json) {
-	                // key not in schema is definitely not required!
-	                // can be deleted
-	                if (toplevel[key] === undefined) {
-	                    if (this._is_primitive_type(toplevel[key].type)) {
-	                        json[key] = true;
-	                    } else {
-	                        json[key]['_deletable'] = true;
-	                        this._mark_all_children_deletable(json[key]);
-	                    }
-	                } else {
-	                    // in schema
-	                    if (this._is_primitive_type(toplevel[key].type)) {
-	                        // rare, unlikely case
-	                        // assume toplevel keys that are defined in schema are required...
-	                        json[key] = false;
-	                    } else {
-	                        json[key]['_deletable'] = false; // toplevels never deleteable
-	                        this._generateMeta(json[key], toplevel[key]);
-	                    }
-	                }
-	            }
-	            return json;
 	        }
 	    }, {
 	        key: '_mark_all_children_deletable',
@@ -59791,7 +60130,7 @@
 	                    // skip special keys
 	                    continue;
 	                }
-	                if (this._is_primitive(json[key])) {
+	                if ((0, _helper.is_primitive)(json[key])) {
 	                    json[key] = true;
 	                } else {
 	                    json[key]['_deletable'] = true;
@@ -59799,18 +60138,179 @@
 	                }
 	            }
 	        }
+
+	        /*
+	             Generate a skeleton of json data based on the schema
+	            given a JSON path
+	             NB for now, we only allow extending lists and arrays with 'subtype'
+	            this makes this process a lot easier right here
+	              returns json AND meta for rendering...
+	         */
+
+	    }, {
+	        key: 'get_required_data_structure',
+	        value: function get_required_data_structure(json_path) {
+
+	            var schema = this.schema.toplevel[json_path[0]];
+	            var i = 1;
+	            // traverse down the tree to the point we need
+	            // these are all going to be compond types so need to check for primitives
+	            while (i < json_path.length) {
+	                if (schema.props === undefined && schema.subtype !== undefined) {
+	                    // this must be a user-defined type for the schema to be well formed
+	                    schema = this.schema.types[schema.subtype];
+	                } else if (schema.props !== undefined) {
+	                    schema = schema.props[json_path[i]];
+	                } else {
+	                    if (this._user_type_exists(schema.type)) {
+	                        schema = this.schema.types[schema.type];
+	                        continue; //descend one level without incrementing
+	                    }
+	                }
+	                i++;
+	            }
+
+	            // schema now points to the place we want to retrieve a data structure from
+
+	            // let json = this._get_instance_of_schema(schema);
+	            // let meta = JSON.parse(JSON.stringify(json));
+	            // this._generateMeta(meta, schema);   // transforms the copy into metadata
+	            // return {json: json, meta: meta}
+
+	            return this._get_instance_of_schema(schema);
+
+	            // if (is_primitive_type(schema.subtype)) {
+	            //     return _get_instance_of_primitive_subtype(schema);
+	            // } else {
+	            //     return _get_instance_of_schema(this.schema.types[schema]);
+	            // }
+	        }
+	    }, {
+	        key: '_get_instance_of_primitive_type',
+	        value: function _get_instance_of_primitive_type(schema) {
+	            (0, _helper.assert)((0, _helper.is_primitive_type)(schema.type), "Schema type is not primitive");
+	            return this._get_instance_of_primitive(schema, schema.type);
+	        }
+	    }, {
+	        key: '_get_instance_of_primitive_subtype',
+	        value: function _get_instance_of_primitive_subtype(schema) {
+	            (0, _helper.assert)((0, _helper.is_primitive_type)(schema.subtype), "Schema subtype is not primitive");
+	            return this._get_instance_of_primitive(schema, schema.subtype);
+	        }
+	    }, {
+	        key: '_get_instance_of_primitive',
+	        value: function _get_instance_of_primitive(schema, type_to_use) {
+	            if (type_to_use === "string") {
+	                return "";
+	            } else if (type_to_use === "boolean") {
+	                return false;
+	            } else if (type_to_use === "number") {
+	                // define it on lower boundary if defined
+	                if (schema.min !== undefined) {
+	                    return schema.min;
+	                }
+	                // else on upper boundary if defined
+	                if (schema.max !== undefined) {
+	                    return schema.max;
+	                }
+	                // else 0
+	                return 0;
+	            } else {
+	                throw Error("What kind of primitive is not string, boolean or numebr??");
+	            }
+	        }
+
+	        // first time this is called it so for sure an object/array with non-primitive, user-defined subtype which gets passed in here
+
+	    }, {
+	        key: '_get_instance_of_schema',
+	        value: function _get_instance_of_schema(schema_type) {
+
+	            // primitive type aliased as user defined type (eg num_0_255)
+	            if ((0, _helper.is_primitive_type)(schema_type.type)) {
+	                return this._get_instance_of_primitive_type(schema_type);
+	            }
+
+	            // create correct type of structure
+	            var result = void 0;
+	            if (schema_type.type === 'array') {
+	                result = [];
+	                debugger;
+	            } else {
+	                result = {};
+	            }
+
+	            // recurse on user defined type immediately as it's definition is elsewhere
+	            if (this._user_type_exists(schema_type['type'])) {
+	                return this._get_instance_of_schema(this.schema.types[schema_type.type]);
+	            }
+
+	            // open size with prescribed subtypes
+	            if (schema_type['props'] === undefined && schema_type['subtype'] !== undefined) {
+
+	                // flexible size, create with minimum number of components else 0
+	                var required_size = 1; // TODO this really should check for min/max-size!
+
+	                var required_subtype = schema_type['subtype'];
+
+	                for (var i = 0; i < required_size; i++) {
+	                    var key = DEFAULT_NEW_OBJECT_PROP_PREFIX + "_" + (i + 1);
+	                    if (schema_type.type === 'array') {
+	                        // integer keys of arrays
+	                        key = i;
+	                    }
+
+	                    if ((0, _helper.is_primitive_type)(required_subtype)) {
+	                        result[key] = this._get_instance_of_primitive_subtype(schema_type);
+	                    } else {
+	                        (0, _helper.assert)(this._user_type_exists(required_subtype), "Malformed schema - object or array subtypes must be removed to new types!");
+
+	                        // required_subtype must be a user-defined type at this point
+	                        result[key] = this._get_instance_of_schema(this.schema.types[required_subtype]);
+	                    }
+	                }
+	            } else if (schema_type['props'] !== undefined) {
+	                var required_props = schema_type['props'];
+	                for (var _key4 in required_props) {
+	                    if (_key4 === '_deletable') {
+	                        continue; // skip special deletable key
+	                    }
+
+	                    var returned = this._get_instance_of_schema(required_props[_key4]);
+
+	                    // array indices are numbers not strings though json keys are strings
+	                    if (schema_type.type === 'array') {
+	                        _key4 = Number(_key4);
+	                    }
+
+	                    debugger;
+	                    result[_key4] = returned;
+	                }
+	            } else {
+	                // this shouldn't be happening as we assume we only generate from well formed schemas
+	                throw Error("Incorrect schema - need either 'props' or 'subtype' to be defined in schema for object types " + JSON.stringify(schema_type));
+	            }
+
+	            return result;
+	        }
+
+	        /*
+	            Validator code
+	             this should be merged with _check at some point // TODO
+	        */
+
+	    }, {
+	        key: 'validate',
+	        value: function validate(json, schema) {}
+	    }, {
+	        key: '_user_type_exists',
+	        value: function _user_type_exists(type) {
+	            return this.schema.types[type] !== undefined;
+	        }
 	    }]);
 
-	    return TypeChecker;
+	    return SchemaChecker;
 	}();
-
-	exports.default = TypeChecker;
-
-/***/ }),
-/* 719 */
-/***/ (function(module, exports) {
-
-	module.exports = {"parties":{"Liberal-National Coalition":{"background-color":[0,85,165,1]},"Green":{"background-color":[0,190,0,1]},"Labor":{"background-color":[229,54,65,1]}},"topics":{"environment":{"displayName":"environment","image":"images/env.png","questions":{"left":"I think that we are doing enough or too much to protect our environment","right":"I think that we need to do more to protect our environment"},"statusquo":["Australia is currently are committed to reducing our carbon emissions by 28% by 2030","The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions","90% of the Great Barrier Reef has suffered from bleaching","It is currently legal to test products on animals","Australia is currently the 5th biggest carbon emitter per capita in the world"],"data":{"current":5,"options":{"Liberal-National Coalition":{"subtopics":{"Climate Change":{"value":4.8,"facts":["Reduce emissions by 28% by 2030","Emissions Reduction Fund to incentivise clean business","No carbon tax"]},"Great Barrier Reef":{"value":3.5,"facts":["Ban on dredging, $2B on reef protection","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":4.5,"facts":["23% reliance on renewable energy by 2020","$1B to target innovation projects into renewable energy transition"]},"Forests":{"value":3.4,"facts":["20 million trees to be planted by 2020"]},"Animal Welfare":{"value":4,"facts":["$190 million to protect endangered species"]}}},"Green":{"subtopics":{"Climate Change":{"value":9,"facts":["90% clean energy by 2030","Supports a carbon tax","Opposes Emissions Reduction Fund - pays companies not to pollute"]},"Great Barrier Reef":{"value":9.5,"facts":["$2.18B for reef protection","Ban future coal projects","Increase water quality pollution control to $2B","New national environmental watchdog","Further shipping restrictions"]},"Renewable Energy":{"value":9.6,"facts":["90% clean energy by 2030","Ban on future coal projects","Transition away from coal and gas with $1B clean energy transition fund"]},"Forests":{"value":8.5,"facts":["Stop logging of all high conservation forests"]},"Animal Welfare":{"value":9.6,"facts":["Ban animal testing, live exports, greyhound racing, selective breeding","Reestablish a biodiversity fund","$130M threatened species plan"]}}},"Labor":{"subtopics":{"Climate Change":{"value":6,"facts":["Net zero pollution by 2050 through an Emissions Trading Scheme","Opposes Emissions Reduction Fund - increases emissions and wastes money","No carbon tax"]},"Great Barrier Reef":{"value":4.5,"facts":["$500M invested in science and research, environmental investment and reef management","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":6,"facts":["50% renewables by 2030","Support transition to clean energy industry with a fund of $300M"]},"Forests":{"value":5.1,"facts":["Expand world heritage listed areas"]},"Animal Welfare":{"value":5.2,"facts":["Ban animal testing","Introduce an independent office of animal welfare"]}}}}}}}}
 
 /***/ })
 /******/ ]);

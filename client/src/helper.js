@@ -128,6 +128,24 @@ export function type_of(data) {
     return typeof data;
 }
 
+export function is_primitive(value) {
+    let type = type_of(value);
+    return is_primitive_type(type);
+}
+
+export function is_primitive_type(type) {
+    return (type === 'number' || type === 'string' || type === 'boolean');      
+}
+
+export function is_simple_builtin_type(type) {
+    return (type === 'object'   || 
+            type === 'array'    || 
+            type === 'number'   ||
+            type === 'string'   ||
+            type === 'boolean');
+}
+
+
 // https://stackoverflow.com/questions/15313418/what-is-assert-in-javascript
 export function assert(condition, message) {
     if (!condition) {

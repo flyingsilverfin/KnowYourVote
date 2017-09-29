@@ -170,8 +170,6 @@
     height: 13px;
     padding: 0px;
 
-    border: 1px solid #E24141;
-    color: #E24141;
     text-align: center;
     -webkit-transition: all 0.2s linear;
     -moz-transition: all 0.2s linear;
@@ -189,29 +187,38 @@
 
 .minus-circle {
     line-height:0.9em;
+
+    border: 1px solid #E24141;
+    color: #E24141;
 }
 
 .plus-circle{
   line-height: 1.1em;
+  color: green;
+
 }
 
-.entry-container-empty {
-    
-}
 
 .item-button {
-    width: 15px;
-    height: 17px;
     padding: 0px;
     background-size: cover;
     display: inline-block;
     margin-right: 8px;
     margin-bottom: -3px;
+    cursor: pointer;
 }
 
 .item-delete {
     background-image: url('/images/Delete.png');
     cursor: pointer;
+    width: 15px;
+    height: 17px;
+}
+
+.item-add {
+    background-image: url('/images/plus_circle.png');
+    height: 20px;
+    width: 20px;
 }
 
 .item-required {
