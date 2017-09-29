@@ -340,7 +340,6 @@ export class SchemaChecker {
         let result;
         if (schema_type.type === 'array') {
             result = [];
-            debugger;
         } else {
             result = {};
         }
@@ -388,7 +387,6 @@ export class SchemaChecker {
                     key = Number(key);
                 }
 
-                debugger
                 result[key] = returned;
             }
         } else {
@@ -411,7 +409,6 @@ export class SchemaChecker {
                 return "Type mismatch, require " + schema_type;
             }
         } else {
-            assert(is_primitive_type(schema_type.type), "Schema type returned is not primitive type");
             try {
                 this._check(value, schema_type); //TODO test this works as expected 
             } catch (err) {

@@ -186,17 +186,19 @@ class AdminPage extends React.Component {
         let new_value;
         try {
             new_value = get_value_fn(); // attempts to retrieve correctly typed value eg a number
-            if (isNaN(new_value)) {
+            if (Number.isNaN(new_value)) { // special case for number entries failing
                 throw Error("Number required");
             }
         } catch (err) {
             console.error(err);
             //TODO some sort of error handling to notify user
             
+        debugger
 
             // hack to set the editabletext back
-            set_value_fn(old_value);
-
+            if (set_value_fn) {
+                set_value_fn(old_value);
+            }
         }        
 
         // skip if unchanged
@@ -204,6 +206,7 @@ class AdminPage extends React.Component {
             return;
         }
 
+        debugger
 
         let valid = this.validate_edit(json_path, new_value);
 
@@ -212,7 +215,9 @@ class AdminPage extends React.Component {
 
 
             // hack to set the editabletext back
-            set_value_fn(old_value);
+            if (set_value_fn) {
+                set_value_fn(old_value);
+            }
 
         } else {
             this.setState({
@@ -273,8 +278,9 @@ class AdminPage extends React.Component {
             console.error(err);
 
             // hack to set the editabletext back
-            set_value_fn(old_name);
-
+            if (set_value_fn) {
+                set_value_fn(old_name);
+            }
             return;
         }
 
@@ -290,7 +296,9 @@ class AdminPage extends React.Component {
             // TODO
             
             // hack to set the editabletext back
-            set_value_fn(old_name);
+            if (set_value_fn) {
+                set_value_fn(old_name);
+            }
             
 
         } else {

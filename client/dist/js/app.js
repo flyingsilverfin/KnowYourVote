@@ -45475,22 +45475,28 @@
 	            var new_value = void 0;
 	            try {
 	                new_value = get_value_fn(); // attempts to retrieve correctly typed value eg a number
-	                if (isNaN(new_value)) {
+	                if (Number.isNaN(new_value)) {
+	                    // special case for number entries failing
 	                    throw Error("Number required");
 	                }
 	            } catch (err) {
 	                console.error(err);
 	                //TODO some sort of error handling to notify user
 
+	                debugger;
 
 	                // hack to set the editabletext back
-	                set_value_fn(old_value);
+	                if (set_value_fn) {
+	                    set_value_fn(old_value);
+	                }
 	            }
 
 	            // skip if unchanged
 	            if (new_value === old_value) {
 	                return;
 	            }
+
+	            debugger;
 
 	            var valid = this.validate_edit(json_path, new_value);
 
@@ -45499,7 +45505,9 @@
 
 
 	                // hack to set the editabletext back
-	                set_value_fn(old_value);
+	                if (set_value_fn) {
+	                    set_value_fn(old_value);
+	                }
 	            } else {
 	                this.setState({
 	                    status: "Saving"
@@ -45604,8 +45612,9 @@
 	                console.error(err);
 
 	                // hack to set the editabletext back
-	                set_value_fn(old_name);
-
+	                if (set_value_fn) {
+	                    set_value_fn(old_name);
+	                }
 	                return;
 	            }
 
@@ -45620,7 +45629,9 @@
 	                // TODO
 
 	                // hack to set the editabletext back
-	                set_value_fn(old_name);
+	                if (set_value_fn) {
+	                    set_value_fn(old_name);
+	                }
 	            } else {
 	                this.setState({
 	                    status: "Saving"
@@ -45871,7 +45882,6 @@
 	        'div',
 	        null,
 	        choices_paths.map(function (choice_path, index) {
-	            debugger;
 	            var choice = choice_path[choice_path.length - 1]; // last element is name
 	            var deletable_root = meta;
 	            var _iteratorNormalCompletion = true;
@@ -46208,7 +46218,6 @@
 
 	            var name = this.props.name;
 	            var data = this.props.data;
-	            debugger;
 
 	            // whether or not to render functionality to add another child
 	            var extendable = all_children_deletable(this.props.meta);
@@ -46434,8 +46443,11 @@
 	                    { className: 'entry-content' },
 	                    _react2.default.createElement(_ColorPicker2.default /* I think this modifies rgba in props.data directly */
 	                    , { rgba: this.props.data,
-	                        onBlur: function onBlur(event) {
-	                            return _this6.props.on_edit(_this6.props.json_path, event);
+	                        onClose: function onClose(c) {
+	                            var color_arr = [c.r, c.g, c.b, c.a];
+	                            _this6.props.on_edit(_this6.props.json_path, function () {
+	                                return color_arr;
+	                            });
 	                        } })
 	                )
 	            );
@@ -46596,7 +46608,7 @@
 	                    ' Loading '
 	                );
 	            }
-
+	            debugger;
 	            return _react2.default.createElement(
 	                'div',
 	                null,
@@ -46695,11 +46707,17 @@
 	    key: 'handleClose',
 	    value: function handleClose() {
 	      this.setState({ displayColorPicker: false });
+	      this.props.onClose(this.state.color);
 	    }
 	  }, {
 	    key: 'handleChange',
 	    value: function handleChange(color) {
 	      this.setState({ color: color.rgb });
+	    }
+	  }, {
+	    key: 'handleChangeFinished',
+	    value: function handleChangeFinished(color, event) {
+	      this.props.onChangeComplete(color, event);
 	    }
 	  }, {
 	    key: 'render',
@@ -60507,7 +60525,6 @@
 	            var result = void 0;
 	            if (schema_type.type === 'array') {
 	                result = [];
-	                debugger;
 	            } else {
 	                result = {};
 	            }
@@ -60555,7 +60572,6 @@
 	                        _key4 = Number(_key4);
 	                    }
 
-	                    debugger;
 	                    result[_key4] = returned;
 	                }
 	            } else {
@@ -60580,7 +60596,6 @@
 	                    return "Type mismatch, require " + schema_type;
 	                }
 	            } else {
-	                (0, _helper.assert)((0, _helper.is_primitive_type)(schema_type.type), "Schema type returned is not primitive type");
 	                try {
 	                    this._check(value, schema_type); //TODO test this works as expected 
 	                } catch (err) {

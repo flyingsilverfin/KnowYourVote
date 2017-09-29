@@ -171,7 +171,6 @@ class ObjectEntry extends React.Component {
     render() {
         let name = this.props.name;
         let data = this.props.data;
-        debugger
 
 
         // whether or not to render functionality to add another child
@@ -385,7 +384,12 @@ class ColorPickerEntry extends React.Component {
                 <div className="entry-content">
                     <ColorPicker /* I think this modifies rgba in props.data directly */
                         rgba={this.props.data} 
-                        onBlur={(event) => this.props.on_edit(this.props.json_path, event)}/>
+                        onClose={(c) => {
+                            let color_arr = [c.r, c.g, c.b, c.a];
+                            this.props.on_edit(
+                                this.props.json_path, 
+                                () => color_arr)
+                        }}/>
                 </div>
             </div>
         )
@@ -527,7 +531,7 @@ class JSONEditor extends React.Component {
         if (this.props.meta === null || this.props.json === null) {
             return <div> Loading </div>
         }
-
+debugger
         return (
             <div> 
             {

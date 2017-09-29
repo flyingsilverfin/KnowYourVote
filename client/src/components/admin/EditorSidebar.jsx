@@ -15,7 +15,6 @@ const EditorSidebar = ({
 <div>
     {
         choices_paths.map(function(choice_path, index) {
-            debugger
             let choice = choice_path[choice_path.length-1]; // last element is name
             let deletable_root = meta;
             for (let key of choice_path) {

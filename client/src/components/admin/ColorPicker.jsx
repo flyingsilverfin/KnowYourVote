@@ -30,11 +30,16 @@ class ColorPicker extends React.Component {
 
   handleClose() {
     this.setState({ displayColorPicker: false })
+    this.props.onClose(this.state.color);
   };
 
   handleChange(color) {
     this.setState({ color: color.rgb })
   };
+
+  handleChangeFinished(color, event) {
+    this.props.onChangeComplete(color, event);
+  }
 
   render() {
 
@@ -75,7 +80,7 @@ class ColorPicker extends React.Component {
         </div>
         { this.state.displayColorPicker ? <div style={ styles.popover }>
           <div style={ styles.cover } onClick={ this.handleClose.bind(this) }/>
-          <SketchPicker color={ this.state.color } onChange={ this.handleChange.bind(this) } />
+          <SketchPicker color={ this.state.color } onChange={ this.handleChange.bind(this)} />
         </div> : null }
 
       </div>
