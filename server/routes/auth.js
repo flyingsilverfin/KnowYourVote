@@ -1,6 +1,10 @@
+const db_funcs = require('../db/db');
+const db_get_data = db_funcs.get_data;
+const db_save_data = db_funcs.save_data;
+
 const express = require('express');
 const validator = require('validator');
-const MongoClient = require('mongodb').MongoClient;
+
 
 const router = new express.Router();
 
@@ -107,47 +111,14 @@ router.post('/login', (req, res) => {
 
 
 
-
-
-
-
-// --- DB stuff ---
-
-var url = 'mongodb://localhost:5000/data';
-var db;
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, conn) {
-  console.log("Connected successfully to server");
-  db = conn;
-
-  let collection = db.collection('documents');
-  collection.find({}).toArray(function(err, docs) {
-    console.log(docs);
-    if (docs.length < 2) {
-      console.log("inserting basic docs");
-      collection.insertMany([
-        {
-          name: 'active',
-          data: {
-              "parties": {
-              },
-              "topics": {
-              }
-          }
-        },
-        {
-          name: 'staged',
-          data: {
-              "parties": {
-              },
-              "topics": {
-              }
-          }
-        }
-      ])
-    }
-  });
-});
+router.get('/staged/data', (req, res) => {
+  db_get_data('staged', (staged) =>
+    res.send({
+      status: 'success',
+      data: staged
+    })
+  )}
+);
 
 
 router.post('/staged/add', (req, res) => {
@@ -156,7 +127,7 @@ router.post('/staged/add', (req, res) => {
   let added = data.value;
 
 
-  get_staged_data((staged) => {
+  db_get_data('staged', (staged) => {
     
     let root = staged;
     for (let elem of json_path) {
@@ -168,7 +139,7 @@ router.post('/staged/add', (req, res) => {
     }
 
     // save it back to the DB
-    save_staged_data(staged, (result) => {
+    db_save_data('staged', staged, (result) => {
       console.log('sucess writing new values');
       res.send({'status': 'sucess'})
       res.status(400);
@@ -180,7 +151,7 @@ router.post('/staged/delete', (req,res) => {
   let data = req.body;
   let json_path = data.json_path;
 
-  get_staged_data((staged) => {
+  db_get_data('staged', (staged) => {
     let root = staged;
     for (let elem of json_path.slice(0,json_path.length-1)) {
       root = root[elem];
@@ -194,7 +165,7 @@ router.post('/staged/delete', (req,res) => {
     }
   
     // save it back to the DB
-    save_staged_data(staged, (result) => {
+    db_save_data('staged', staged, (result) => {
       console.log('sucess writing deletion to staged');
       console.log(result); 
       res.send({'status': 'sucess'})
@@ -210,7 +181,7 @@ router.post('/staged/edit', (req, res) => {
 
   console.log("received path and data");
 
-  get_staged_data((staged) => {
+  db_get_data('staged', (staged) => {
     let root = staged;
     for (let elem of json_path.slice(0,json_path.length-1)) {
       root = root[elem];
@@ -218,7 +189,7 @@ router.post('/staged/edit', (req, res) => {
     root[json_path[json_path.length-1]] = new_value;
 
     // save it back to the DB
-    save_staged_data(staged, (result) => {
+    db_save_data('staged', staged, (result) => {
       console.log('sucess writing edit to staged');
       console.log(result);
       res.send({'status': 'sucess'})
@@ -233,7 +204,7 @@ router.post('/staged/rename', (req, res) => {
   let new_name = data.new_name;
 
 
-  get_staged_data((staged) => {
+  db_get_data('staged', (staged) => {
     let ptr = staged;
     for (let elem of json_path.slice(0,json_path.length-1)) {
         ptr = ptr[elem];
@@ -244,7 +215,7 @@ router.post('/staged/rename', (req, res) => {
     ptr[new_name] = tmp;  // copy into new name
     
     // save it back to the DB
-    save_staged_data(staged, (result) => {
+    db_save_data('staged', staged, (result) => {
       console.log('sucess writing rename to staged');
       console.log(result);
       res.send({'status': 'sucess'})
@@ -253,25 +224,26 @@ router.post('/staged/rename', (req, res) => {
   });
 });
 
-// this would be more elegant with a promise, once I figure those out
-function get_staged_data(callback) {
-  db.collection('documents').findOne({name:'staged'}, (err, doc) =>
-    {
-      if (err) throw err;
-      console.log(doc);
-      callback(doc.data);
+router.post('/staged/publish', (req, res) => {
+  db_get_data('staged', (staged) => {
+    db_save_data('live', staged, (result) => {
+      console.log('sucess pushing staged to live');
+      res.send({'status': 'sucess'})
+      res.status(400);
+    });
   });
-}
+})
 
-function save_staged_data(data, callback) {
-
-  db.collection('documents').updateOne({name: 'staged'}, {name: 'staged', data: data}, (err, result) => {
-    if (err) throw err;
-    console.log(result);
-    callback(result);
+router.post('/staged/delete', (req, res) => {
+  db_get_data('live', (staged) => {
+    db_save_data('stage', staged, (result) => {
+      console.log('sucess overwriting staged with live');
+      res.send({'status': 'sucess'})
+      res.status(400);
+    });
   });
+})
 
-}
 
 module.exports = router;
 

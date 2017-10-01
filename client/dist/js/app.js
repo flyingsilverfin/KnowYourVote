@@ -35335,10 +35335,6 @@
 
 	var _AdminPage2 = _interopRequireDefault(_AdminPage);
 
-	var _data = __webpack_require__(719);
-
-	var _data2 = _interopRequireDefault(_data);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var routes = {
@@ -35346,8 +35342,7 @@
 	  component: _Base2.default,
 	  childRoutes: [{
 	    path: '/',
-	    component: _HomePage2.default,
-	    data: _data2.default
+	    component: _HomePage2.default
 	  }, {
 	    path: '/login',
 	    component: _LoginPage2.default
@@ -35356,8 +35351,7 @@
 	    component: _SignUpPage2.default
 	  }, {
 	    path: '/topic/*',
-	    component: _TopicPage2.default,
-	    data: _data2.default
+	    component: _TopicPage2.default
 	  }, {
 	    path: '/admin',
 	    component: _AdminPage2.default
@@ -35370,32 +35364,104 @@
 /* 397 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _helper = __webpack_require__(482);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Base = function Base(_ref) {
-	  var children = _ref.children;
-	  return _react2.default.createElement(
-	    "div",
-	    { className: "full-height" },
-	    children
-	  );
-	};
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	// const Base = ({ children }) => (
+	//   <div className="full-height">
+	//     {children}
+	//   </div>
+	// );
+
+
+	var Base = function (_React$Component) {
+	  _inherits(Base, _React$Component);
+
+	  function Base(props) {
+	    _classCallCheck(this, Base);
+
+	    var _this = _possibleConstructorReturn(this, (Base.__proto__ || Object.getPrototypeOf(Base)).call(this, props));
+
+	    _this.state = {
+	      data: null
+	    };
+	    return _this;
+	  }
+
+	  _createClass(Base, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      this.getData();
+	    }
+	  }, {
+	    key: 'getData',
+	    value: function getData() {
+	      var _this2 = this;
+
+	      (0, _helper.httpGet)('/public/live', function (response) {
+	        var json = JSON.parse(response);
+	        console.log(json);
+	        if (json.status !== 'success') {
+	          console.error('Error getting data');
+	          return;
+	        }
+	        console.log(json.data);
+	        _this2.setState({
+	          data: json.data
+	        });
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this3 = this;
+
+	      if (this.state.data === null) {
+	        return _react2.default.createElement(
+	          'div',
+	          { className: 'loading-screen' },
+	          ' Loading '
+	        );
+	      } else {
+	        return _react2.default.createElement(
+	          'div',
+	          { className: 'full-height' },
+	          _react2.default.Children.map(this.props.children, function (child) {
+	            return _react2.default.cloneElement(child, { data: _this3.state.data });
+	          })
+	        );
+	      }
+	    }
+	  }]);
+
+	  return Base;
+	}(_react2.default.Component);
+
+	exports.default = Base;
+
 
 	Base.propTypes = {
 	  children: _react.PropTypes.object.isRequired
 	};
-
-	exports.default = Base;
 
 /***/ }),
 /* 398 */
@@ -35438,7 +35504,7 @@
 	    function HomePage(props) {
 	        _classCallCheck(this, HomePage);
 
-	        // data is in this.props.route.data
+	        // data is in this.props.data
 
 	        var _this = _possibleConstructorReturn(this, (HomePage.__proto__ || Object.getPrototypeOf(HomePage)).call(this, props));
 
@@ -35491,7 +35557,7 @@
 	                        'div',
 	                        { className: 'topic-tiles-container' },
 	                        _react2.default.createElement(_TopicTiles2.default, {
-	                            topics: this.props.route.data.topics,
+	                            topics: this.props.data.topics,
 	                            activeTopic: this.state.activeTopic,
 	                            activateTopic: this.activateTopic.bind(this),
 	                            deactivateTopic: this.deactivateTopic.bind(this)
@@ -35559,7 +35625,7 @@
 	                    _react2.default.createElement(
 	                        'div',
 	                        { className: 'topic-tile-text' },
-	                        topics[topic].displayName[0].toUpperCase() + topics[topic].displayName.slice(1)
+	                        topics[topic].displayName.length > 1 ? topics[topic].displayName[0].toUpperCase() + topics[topic].displayName.slice(1) : topics[topic].displayName.toUpperCase()
 	                    )
 	                )
 	            );
@@ -43867,7 +43933,7 @@
 	        key: 'render',
 	        value: function render() {
 
-	            var data = this.props.route.data.topics[this.state.topic];
+	            var data = this.props.data.topics[this.state.topic];
 
 	            return _react2.default.createElement(
 	                'div',
@@ -43889,7 +43955,7 @@
 	                _react2.default.createElement(_Topic2.default, {
 	                    name: this.state.topic,
 	                    data: data.data,
-	                    partyStyles: this.props.route.data.partyStyles,
+	                    parties: this.props.data.parties,
 	                    statusquo: data.statusquo,
 	                    questions: data.questions,
 	                    direction: this.state.direction,
@@ -44032,7 +44098,7 @@
 	                        'Choose'
 	                    )
 	                ),
-	                _react2.default.createElement(_ChoicePane2.default, { leftQuestion: questions["question-left"], rightQuestion: questions["question-right"], onSelect: directionSelected }),
+	                _react2.default.createElement(_ChoicePane2.default, { leftQuestion: questions.left, rightQuestion: questions.right, onSelect: directionSelected }),
 	                _react2.default.createElement(
 	                    'div',
 	                    { style: headingStyle },
@@ -44426,15 +44492,55 @@
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	            var parties = Object.keys(this.props.options);
-	            var subtopics = Object.keys(this.props.options[parties[0]].subtopics);
 
-	            // we want to put Conservative, Labor, and Green at the front of the list for later
-	            var conservativesIndex = parties.indexOf('Liberal-National Coalition');
-	            this.swapElements(parties, conservativesIndex, 0);
-	            var laborIndex = parties.indexOf('Labor');
-	            this.swapElements(parties, laborIndex, 1);
-	            var greenIndex = parties.indexOf('Green');
-	            this.swapElements(parties, greenIndex, 2);
+	            // TODO this can be improved...
+	            var subtopics = void 0;
+	            if (Object.keys(this.props.options).length == 0) {
+	                subtopics = [];
+	            } else {
+	                subtopics = Object.keys(this.props.options[parties[0]].subtopics);
+	            }
+
+	            // this could be made a 'parties' property in the JSON
+	            // TODO
+	            // order in which parties should be rendered
+	            // for others use alphanumeric sorting
+	            var initial_order = ['Liberal-National Coalition', 'Labor', 'Green'];
+	            var parties_ordered = [];
+	            var parties_copy = parties.concat([]); // TODO proper way to do this?
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = initial_order[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var party = _step.value;
+
+	                    var index = parties_copy.indexOf(party);
+	                    if (parties_copy.indexOf(party) > 0) {
+	                        parties_ordered.push(party);
+	                        parties_copy.splice(index, 1); // cut it out
+	                    }
+	                }
+	                // parties_copy now only parties not in initial order
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            parties_copy.sort(); //TODO how sort
+
+	            parties = parties_ordered.concat(parties_copy);
 
 	            this.setState({
 	                parties: parties,
@@ -44447,6 +44553,8 @@
 	        value: function render() {
 	            var _this2 = this;
 
+	            debugger;
+
 	            // the 'key' property now relies on each party having the same number of subtopics or they might not be unique
 	            var options = this.state.parties.map(function (p, i) {
 	                return Object.keys(_this2.props.options[p].subtopics).map(function (subtopic, j) {
@@ -44454,12 +44562,12 @@
 	                        ref: p + "-" + subtopic,
 	                        name: subtopic,
 	                        facts: _this2.props.options[p].subtopics[subtopic].facts,
-	                        value: _this2.props.options[p].subtopics[subtopic].value,
+	                        value: _this2.props.options[p].subtopics[subtopic].current,
 	                        key: _this2.state.seed + i * _this2.state.subtopics.length + j,
 	                        onClick: function () {
 	                            this.optionSelected(p, subtopic);
 	                        }.bind(_this2),
-	                        active: _this2.props.direction === null ? null : _this2.props.direction === 'left' && _this2.props.options[p].subtopics[subtopic].value <= _this2.props.currentValue || _this2.props.direction === 'right' && _this2.props.options[p].subtopics[subtopic].value >= _this2.props.currentValue ? true : false,
+	                        active: _this2.props.direction === null ? null : _this2.props.direction === 'left' && _this2.props.options[p].subtopics[subtopic].current <= _this2.props.currentValue || _this2.props.direction === 'right' && _this2.props.options[p].subtopics[subtopic].current >= _this2.props.currentValue ? true : false,
 	                        parties: _this2.props.parties,
 	                        partyName: p,
 	                        topicName: subtopic,
@@ -44764,13 +44872,6 @@
 	            } else {
 	                return middle - height / 2;
 	            }
-	        }
-	    }, {
-	        key: 'swapElements',
-	        value: function swapElements(arr, i1, i2) {
-	            var tmp = arr[i1];
-	            arr[i1] = arr[i2];
-	            arr[i2] = tmp;
 	        }
 	    }]);
 
@@ -45258,7 +45359,7 @@
 	    _createClass(AdminPage, [{
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	            this.getData();
+	            this.getStaged();
 	            this.getSchema();
 	        }
 	    }, {
@@ -45271,15 +45372,20 @@
 	            }.bind(this), delay);
 	        }
 	    }, {
-	        key: 'getData',
-	        value: function getData() {
+	        key: 'getStaged',
+	        value: function getStaged() {
 	            var _this2 = this;
 
 	            this.setState({
 	                status: "Loading"
 	            });
-	            (0, _helper.httpGet)('/data_admin/data.json', function (raw) {
-	                return _this2.dataLoaded(raw);
+	            (0, _helper.httpGet)('/auth/staged/data', function (raw) {
+	                var json = JSON.parse(raw);
+	                if (json.status !== 'success') {
+	                    console.error('Error retrieving staged data');
+	                    return;
+	                }
+	                _this2.dataLoaded(json.data);
 	            });
 	        }
 	    }, {
@@ -45300,25 +45406,25 @@
 	            this.setState({
 	                status: "Reverting"
 	            });
-	            (0, _helper.httpPost)('/admin/revert', {}, this.getData.bind(this));
+	            (0, _helper.httpPost)('/auth/staged/delete', {}, this.getStaged.bind(this));
 	        }
 	    }, {
 	        key: 'publishData',
 	        value: function publishData() {
 	            var _this4 = this;
 
-	            (0, _helper.httpPost)('/admin/publish', {}, function () {
+	            (0, _helper.httpPost)('/auth/staged/publish', {}, function () {
 	                _this4.setState({
-	                    status: "Published. Ready",
+	                    status: "Published.",
 	                    modified: false
 	                });
+	                // TODO make this a shared timer
 	                _this4.delayedSetState(1500, "status", "Ready");
 	            });
 	        }
 	    }, {
 	        key: 'dataLoaded',
-	        value: function dataLoaded(raw) {
-	            var data = JSON.parse(raw);
+	        value: function dataLoaded(data) {
 	            if (this.state.schema != null) {
 	                this.setState({
 	                    data: data,
@@ -45597,8 +45703,6 @@
 	        value: function onRename(json_path, get_value_fn, set_value_fn, set_new_name_in_sidebar) {
 	            var _this8 = this;
 
-	            debugger;
-
 	            var ptr = this.state.data;
 	            var _iteratorNormalCompletion4 = true;
 	            var _didIteratorError4 = false;
@@ -45712,8 +45816,8 @@
 	                    json_meta: this.state.meta,
 	                    status: this.state.status,
 	                    modified: this.state.modified,
-	                    onRevert: this.revertData.bind(this),
-	                    onPublish: this.publishData.bind(this),
+	                    revertData: this.revertData.bind(this),
+	                    publishData: this.publishData.bind(this),
 
 	                    on_add: this.onAdd.bind(this),
 	                    on_edit: this.onEdit.bind(this),
@@ -45851,7 +45955,8 @@
 	                        _react2.default.createElement(_EditorStatusbar2.default, {
 	                            status: this.props.status,
 	                            modified: this.props.modified,
-	                            revertData: this.props.revertData
+	                            revertData: this.props.revertData,
+	                            publishData: this.props.publishData
 	                        })
 	                    )
 	                ),
@@ -60247,7 +60352,7 @@
 	            // anything defined in the JSON must conform to the schema
 	            for (var key in json) {
 	                if (toplevel[key] !== undefined) {
-	                    this._check(json[key], toplevel[key], this.schema.types);
+	                    this._check(json[key], toplevel[key]);
 	                }
 	            }
 	        }
@@ -60375,6 +60480,7 @@
 	    }, {
 	        key: 'generateMetaJson',
 	        value: function generateMetaJson(json_original) {
+	            debugger;
 	            var toplevel = this.schema.toplevel;
 	            // clone JSON
 	            var json = JSON.parse(JSON.stringify(json_original));
@@ -60694,12 +60800,6 @@
 
 	    return SchemaChecker;
 	}();
-
-/***/ }),
-/* 719 */
-/***/ (function(module, exports) {
-
-	module.exports = {"parties":{"Liberal-National Coalition":{"background-color":[0,85,165,1]},"Green":{"background-color":[0,190,0,1]},"Labor":{"background-color":[229,54,65,1]}},"topics":{"environment":{"displayName":"environment","image":"images/env.png","questions":{"left":"I think that we are doing enough or too much to protect our environment","right":"I think that we need to do more to protect our environment"},"statusquo":["Australia is currently are committed to reducing our carbon emissions by 28% by 2030","The Emissions Reduction Fund is in place to financially reward businesses and corporations that lower their carbon emissions","90% of the Great Barrier Reef has suffered from bleaching","It is currently legal to test products on animals","Australia is currently the 5th biggest carbon emitter per capita in the world"],"data":{"current":5,"options":{"Liberal-National Coalition":{"subtopics":{"Climate Change":{"value":4.8,"facts":["Reduce emissions by 28% by 2030","Emissions Reduction Fund to incentivise clean business","No carbon tax"]},"Great Barrier Reef":{"value":3.5,"facts":["Ban on dredging, $2B on reef protection","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":4.5,"facts":["23% reliance on renewable energy by 2020","$1B to target innovation projects into renewable energy transition"]},"Forests":{"value":3.4,"facts":["20 million trees to be planted by 2020"]},"Animal Welfare":{"value":4,"facts":["$190 million to protect endangered species"]}}},"Green":{"subtopics":{"Climate Change":{"value":9,"facts":["90% clean energy by 2030","Supports a carbon tax","Opposes Emissions Reduction Fund - pays companies not to pollute"]},"Great Barrier Reef":{"value":9.5,"facts":["$2.18B for reef protection","Ban future coal projects","Increase water quality pollution control to $2B","New national environmental watchdog","Further shipping restrictions"]},"Renewable Energy":{"value":9.6,"facts":["90% clean energy by 2030","Ban on future coal projects","Transition away from coal and gas with $1B clean energy transition fund"]},"Forests":{"value":8.5,"facts":["Stop logging of all high conservation forests"]},"Animal Welfare":{"value":9.6,"facts":["Ban animal testing, live exports, greyhound racing, selective breeding","Reestablish a biodiversity fund","$130M threatened species plan"]}}},"Labor":{"subtopics":{"Climate Change":{"value":6,"facts":["Net zero pollution by 2050 through an Emissions Trading Scheme","Opposes Emissions Reduction Fund - increases emissions and wastes money","No carbon tax"]},"Great Barrier Reef":{"value":4.5,"facts":["$500M invested in science and research, environmental investment and reef management","Supports construction of the Adani Carmichael mine"]},"Renewable Energy":{"value":6,"facts":["50% renewables by 2030","Support transition to clean energy industry with a fund of $300M"]},"Forests":{"value":5.1,"facts":["Expand world heritage listed areas"]},"Animal Welfare":{"value":5.2,"facts":["Ban animal testing","Introduce an independent office of animal welfare"]}}}}}}}}
 
 /***/ })
 /******/ ]);

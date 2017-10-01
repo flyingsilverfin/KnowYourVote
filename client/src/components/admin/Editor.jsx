@@ -70,6 +70,7 @@ class Editor extends React.Component {
                             status={this.props.status}
                             modified={this.props.modified}
                             revertData={this.props.revertData}
+                            publishData={this.props.publishData}
                             />
                     </div>
                 </div>

@@ -36,7 +36,7 @@ class TopicPage extends React.Component {
 
     render() {
 
-        let data = this.props.route.data.topics[this.state.topic];
+        let data = this.props.data.topics[this.state.topic];
 
         return (
             <div className="topic-container">
@@ -56,7 +56,7 @@ class TopicPage extends React.Component {
                 <Topic 
                     name={this.state.topic}
                     data={data.data}
-                    partyStyles={this.props.route.data.partyStyles}
+                    parties={this.props.data.parties}
                     statusquo={data.statusquo}
                     questions={data.questions}
                     direction={this.state.direction}

@@ -62,6 +62,13 @@ a:hover {
     height: 100%;
 }
 
+.loading-screen {
+    font-size: 3em;
+    height: 100%;
+    display: flex;
+    align-items: center; /* align vertical */
+    justify-content: center;    /* center horizonal */
+}
 
 .header {
     text-align: center;

@@ -46,7 +46,7 @@ const Topic = ({
                 <div style={headingStyle}>
                     <u >Choose</u>
                 </div>
-                <ChoicePane leftQuestion={questions["question-left"]} rightQuestion={questions["question-right"]} onSelect={directionSelected} />
+                <ChoicePane leftQuestion={questions.left} rightQuestion={questions.right} onSelect={directionSelected} />
             
             
                 <div style={headingStyle}>

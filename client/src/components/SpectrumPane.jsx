@@ -42,15 +42,34 @@ class SpectrumPane extends React.Component {
 */
     componentWillMount() {
         let parties = Object.keys(this.props.options);
-        let subtopics = Object.keys(this.props.options[parties[0]].subtopics);
 
-        // we want to put Conservative, Labor, and Green at the front of the list for later
-        let conservativesIndex = parties.indexOf('Liberal-National Coalition');
-        this.swapElements(parties, conservativesIndex, 0);
-        let laborIndex = parties.indexOf('Labor');
-        this.swapElements(parties, laborIndex, 1);
-        let greenIndex = parties.indexOf('Green');
-        this.swapElements(parties, greenIndex, 2);
+        // TODO this can be improved...
+        let subtopics;
+        if (Object.keys(this.props.options).length == 0) {
+            subtopics = []
+        } else {
+            subtopics = Object.keys(this.props.options[parties[0]].subtopics);
+        }
+
+        // this could be made a 'parties' property in the JSON
+        // TODO
+        // order in which parties should be rendered
+        // for others use alphanumeric sorting
+        let initial_order = ['Liberal-National Coalition', 'Labor', 'Green'];
+        let parties_ordered = [];
+        let parties_copy = parties.concat([]); // TODO proper way to do this?
+        for (let party of initial_order) {
+            let index = parties_copy.indexOf(party);
+            if (parties_copy.indexOf(party) > 0) {
+                parties_ordered.push(party);
+                parties_copy.splice(index, 1);  // cut it out
+            }
+        }
+        // parties_copy now only parties not in initial order
+        parties_copy.sort();    //TODO how sort
+
+        parties = parties_ordered.concat(parties_copy);
+
 
 
         this.setState({
@@ -61,6 +80,7 @@ class SpectrumPane extends React.Component {
     }
 
     render() {        
+        debugger
 
         // the 'key' property now relies on each party having the same number of subtopics or they might not be unique
         let options = this.state.parties.map(
@@ -71,12 +91,12 @@ class SpectrumPane extends React.Component {
                         ref={p + "-" + subtopic}
                         name={subtopic} 
                         facts={this.props.options[p].subtopics[subtopic].facts}
-                        value={this.props.options[p].subtopics[subtopic].value}
+                        value={this.props.options[p].subtopics[subtopic].current}
                         key={this.state.seed + i*(this.state.subtopics.length) + j}
                         onClick={function() {this.optionSelected(p, subtopic)}.bind(this)}
                         active={this.props.direction === null ? null : 
-                                ((this.props.direction === 'left' && this.props.options[p].subtopics[subtopic].value <= this.props.currentValue)
-                                || (this.props.direction === 'right' && this.props.options[p].subtopics[subtopic].value >= this.props.currentValue))? true : false}
+                                ((this.props.direction === 'left' && this.props.options[p].subtopics[subtopic].current <= this.props.currentValue)
+                                || (this.props.direction === 'right' && this.props.options[p].subtopics[subtopic].current >= this.props.currentValue))? true : false}
                         parties={this.props.parties}
                         partyName={p}
                         topicName={subtopic}
@@ -374,12 +394,6 @@ class SpectrumPane extends React.Component {
             return middle - height/2;
         }
 
-    }
-
-    swapElements(arr, i1, i2) {
-        let tmp = arr[i1];
-        arr[i1] = arr[i2];
-        arr[i2] = tmp;
     }
 
 }

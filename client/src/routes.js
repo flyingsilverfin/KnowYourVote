@@ -5,16 +5,13 @@ import SignUpPage from './containers/SignUpPage.jsx';
 import TopicPage from './containers/TopicPage.jsx';
 import AdminPage from './containers/AdminPage.jsx';
 
-import data from 'json!../dist/data/data.json';
-
 const routes = {
   // base component (wrapper for the whole application).
   component: Base,
   childRoutes: [
     {
       path: '/',
-      component: HomePage,
-      data: data
+      component: HomePage
     },
 
     {
@@ -28,8 +25,7 @@ const routes = {
     },
     {
       path: '/topic/*',
-      component: TopicPage,
-      data: data
+      component: TopicPage
     },
     {
       path: '/admin',

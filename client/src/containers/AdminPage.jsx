@@ -22,7 +22,7 @@ class AdminPage extends React.Component {
     }
 
     componentDidMount() {
-        this.getData();
+        this.getStaged();
         this.getSchema();
     }
 
@@ -34,11 +34,18 @@ class AdminPage extends React.Component {
         }.bind(this), delay);
     }
 
-    getData() {
+    getStaged() {
         this.setState({
             status: "Loading"
         })
-        httpGet('/data_admin/data.json', (raw) => this.dataLoaded(raw));
+        httpGet('/auth/staged/data', (raw) => {
+            let json = JSON.parse(raw);
+            if ( json.status !== 'success') {
+                console.error('Error retrieving staged data');
+                return;
+            }
+            this.dataLoaded(json.data)
+        });
     }
 
     getSchema() {
@@ -53,21 +60,21 @@ class AdminPage extends React.Component {
         this.setState({
             status: "Reverting",
         });
-        httpPost('/admin/revert', {}, this.getData.bind(this));
+        httpPost('/auth/staged/delete', {}, this.getStaged.bind(this));
     }
 
     publishData() {
-        httpPost('/admin/publish', {}, () => {
+        httpPost('/auth/staged/publish', {}, () => {
             this.setState({
-                status: "Published. Ready",
+                status: "Published.",
                 modified: false
             });
+            // TODO make this a shared timer
             this.delayedSetState(1500, "status", "Ready");
         });
     }
 
-    dataLoaded(raw) {
-        let data = JSON.parse(raw);
+    dataLoaded(data) {
         if (this.state.schema != null) {
             this.setState({
                 data: data,
@@ -279,8 +286,6 @@ class AdminPage extends React.Component {
 
     // rename only possible for Object props
     onRename(json_path, get_value_fn, set_value_fn, set_new_name_in_sidebar) {
-        
-        debugger
 
         let ptr = this.state.data;
         for (let elem of json_path.slice(0,json_path.length-1)) {
@@ -376,8 +381,8 @@ class AdminPage extends React.Component {
                         json_meta={this.state.meta}
                         status={this.state.status}
                         modified={this.state.modified}
-                        onRevert={this.revertData.bind(this)}
-                        onPublish={this.publishData.bind(this)}
+                        revertData={this.revertData.bind(this)}
+                        publishData={this.publishData.bind(this)}
 
                         on_add={this.onAdd.bind(this)}
                         on_edit={this.onEdit.bind(this)}

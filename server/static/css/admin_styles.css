@@ -28,7 +28,7 @@
 }
 
 .admin-sidebar {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .admin-sidebar 

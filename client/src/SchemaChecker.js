@@ -15,7 +15,7 @@ export class SchemaChecker {
         // anything defined in the JSON must conform to the schema
         for (let key in json) {
             if (toplevel[key] !== undefined) {
-                this._check(json[key], toplevel[key], this.schema.types);
+                this._check(json[key], toplevel[key]);
             }
         }
     }
@@ -142,6 +142,7 @@ export class SchemaChecker {
     // and objects/arrays gain an additional property _deletable
     // making full use of JS arrays being objects!
     generateMetaJson(json_original) {
+        debugger
         let toplevel = this.schema.toplevel;
         // clone JSON
         let json = JSON.parse(JSON.stringify(json_original));

@@ -9,7 +9,7 @@ class HomePage extends React.Component {
     constructor(props) {
         super(props);
 
-        // data is in this.props.route.data
+        // data is in this.props.data
 
         this.state = {
             activeTopic:null
@@ -44,7 +44,7 @@ class HomePage extends React.Component {
                 </div>
                 <div className="topic-tiles-container">
                 <TopicTiles
-                    topics={this.props.route.data.topics}
+                    topics={this.props.data.topics}
                     activeTopic={this.state.activeTopic}
                     activateTopic={this.activateTopic.bind(this)}
                     deactivateTopic={this.deactivateTopic.bind(this)}

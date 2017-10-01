@@ -26,7 +26,7 @@ const TopicTiles = ({
                 }) () }
                 </div>
                 <div className="topic-tile-text">
-                    {topics[topic].displayName[0].toUpperCase() + topics[topic].displayName.slice(1)}
+        {topics[topic].displayName.length > 1 ? topics[topic].displayName[0].toUpperCase() + topics[topic].displayName.slice(1) : topics[topic].displayName.toUpperCase()}
                 </div>
             </div>
         </Link>

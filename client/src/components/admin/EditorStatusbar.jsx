@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 
-
 const EditorStatusbar = ({
     status,
     modified,

@@ -47,6 +47,8 @@ app.use((req, res, next) => {
 const authRoutes = require('./server/routes/auth');
 app.use('/auth', authRoutes);
 
+const publicRoutes = require('./server/routes/public');
+app.use('/public', publicRoutes);
 
 
 
