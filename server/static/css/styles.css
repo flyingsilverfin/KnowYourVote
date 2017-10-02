@@ -73,8 +73,6 @@ a:hover {
 .header {
     text-align: center;
     background-color: #600;
-    font-size: 2em;
-    font-weight: bold;
     color:white;
     
 /*    min-height: 100px;
@@ -93,9 +91,14 @@ align-items: center; /* align vertical */
 
 }
 
+.header-title {
+    font-size: 2em;
+}
+
 /*TODO*/
 .header-right {
   float: right;
+  font-size: 1em;
 }
 
 .header a {
@@ -389,10 +392,10 @@ align-items: center; /* align vertical */
 .topic-content {
     display: flex;
     flex-flow: column;
-    height:100%;
     max-width:1200px;
     background-color: #FDFDFD;
     margin: 0 auto;
+    background-color: white;
 }
 
 .topic-description-container {
@@ -436,9 +439,9 @@ align-items: center; /* align vertical */
 
 
 /*
-    Subtopic styling
+    Issues styling
 */
-.subtopics-container {
+.issues-container {
     display:flex;
     flex-direction: row;
     max-width: 1000px;
@@ -447,13 +450,13 @@ align-items: center; /* align vertical */
     min-height: 200px;
 }
 
-.subtopics-no-party-selected {
+.issues-no-party-selected {
     width: 100%;
     text-align: center;
     font-size: 2em;
 }
 
-.subtopic-titles-container {
+.issue-titles-container {
     width: 35%;
     display: flex;
     justify-content: center;
@@ -462,7 +465,7 @@ align-items: center; /* align vertical */
     padding: 10px;
 }
 
-.subtopic-title {
+.issue-title {
     display:block;
     font-size: 1.5em;
     padding: 5px;
@@ -472,13 +475,13 @@ align-items: center; /* align vertical */
     transition: all 0.5s ease-out; 
 }
 
-.subtopic-title:hover {
+.issue-title:hover {
     background-color: rgba(96, 0, 0, 0.2);
     transition: all 0.5s ease-out;
 }
 
 
-.subtopic-facts-container {
+.issue-facts-container {
     display:inline-block;
     width:65%;
     font-size: 1.3em;
@@ -486,7 +489,7 @@ align-items: center; /* align vertical */
     align-items: center;
 }
 
-.subtopic-facts-container li {
+.issue-facts-container li {
     margin: 5px;
 }
 
@@ -634,4 +637,10 @@ align-items: center; /* align vertical */
 
 .center-horizontal {
     text-align: center;
+}
+
+.flex-center-all {
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */
 }

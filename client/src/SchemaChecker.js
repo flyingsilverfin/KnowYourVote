@@ -1,6 +1,6 @@
 import {type_of, assert, is_primitive, is_primitive_type, is_simple_builtin_type} from './helper.js';
 
-export var DEFAULT_NEW_OBJECT_PROP_PREFIX = "Name me";
+export var DEFAULT_NEW_OBJECT_PROP_PREFIX = "Name_me";
 
 export class SchemaChecker {
 
@@ -312,6 +312,9 @@ export class SchemaChecker {
             return false;
         } else if (type_to_use === "number") {
             // define it on lower boundary if defined
+            if (schema.default !== undefined) {
+                return schema.default;
+            }
             if (schema.min !== undefined) {
                 return schema.min;
             }

@@ -110,18 +110,27 @@ router.post('/login', (req, res) => {
 
 
 
-
+// retrieved staged data
 router.get('/staged/data', (req, res) => {
   db_get_data('staged', (staged) =>
-    res.send({
-      status: 'success',
-      data: staged
+    db_get_data('live', (live) => {
+      // this is quite inefficient but whatever
+      // won't be used often I think
+      let staged_string = JSON.stringify(staged);
+      let live_string = JSON.stringify(live);
+      let modified = staged_string !== live_string;
+
+      res.send({
+        status: 'success',
+        data: staged,
+        modified: modified
+      })      
     })
   )}
 );
 
-
-router.post('/staged/add', (req, res) => {
+// add a property to object/element in array
+router.post('/staged/modify/add', (req, res) => {
   let data = req.body;
   let json_path = data.json_path;
   let added = data.value;
@@ -147,7 +156,8 @@ router.post('/staged/add', (req, res) => {
   });
 });
 
-router.post('/staged/delete', (req,res) => {
+// delete a property/element in array
+router.post('/staged/modify/delete', (req,res) => {
   let data = req.body;
   let json_path = data.json_path;
 
@@ -174,7 +184,8 @@ router.post('/staged/delete', (req,res) => {
   });
 });
 
-router.post('/staged/edit', (req, res) => {
+// edit a value somewhere in document
+router.post('/staged/modify/edit', (req, res) => {
   let data = req.body;
   let json_path = data.json_path;
   let new_value = data.value;
@@ -198,7 +209,8 @@ router.post('/staged/edit', (req, res) => {
   });
 });
 
-router.post('/staged/rename', (req, res) => {
+// rename a property of an object
+router.post('/staged/modify/rename', (req, res) => {
   let data = req.body;
   let json_path = data.json_path;
   let new_name = data.new_name;
@@ -224,6 +236,7 @@ router.post('/staged/rename', (req, res) => {
   });
 });
 
+// overwrite live with staged ie. publish
 router.post('/staged/publish', (req, res) => {
   db_get_data('staged', (staged) => {
     db_save_data('live', staged, (result) => {
@@ -234,9 +247,10 @@ router.post('/staged/publish', (req, res) => {
   });
 })
 
+// overwrite staged changes with live document
 router.post('/staged/delete', (req, res) => {
-  db_get_data('live', (staged) => {
-    db_save_data('stage', staged, (result) => {
+  db_get_data('live', (live) => {
+    db_save_data('staged', live, (result) => {
       console.log('sucess overwriting staged with live');
       res.send({'status': 'sucess'})
       res.status(400);

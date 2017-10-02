@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import Editor from "../components/admin/Editor.jsx";
+import Header from "../components/Header.jsx";
 import {SchemaChecker, DEFAULT_NEW_OBJECT_PROP_PREFIX} from "../SchemaChecker.js";
 
 import {httpGet, httpPost, type_of, assert, isArray} from '../helper.js';
@@ -44,7 +45,7 @@ class AdminPage extends React.Component {
                 console.error('Error retrieving staged data');
                 return;
             }
-            this.dataLoaded(json.data)
+            this.dataLoaded(json.data, json.modified);
         });
     }
 
@@ -57,10 +58,20 @@ class AdminPage extends React.Component {
 
 
     revertData() {
+        console.log("BBBB");
         this.setState({
             status: "Reverting",
         });
-        httpPost('/auth/staged/delete', {}, this.getStaged.bind(this));
+        httpPost('/auth/staged/delete', {},  () => {
+            this.setState({
+                status: "Reverted to live.",
+                modified: false
+            });
+            this.getStaged();
+            if (this.state.schema === null) {
+                this.getSchema();
+            }
+        });
     }
 
     publishData() {
@@ -69,16 +80,17 @@ class AdminPage extends React.Component {
                 status: "Published.",
                 modified: false
             });
+            this.props.reloadLiveData();
             // TODO make this a shared timer
             this.delayedSetState(1500, "status", "Ready");
         });
     }
 
-    dataLoaded(data) {
+    dataLoaded(data, modified) {
         if (this.state.schema != null) {
             this.setState({
                 data: data,
-                modified: false,
+                modified: modified,
                 status: "Ready"
             });
 
@@ -87,7 +99,7 @@ class AdminPage extends React.Component {
         } else {
             this.setState({
                 data: data,
-                modified: false
+                modified: modified
             });
         }
     }
@@ -181,7 +193,7 @@ class AdminPage extends React.Component {
 
         
 
-        httpPost('/auth/staged/add', {
+        httpPost('/auth/staged/modify/add', {
             json_path: json_path,
             value: modified
         }, () => {
@@ -205,9 +217,10 @@ class AdminPage extends React.Component {
         }
 
         let old_value = ptr[json_path[json_path.length-1]];
-        let new_value;
+        let value;
         try {
-            new_value = get_value_fn(); // attempts to retrieve correctly typed value eg a number
+            value = get_value_fn(); // attempts to retrieve correctly typed value eg a number
+
             if (Number.isNaN(new_value)) { // special case for number entries failing
                 throw Error("Number required");
             }
@@ -215,15 +228,25 @@ class AdminPage extends React.Component {
             console.error(err);
             //TODO some sort of error handling to notify user
             
-            // hack to set the editabletext back
+            // hack to set the editabletext back to an old valid value
             if (set_value_fn) {
                 set_value_fn(old_value);
             }
-        }        
+        }
 
         // skip if unchanged
-        if (new_value === old_value) {
+        if (value === old_value) {
             return;
+        }
+    
+        let new_value;
+        // trim off whitespace
+        if (type_of(value) === "string") {
+            new_value = value.trim();
+            console.log(new_value);
+            if (new_value !== value) {
+                set_value_fn(new_value);
+            }
         }
 
 
@@ -246,7 +269,7 @@ class AdminPage extends React.Component {
             ptr[json_path[json_path.length-1]] = new_value;
 
 
-            httpPost('/auth/staged/edit', {json_path: json_path, value: new_value}, () => {
+            httpPost('/auth/staged/modify/edit', {json_path: json_path, value: new_value}, () => {
                 this.setState({
                     status: "Saved",
                     modified: true
@@ -276,7 +299,7 @@ class AdminPage extends React.Component {
         }
         this.regenerate_meta();
 
-        httpPost('/auth/staged/delete', {json_path: json_path}, () => {
+        httpPost('/auth/staged/modify/delete', {json_path: json_path}, () => {
             this.setState({
                 status: "Saved",
                 modified: true
@@ -293,9 +316,9 @@ class AdminPage extends React.Component {
         }
 
         let old_name = json_path[json_path.length-1];
-        let new_name;
+        let name;
         try {
-            new_name = get_value_fn();
+            name = get_value_fn();
         } catch (err) {
             console.error(err);
 
@@ -306,8 +329,21 @@ class AdminPage extends React.Component {
             return;
         }
 
-        if (old_name === new_name) {
+        if (old_name === name) {
             return;
+        }
+
+        let new_name;
+        // trim off whitespace
+        if (type_of(name) === "string") {
+            new_name = name.trim();
+            console.log(new_name);
+            if (new_name !== name) {
+                set_value_fn(new_name);
+                if (set_new_name_in_sidebar) {
+                    set_new_name_in_sidebar(new_name);
+                }
+            }
         }
 
 
@@ -338,7 +374,7 @@ class AdminPage extends React.Component {
             
             this.regenerate_meta();
 
-            httpPost('/auth/staged/rename', {json_path: json_path, new_name:new_name}, () => {
+            httpPost('/auth/staged/modify/rename', {json_path: json_path, new_name:new_name}, () => {
                 this.setState({
                     status: "Saved",
                     modified: true
@@ -370,10 +406,15 @@ class AdminPage extends React.Component {
         }
         
         return (
+            // TODO logged in value from actual logged in value
             <div className="">
-                <div className="header admin-header">
-                    Admin Interface
-                </div>
+                <Header 
+                    home={false}
+                    alt_title={"Admin Interface"}
+                    logged_in={true}
+                    extra_classes=" admin-header"
+                    />
+
 
                 {this.state.data ? 
                     <Editor 

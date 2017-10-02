@@ -65,7 +65,7 @@ class Editor extends React.Component {
                             on_rename={this.props.on_rename}
                             />
                     </div>
-                    <div className="admin-statusbar">
+                    <div className="admin-statusbar flex-center-all">
                         <EditorStatusbar
                             status={this.props.status}
                             modified={this.props.modified}

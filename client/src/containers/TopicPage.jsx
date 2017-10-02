@@ -2,13 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Link} from 'react-router';
 
+import Header from '../components/Header.jsx';
 import Topic from '../components/Topic.jsx';
-/*
-import ChoicePane from './ChoicePane';
-import DetailedSubtopicFacts from './DetailedSubtopicFacts';
-import SpectrumPane from './SpectrumPane';
-import PartiesKey from './PartiesKey';
-*/
+
 // import {smooth_scroll_to, getCoords, capitalizeWord} from '../src/helper';
 
 
@@ -22,7 +18,7 @@ class TopicPage extends React.Component {
             topic: topic,
             direction: null,
             activeParty: null,
-            activeSubtopic:null
+            activeIssue:null
         };
     }
 
@@ -37,31 +33,36 @@ class TopicPage extends React.Component {
     render() {
 
         let data = this.props.data.topics[this.state.topic];
-
+debugger
         return (
             <div className="topic-container">
-                <div className="header">
+                <Header
+                    home={false}
+                    logged_in={false}
+                    />
+                {/*<div className="header">
                     <Link to="/">
                         <div id="topic-header-home-button">
                             Home
                         </div>
                     </Link>
-                    {/*<div id="topic-header-text">
+                    <div id="topic-header-text">
                         {this.state.topic}
                     </div> 
-                    */}
+                    
                     What Floats Your Vote
                     
-                </div>
+                </div>*/}
                 <Topic 
                     name={this.state.topic}
+                    displayName={data.displayName}
                     data={data.data}
                     parties={this.props.data.parties}
                     statusquo={data.statusquo}
                     questions={data.questions}
                     direction={this.state.direction}
                     activeParty={this.state.activeParty}
-                    activeSubtopic={this.state.activeSubtopic}
+                    activeIssue={this.state.activeIssue}
                     optionSelected={this.optionSelected.bind(this)}
                     directionSelected={this.setDirection.bind(this)}
                 />
@@ -80,18 +81,18 @@ class TopicPage extends React.Component {
         }, 500);*/
     }
 
-    optionSelected(party, subtopic) {
-        console.log('party selected: ' + party + ', subtopic: ' + subtopic);
+    optionSelected(party, issue) {
+        console.log('party selected: ' + party + ', issue: ' + issue);
         this.setState({
             activeParty : party,
-            activeSubtopic: subtopic
+            activeIssue: issue
         });
 
-        /*let subtopics = this.refs['subtopics-container'];
-        subtopics = ReactDOM.findDOMNode(subtopics);
+        /*let issues = this.refs['issues-container'];
+        issues = ReactDOM.findDOMNode(issues);
         
         $('html, body').animate({
-            scrollTop: $(subtopics).offset().top
+            scrollTop: $(issues).offset().top
         }, 500)*/
         
     }

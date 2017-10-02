@@ -4,7 +4,7 @@ import {Link} from 'react-router';
 
 
 import ChoicePane from './ChoicePane.jsx';
-import DetailedSubtopicFacts from './DetailedSubtopicFacts.jsx';
+import DetailedIssueFacts from './DetailedIssueFacts.jsx';
 import SpectrumPane from './SpectrumPane.jsx';
 import PartiesKey from './PartiesKey.jsx';
 
@@ -16,13 +16,14 @@ let headingStyle = {"marginLeft": "7%", "fontSize":"1.3em",  "marginTop": "20px"
 
 const Topic = ({
     name,
+    displayName,
     data,
     statusquo,
     questions,
     parties,
     direction,
     activeParty,
-    activeSubtopic,
+    activeIssue,
     optionSelected,
     directionSelected
   }) => (
@@ -30,7 +31,7 @@ const Topic = ({
         {/* TODO <Header /> */ }
         <div className="topic-content">
             <div className="topic-description-container">
-                <h2 style={{"textAlign":"center"}}> {capitalizeWord(name)}</h2>
+                <h2 style={{"textAlign":"center"}}> {capitalizeWord(displayName)}</h2>
                 <u style={headingStyle}> Learn </u>
                 <div className="topic-description">
                     <ol>
@@ -57,8 +58,8 @@ const Topic = ({
             </div>
             <SpectrumPane topic={name} currentValue={data.current} options={data.options} direction={direction} optionSelected={optionSelected} parties={parties}/>
         
-            {/*<Subtopics ref="subtopics-container" options={this.state.data.options} activeParty={this.state.activeParty} />*/}
-            <DetailedSubtopicFacts options={data.options} activeParty={activeParty} activeSubtopic={activeSubtopic} />
+            {/*<issues ref="issues-container" options={this.state.data.options} activeParty={this.state.activeParty} />*/}
+            <DetailedIssueFacts options={data.options} activeParty={activeParty} activeIssue={activeIssue} />
         </div>
     </div>
   );
@@ -72,7 +73,7 @@ Topic.propTypes = {
     parties: PropTypes.object.isRequired,
     direction: PropTypes.string, //.isRequired,
     activeParty: PropTypes.string, //.isRequired,
-    activeSubtopic: PropTypes.string, //.isRequired,
+    activeIssue: PropTypes.string, //.isRequired,
     optionSelected: PropTypes.func.isRequired,
     directionSelected: PropTypes.func.isRequired
 };

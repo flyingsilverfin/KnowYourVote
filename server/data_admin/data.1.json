@@ -29,7 +29,7 @@
                 "current": 5.0,
                 "options": {
                     "Liberal-National Coalition" : {
-                        "subtopics":
+                        "issues":
                             {
                                 "Climate Change" : {
                                     "current": 4.8,
@@ -68,7 +68,7 @@
                         }
                     },
                     "Green" : {
-                        "subtopics": {
+                        "issues": {
                             "Climate Change" : {
                                 "current": 9.0,
                                 "facts": [
@@ -112,7 +112,7 @@
                         }
                     },
                     "Labor" : {
-                        "subtopics": {
+                        "issues": {
                             "Climate Change" :  {
                                 "current": 6.0,
                                 "facts": [ 

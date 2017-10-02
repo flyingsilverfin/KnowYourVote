@@ -18,7 +18,7 @@ class SpectrumPane extends React.Component {
         */
         this.state = {
             parties: null,
-            subtopics: null,
+            issues: null,
             seed: 0,
             dividerPositionLeft: null,
             //direction: null,
@@ -38,17 +38,17 @@ class SpectrumPane extends React.Component {
     }
 
 /*
-    WARNING: EACH PARTY MUST CONTAIN THE SAME SUBTOPICS!!!!
+    WARNING: EACH PARTY MUST CONTAIN THE SAME issues!!!!
 */
     componentWillMount() {
         let parties = Object.keys(this.props.options);
 
         // TODO this can be improved...
-        let subtopics;
+        let issues;
         if (Object.keys(this.props.options).length == 0) {
-            subtopics = []
+            issues = []
         } else {
-            subtopics = Object.keys(this.props.options[parties[0]].subtopics);
+            issues = Object.keys(this.props.options[parties[0]].issues);
         }
 
         // this could be made a 'parties' property in the JSON
@@ -74,7 +74,7 @@ class SpectrumPane extends React.Component {
 
         this.setState({
             parties: parties,
-            subtopics: subtopics,
+            issues: issues,
             dividerPositionLeft: 100*(this.props.currentValue/10.0) //percentage from left
         });
     }
@@ -82,25 +82,25 @@ class SpectrumPane extends React.Component {
     render() {        
         debugger
 
-        // the 'key' property now relies on each party having the same number of subtopics or they might not be unique
+        // the 'key' property now relies on each party having the same number of issues or they might not be unique
         let options = this.state.parties.map(
             (p, i) =>
-                Object.keys(this.props.options[p].subtopics).map(
-                (subtopic, j) =>
+                Object.keys(this.props.options[p].issues).map(
+                (issue, j) =>
                     <SpectrumOption 
-                        ref={p + "-" + subtopic}
-                        name={subtopic} 
-                        facts={this.props.options[p].subtopics[subtopic].facts}
-                        value={this.props.options[p].subtopics[subtopic].current}
-                        key={this.state.seed + i*(this.state.subtopics.length) + j}
-                        onClick={function() {this.optionSelected(p, subtopic)}.bind(this)}
+                        ref={p + "-" + issue}
+                        name={issue} 
+                        facts={this.props.options[p].issues[issue].facts}
+                        value={this.props.options[p].issues[issue].current}
+                        key={this.state.seed + i*(this.state.issues.length) + j}
+                        onClick={function() {this.optionSelected(p, issue)}.bind(this)}
                         active={this.props.direction === null ? null : 
-                                ((this.props.direction === 'left' && this.props.options[p].subtopics[subtopic].current <= this.props.currentValue)
-                                || (this.props.direction === 'right' && this.props.options[p].subtopics[subtopic].current >= this.props.currentValue))? true : false}
+                                ((this.props.direction === 'left' && this.props.options[p].issues[issue].current <= this.props.currentValue)
+                                || (this.props.direction === 'right' && this.props.options[p].issues[issue].current >= this.props.currentValue))? true : false}
                         parties={this.props.parties}
                         partyName={p}
-                        topicName={subtopic}
-                        selected={this.state.selectedParty === p && this.state.selectedTopic === subtopic}
+                        topicName={issue}
+                        selected={this.state.selectedParty === p && this.state.selectedTopic === issue}
                     />
             )
         );
@@ -204,11 +204,11 @@ class SpectrumPane extends React.Component {
         }
     }
 
-    optionSelected(party, subtopic) {
-        this.props.optionSelected(party, subtopic);
+    optionSelected(party, issue) {
+        this.props.optionSelected(party, issue);
         this.setState({
             'selectedParty': party,
-            'selectedTopic': subtopic
+            'selectedTopic': issue
         });
     }
 
@@ -292,9 +292,9 @@ class SpectrumPane extends React.Component {
                 });
                 return;
             } else {
-                console.log("placing: " + this.state.parties[i] + '-' + this.state.subtopics[j])
+                console.log("placing: " + this.state.parties[i] + '-' + this.state.issues[j])
                 this.placeItem(
-                    this.refs[this.state.parties[i] + '-' + this.state.subtopics[j]],
+                    this.refs[this.state.parties[i] + '-' + this.state.issues[j]],
                     cH, cW, cd,
                     function() {
                         func(i, j+1, ilimit, jlimit, cH, cW, cd, func);
@@ -303,7 +303,7 @@ class SpectrumPane extends React.Component {
             }
         }).bind(this);
 
-        f(0, 0, this.state.parties.length, this.state.subtopics.length, containerHeight, containerWidth, cd, f);
+        f(0, 0, this.state.parties.length, this.state.issues.length, containerHeight, containerWidth, cd, f);
 
     }
 

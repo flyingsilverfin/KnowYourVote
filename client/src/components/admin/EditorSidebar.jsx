@@ -32,7 +32,7 @@ const EditorSidebar = ({
 
             return (
                 <div 
-                    className={"sidebar-choice" + (choice === active ? ' active' : '')}
+                    className={"sidebar-choice" + (choice === active ? ' active' : ' inactive')}
                     onClick={() => setActive(choice)} 
                     key={index}>
 

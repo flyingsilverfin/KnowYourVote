@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-export default class SubtopicData extends React.Component {
+export default class IssueData extends React.Component {
 
     constructor(props) {
         super(props);
@@ -13,13 +13,13 @@ export default class SubtopicData extends React.Component {
             (fact, i) =>
                 <li 
                     key={i}
-                    className="subtopic-fact">
+                    className="issue-fact">
                     {fact}
                 </li>
         );
 
         return (
-            <div className="subtopic-facts-container">
+            <div className="issue-facts-container">
                 <ul>
                     {formattedFacts}
                 </ul>

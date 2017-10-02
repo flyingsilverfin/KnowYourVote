@@ -41,13 +41,22 @@
     vertical-align: middle;
     font-size: 1.3em;
     margin-left: 10px;
+    cursor: pointer;
 }
 
-.admin-sidebar .active {
+.admin-sidebar 
+  .active {
     /*background-color: rgba(150, 150, 150, 1.0);*/
     margin-left: 0;
     border-left: 10px solid #600;
     background-color: rgba(96, 0, 0, 0.15);
+}
+
+.admin-sidebar
+  .inactive:hover {
+    background-color: rgba(96, 0, 0, 0.15);
+    padding-left: 13px;
+    margin-left: 0px;
 }
 
 .admin-sidebar
@@ -56,7 +65,9 @@
     width: 70%;
     margin-right: 10%;
     min-height: 0;
+    cursor: text;
 }
+
 
 .admin-sidebar
     .item-delete {
@@ -70,18 +81,46 @@
 
 .admin-statusbar {
     height: 10vh;
+    min-height: 10vh;
     line-height: 1em;
+    border-top: 2px solid #600;
 }
 
 .admin-statusbar 
   .statusbar-status {
-      max-height: 5vh;
+    max-height: 5vh;
+}
+
+.admin-statusbar
+  .statusbar-button {
+    margin: 2px;
+    padding: 3px;
+    border-bottom: 1px solid #600;
+    cursor: pointer;
+}
+
+.admin-statusbar
+  .statusbar-button-unclickable {
+    background-color: #7d7d7d;
+    cursor: default;
+  }
+.admin-statusbar
+  .statusbar-button-clickable {
+    background-color: none;
+    cursor: pointer;
+}
+
+.admin-statusbar
+  .statusbar-button-clickable:hover {
+    background-color: rgba(96,0,0,0.15);
+    transition: all 0.25s ease-out;
 }
 
 .admin-statusbar 
   .statusbar-revert {
       flex: 1;
       max-height: 5vh;
+      
 }
 
 .admin-statusbar

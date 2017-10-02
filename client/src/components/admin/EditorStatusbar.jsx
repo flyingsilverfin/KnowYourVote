@@ -13,12 +13,13 @@ const EditorStatusbar = ({
     </div>
     <div className="flex-one flex-row">
         <div 
-            className="statusbar-revert center-horizontal" 
+            className={"statusbar-button statusbar-revert center-horizontal " + (modified ? 
+            "statusbar-button-clickable" : "statusbar-button-unclickable")}
             onClick={modified ? revertData : null}>
             Delete
         </div>
         <div 
-            className="statusbar-publish center-horizontal" 
+            className={"statusbar-button statusbar-publish center-horizontal " + (modified ? "statusbar-button-clickable" : "statusbar-button-unclickable")}
             onClick={modified ? publishData : null}>
             Publish
         </div>

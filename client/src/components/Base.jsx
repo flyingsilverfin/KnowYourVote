@@ -47,10 +47,13 @@ export default class Base extends React.Component {
               {
                 React.Children.map(
                     this.props.children, 
-                    (child) =>
+                        (child) =>
                         React.cloneElement(
-                                child, 
-                                {data: this.state.data})
+                            child, 
+                            {data: this.state.data,
+                             reloadLiveData: this.getData.bind(this)
+                            }
+                          )
                 )
               }
           </div>
