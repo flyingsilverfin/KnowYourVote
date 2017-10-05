@@ -45637,13 +45637,18 @@
 	            }
 
 	            var new_value = void 0;
+
+	            debugger;
 	            // trim off whitespace
+	            // yucky code. did this late night
 	            if ((0, _helper.type_of)(value) === "string") {
 	                new_value = value.trim();
 	                console.log(new_value);
 	                if (new_value !== value) {
 	                    set_value_fn(new_value);
 	                }
+	            } else {
+	                new_value = value;
 	            }
 
 	            var valid = this.validate_edit(json_path, new_value);
@@ -45786,6 +45791,8 @@
 	                        set_new_name_in_sidebar(new_name);
 	                    }
 	                }
+	            } else {
+	                new_name = name;
 	            }
 
 	            var valid = this.validate_rename(json_path, old_name, new_name, ptr);

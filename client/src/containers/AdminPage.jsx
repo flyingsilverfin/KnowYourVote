@@ -240,13 +240,18 @@ class AdminPage extends React.Component {
         }
     
         let new_value;
+
+        debugger
         // trim off whitespace
+        // yucky code. did this late night
         if (type_of(value) === "string") {
             new_value = value.trim();
             console.log(new_value);
             if (new_value !== value) {
                 set_value_fn(new_value);
             }
+        } else {
+            new_value = value
         }
 
 
@@ -344,6 +349,8 @@ class AdminPage extends React.Component {
                     set_new_name_in_sidebar(new_name);
                 }
             }
+        } else {
+            new_name = name;
         }
 
 

@@ -1,7 +1,7 @@
 {
-  "name": "whatfloatsyourvote",
+  "name": "authentication-in-react-apps",
   "version": "1.0.0",
-  "description": "WhatFloatsYourVote, a react app for politics",
+  "description": "WhatFloatsYourVote, as a dynamically served react app",
   "main": "index.js",
   "scripts": {
     "start": "nodemon --use_strict index.js",
