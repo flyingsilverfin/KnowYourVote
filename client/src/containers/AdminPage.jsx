@@ -56,9 +56,15 @@ class AdminPage extends React.Component {
         httpGet('/data_admin/schema.json', (raw) => this.schemaLoaded(raw));
     }
 
+    
+
 
     revertData() {
-        console.log("BBBB");
+
+        if (!confirm("Are you sure you want to delete all changes and revert to live data?")) {
+            return;
+        }
+
         this.setState({
             status: "Reverting",
         });

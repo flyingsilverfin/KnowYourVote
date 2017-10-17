@@ -80,8 +80,8 @@
 }
 
 .admin-statusbar {
-    height: 10vh;
-    min-height: 10vh;
+    height: 15vh;
+    min-height: 15vh;
     line-height: 1em;
     border-top: 2px solid #600;
 }
@@ -89,14 +89,19 @@
 .admin-statusbar 
   .statusbar-status {
     max-height: 5vh;
+    margin: 5px 0;
 }
 
 .admin-statusbar
   .statusbar-button {
     margin: 2px;
     padding: 3px;
-    border-bottom: 1px solid #600;
+    /*border-bottom: 1px solid #600;*/
     cursor: pointer;
+    margin: 10px 0;
+    padding: 5px 10px;
+    color: #CCC;
+    max-height: 5vh;
 }
 
 .admin-statusbar
@@ -107,26 +112,25 @@
 .admin-statusbar
   .statusbar-button-clickable {
     background-color: none;
+    background-color: #080;
     cursor: pointer;
 }
 
 .admin-statusbar
   .statusbar-button-clickable:hover {
-    background-color: rgba(96,0,0,0.15);
+    /*background-color: rgba(96,0,0,0.15);*/
+    color: white;
     transition: all 0.25s ease-out;
 }
 
 .admin-statusbar 
-  .statusbar-revert {
-      flex: 1;
-      max-height: 5vh;
-      
+  .statusbar-button-clickable.statusbar-revert  {
+      background-color: red;
 }
 
 .admin-statusbar
-  .statusbar-publish {
-      flex: 1;
-      max-height: 5vh;
+  .statusbar-button-clickable.statusbar-publish {
+      background-color: green;
 }
 
 .admin-main-content {

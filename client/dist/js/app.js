@@ -45409,7 +45409,10 @@
 	        value: function revertData() {
 	            var _this4 = this;
 
-	            console.log("BBBB");
+	            if (!confirm("Are you sure you want to delete all changes and revert to live data?")) {
+	                return;
+	            }
+
 	            this.setState({
 	                status: "Reverting"
 	            });
@@ -46186,20 +46189,20 @@
 	        ),
 	        _react2.default.createElement(
 	            "div",
-	            { className: "flex-one flex-row" },
-	            _react2.default.createElement(
-	                "div",
-	                {
-	                    className: "statusbar-button statusbar-revert center-horizontal " + (modified ? "statusbar-button-clickable" : "statusbar-button-unclickable"),
-	                    onClick: modified ? revertData : null },
-	                "Delete"
-	            ),
+	            { className: "" },
 	            _react2.default.createElement(
 	                "div",
 	                {
 	                    className: "statusbar-button statusbar-publish center-horizontal " + (modified ? "statusbar-button-clickable" : "statusbar-button-unclickable"),
 	                    onClick: modified ? publishData : null },
 	                "Publish"
+	            ),
+	            _react2.default.createElement(
+	                "div",
+	                {
+	                    className: "statusbar-button statusbar-revert center-horizontal " + (modified ? "statusbar-button-clickable" : "statusbar-button-unclickable"),
+	                    onClick: modified ? revertData : null },
+	                "Delete"
 	            )
 	        )
 	    );
